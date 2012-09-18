@@ -29,6 +29,10 @@ You might want to use `pathogen <https://github.com/tpope/vim-pathogen>`_ to
 install jedi in VIM. Also you need a VIM version that was compiled with
 ``+python``, which is typical for most distributions on Linux.
 
+The first thing you need after that is an up-to-date version of Jedi. You can
+either get it via ``pip install jedi`` or with ``git submodule update --init``
+in your jedi-vim repository.
+
 The autocompletion can be used with <ctrl+space>, if you want it to work with
 <tab> you can use `supertab <https://github.com/ervandew/supertab>`_.
 
