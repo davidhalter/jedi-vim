@@ -11,8 +11,8 @@ jedi-vim is a is a VIM binding to the awesome autocompletion library *Jedi*.
 
 Get the latest from `github <http://github.com/davidhalter/jedi-vim>`_.
 
-You can get the Jedi library from
-`github <http://github.com/davidhalter/jedi>`_.
+You can get the Jedi library is documented
+`here <http://github.com/davidhalter/jedi>`_.
 
 
 Support

@@ -434,7 +434,7 @@ import vim
 import sys
 import os
 from os.path import dirname, abspath
-sys.path.insert(0, dirname(dirname(abspath(vim.eval('s:current_file')))))
+sys.path.insert(0, dirname(dirname(abspath(vim.eval('s:current_file')))) + '/jedi')
 
 import traceback  # for exception output
 import re
