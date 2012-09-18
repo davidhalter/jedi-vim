@@ -4,7 +4,7 @@ jedi-vim - awesome Python autocompletion with VIM
 
 **now in beta testing phase**
 
-*If you have any comments or feature request, please tell me! I really want to
+*If you have any comments or feature requests, please tell me! I really want to
 know, what you think about Jedi and jedi-vim.*
 
 jedi-vim is a is a VIM binding to the awesome autocompletion library *Jedi*.
