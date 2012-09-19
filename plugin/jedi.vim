@@ -64,8 +64,8 @@ import vim
 # update the system path, to include the python scripts 
 import sys
 import os
-from os.path import dirname, abspath
-sys.path.insert(0, dirname(dirname(abspath(vim.eval('s:current_file')))) + '/jedi')
+from os.path import dirname, abspath, join
+sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('s:current_file')))), 'jedi'))
 
 import traceback  # for exception output
 import re
