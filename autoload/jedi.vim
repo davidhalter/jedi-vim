@@ -61,7 +61,13 @@ endfunction
 " func_def
 " ------------------------------------------------------------------------
 function jedi#show_func_def()
-    python show_func_def(get_script().get_in_function_call())
+  python << PYTHONEOF
+if 1:
+    try:
+        show_func_def(get_script().get_in_function_call())
+    except Exception as e:
+        print e
+PYTHONEOF
     return ''
 endfunction
 
