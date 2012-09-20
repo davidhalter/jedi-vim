@@ -81,6 +81,8 @@ if 1:
     vim.command(r'try | %%s/%s/\1/g | catch | endtry' % regex)
     vim.current.window.cursor = cursor
 PYTHONEOF
+    call histdel("search", -1)
+    let @/ = histget("search", -1)
 endfunction
 
 
