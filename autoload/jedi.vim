@@ -140,7 +140,7 @@ if 1:
         if replace is None:
             echo_highlight('No rename possible, if no name is given.')
         else:
-            for r in temp_rename:
+            for r in reversed(temp_rename):
                 if r.in_builtin_module():
                     continue
                 start_pos = r.start_pos + (0, 1)  # vim cursor starts with 1 indent
