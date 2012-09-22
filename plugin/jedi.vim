@@ -57,6 +57,10 @@ endif
 set switchbuf=useopen  " needed for pydoc
 let s:current_file=expand("<sfile>")
 
+if g:jedi#auto_initialization 
+    autocmd FileType python setlocal omnifunc=jedi#complete
+endif
+
 python << PYTHONEOF
 """ here we initialize the jedi stuff """
 import vim
