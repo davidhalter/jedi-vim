@@ -130,6 +130,8 @@ if 1:
         vim.command('normal! diw')
         vim.command(':startinsert')
     else:
+        cursor = vim.current.window.cursor
+        window_path = vim.current.buffer.name
         # reset autocommand
         vim.command('autocmd! jedi_rename InsertLeave')
 
@@ -150,6 +152,8 @@ if 1:
                 vim.current.window.cursor = r.start_pos
                 vim.command('normal! cw%s' % replace)
 
+            vim.current.window.cursor = cursor
+            vim.eval("jedi#new_buffer('%s')" % window_path)
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
         # reset rename variables
         temp_rename = None
