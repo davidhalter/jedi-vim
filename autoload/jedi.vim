@@ -61,7 +61,7 @@ endfunction
 " func_def
 " ------------------------------------------------------------------------
 function jedi#show_func_def()
-  python << PYTHONEOF
+python << PYTHONEOF
 if 1:
     try:
         show_func_def(get_script().get_in_function_call())
@@ -321,10 +321,5 @@ endfunc
 
 function! jedi#configure_function_definition()
     autocmd InsertLeave <buffer> call jedi#clear_func_def()
-
-    " , and () mappings
-    inoremap <buffer> ( (<C-R>=jedi#show_func_def()<CR>
-    inoremap <buffer> ) )<C-R>=jedi#show_func_def()<CR>
-    inoremap <buffer> , ,<C-R>=jedi#show_func_def()<CR>
-    inoremap <buffer> <BS> <BS><C-R>=jedi#show_func_def()<CR>
+    autocmd CursorMovedI <buffer> call jedi#show_func_def()
 endfunction
