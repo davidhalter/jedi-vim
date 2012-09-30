@@ -85,7 +85,7 @@ class PythonToVimStr(str):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
     def __repr__(self):
-        return '"%s"' % self.replace('"', r'\"')
+        return '"%s"' % self.replace('\\', '\\\\').replace('"', r'\"')
 
 
 def echo_highlight(msg):
