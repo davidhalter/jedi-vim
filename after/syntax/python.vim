@@ -16,4 +16,7 @@ if g:jedi#show_function_definition == 1 && has('conceal')
   hi def link jediSpace Normal
   hi jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=Grey
   hi jediFunction term=NONE cterm=NONE ctermfg=6 guifg=Cyan gui=NONE ctermbg=0 guibg=Grey
+
+  " override defaults
+  syn match pythonComment "#.*$" contains=pythonTodo,@Spell,jediFunction
 endif
