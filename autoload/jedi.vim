@@ -65,8 +65,8 @@ python << PYTHONEOF
 if 1:
     try:
         show_func_def(get_script().get_in_function_call())
-    except Exception as e:
-        print e
+    except Exception:
+        print(traceback.format_exc())
 PYTHONEOF
     return ''
 endfunction
@@ -77,12 +77,16 @@ python << PYTHONEOF
 if 1:
     cursor = vim.current.window.cursor
     e = vim.eval('g:jedi#function_definition_escape')
-    regex = r'%sjedi=\([^%s]*\)%s.*%sjedi%s'.replace('%s', e)
-    vim.command(r'try | %%s/%s/\1/g | catch | endtry' % regex)
+    regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
+    for i, line in enumerate(vim.current.buffer):
+        match = re.search(r'%s' % regex, line)
+        if match is not None:
+            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' % int(match.group(1))
+            vim.command(r'try | %s,%ss/%s/\2/g | catch | endtry' % (i + 1, i + 1, vim_regex))
+            vim.command('call histdel("search", -1)')
+            vim.command('let @/ = histget("search", -1)')
     vim.current.window.cursor = cursor
 PYTHONEOF
-    call histdel("search", -1)
-    let @/ = histget("search", -1)
 endfunction
 
 

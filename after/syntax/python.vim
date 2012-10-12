@@ -17,6 +17,19 @@ if g:jedi#show_function_definition == 1 && has('conceal')
   hi jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=Grey
   hi jediFunction term=NONE cterm=NONE ctermfg=6 guifg=Cyan gui=NONE ctermbg=0 guibg=Grey
 
-  " override defaults
+  " override defaults (add jediFunction to contains)
   syn match pythonComment "#.*$" contains=pythonTodo,@Spell,jediFunction
+  syn region pythonString
+      \ start=+[uU]\=\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
+      \ contains=pythonEscape,@Spell,jediFunction
+  syn region pythonString
+      \ start=+[uU]\=\z('''\|"""\)+ end="\z1" keepend
+      \ contains=pythonEscape,pythonSpaceError,pythonDoctest,@Spell,jediFunction
+  syn region pythonRawString
+      \ start=+[uU]\=[rR]\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
+      \ contains=@Spell,jediFunction
+  syn region pythonRawString
+      \ start=+[uU]\=[rR]\z('''\|"""\)+ end="\z1" keepend
+      \ contains=pythonSpaceError,pythonDoctest,@Spell,jediFunction
+
 endif

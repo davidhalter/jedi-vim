@@ -168,7 +168,8 @@ def show_func_def(call_def, completion_lines=0):
     if column < 2 or row == 0:
         return  # edge cases, just ignore
 
-    row_to_replace = row - 1  # TODO check if completion menu is above or below
+    # TODO check if completion menu is above or below
+    row_to_replace = row - 1
     line = vim.eval("getline(%s)" % row_to_replace)
 
     insert_column = column - 2 # because it has stuff at the beginning
@@ -185,9 +186,14 @@ def show_func_def(call_def, completion_lines=0):
     # replace line before with cursor
     e = vim.eval('g:jedi#function_definition_escape')
     regex = "xjedi=%sx%sxjedix".replace('x', e)
-    repl = ("%s" + regex + "%s") % (line[:insert_column],
-                    line[insert_column:end_column], text, line[end_column:])
-    vim.eval('setline(%s, "%s")' % (row_to_replace, repl))
+
+    # check the replace stuff for strings, to append them (don't want to break the syntax)
+    replace = line[insert_column:end_column]
+    add = ''.join(re.findall('\\\\*["\']+', replace))  # add are all the strings
+    tup = '%s, %s' % (len(add), replace)
+    repl = ("%s" + regex + "%s") % (line[:insert_column], tup, text, add + line[end_column:])
+
+    vim.eval('setline(%s, %s)' % (row_to_replace, repr(PythonToVimStr(repl))))
 PYTHONEOF
 
 " vim: set et ts=4:
