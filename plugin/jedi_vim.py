@@ -13,9 +13,11 @@ import jedi.keywords
 
 temp_rename = None  # used for jedi#rename
 
+
 class PythonToVimStr(str):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
+
     def __repr__(self):
         return '"%s"' % self.replace('\\', '\\\\').replace('"', r'\"')
 
@@ -38,7 +40,7 @@ def get_script(source=None, column=None):
 
 def complete():
     row, column = vim.current.window.cursor
-    vim.eval('jedi#clear_func_def()')
+    clear_func_def()
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
@@ -56,7 +58,7 @@ def complete():
             else:
                 source += line
             source += '\n'
-        # here again, the hacks, because jedi has a different interface than vim
+        # here again hacks, because jedi has a different interface than vim
         column += len(base)
         try:
             script = get_script(source=source, column=column)
@@ -99,7 +101,8 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
         else:
             definitions = script.goto()
     except jedi.NotFoundError:
-        echo_highlight("Cannot follow nothing. Put your cursor on a valid name.")
+        echo_highlight(
+                    "Cannot follow nothing. Put your cursor on a valid name.")
     except Exception:
         # print to stdout, will be in :messages
         echo_highlight("Some different eror, this shouldn't happen.")
@@ -118,15 +121,13 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
             d = list(definitions)[0]
             if d.in_builtin_module():
                 if isinstance(d.definition, jedi.keywords.Keyword):
-                    echo_highlight("Cannot get the definition of Python keywords.")
+                    echo_highlight(
+                            "Cannot get the definition of Python keywords.")
                 else:
                     echo_highlight("Builtin modules cannot be displayed.")
             else:
                 if d.module_path != vim.current.buffer.name:
-                    if vim.eval('g:jedi#use_tabs_not_buffers') == '1':
-                        vim.command('call jedi#tabnew("%s")' % d.module_path)
-                    else:
-                        vim.command('edit ' + d.module_path)
+                    vim.eval('jedi#new_buffer(%s)' % d.module_path)
                 vim.current.window.cursor = d.line_nr, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
@@ -136,9 +137,10 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                 if d.in_builtin_module():
                     lst.append(dict(text='Builtin ' + d.description))
                 else:
-                    lst.append(dict(filename=d.module_path, lnum=d.line_nr, col=d.column+1, text=d.description))
-            vim.command('call setqflist(%s)' % str(lst))
-            vim.command('call <sid>add_goto_window()')
+                    lst.append(dict(filename=d.module_path, lnum=d.line_nr,
+                                        col=d.column + 1, text=d.description))
+            vim.eval('setqflist(%s)' % str(lst))
+            vim.eval('<sid>add_goto_window()')
     return definitions
 
 
@@ -149,16 +151,18 @@ def clear_func_def():
     for i, line in enumerate(vim.current.buffer):
         match = re.search(r'%s' % regex, line)
         if match is not None:
-            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' % int(match.group(1))
-            vim.command(r'try | %s,%ss/%s/\2/g | catch | endtry' % (i + 1, i + 1, vim_regex))
-            vim.command('call histdel("search", -1)')
+            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' % \
+                                                        int(match.group(1))
+            vim.command(r'try | %s,%ss/%s/\2/g | catch | endtry' \
+                                                % (i + 1, i + 1, vim_regex))
+            vim.eval('histdel("search", -1)')
             vim.command('let @/ = histget("search", -1)')
     vim.current.window.cursor = cursor
 
 
 def show_func_def(call_def, completion_lines=0):
     try:
-        vim.eval('jedi#clear_func_def()')
+        clear_func_def()
 
         if call_def is None:
             return
@@ -171,7 +175,7 @@ def show_func_def(call_def, completion_lines=0):
         row_to_replace = row - 1
         line = vim.eval("getline(%s)" % row_to_replace)
 
-        insert_column = column - 2 # because it has stuff at the beginning
+        insert_column = column - 2  # because it has stuff at the beginning
 
         params = [p.get_code().replace('\n', '') for p in call_def.params]
         try:
@@ -179,31 +183,38 @@ def show_func_def(call_def, completion_lines=0):
         except (IndexError, TypeError):
             pass
 
-        # This stuff is reaaaaally a hack! I cannot stress enough, that this is a
-        # stupid solution. But there is really no other yet. There is no
-        # possibility in VIM to draw on the screen, but there will be one
-        # (see :help todo Patch to access screen under Python. (Marko Mahni, 2010 Jul 18))
+        # This stuff is reaaaaally a hack! I cannot stress enough, that this is
+        # a stupid solution. But there is really no other yet. There is no
+        # possibility in VIM to draw on the screen, but there will be one (see
+        # :help todo Patch to access screen under Python. (Marko Mahni, 2010
+        # Jul 18))
         text = " (%s) " % ', '.join(params)
         text = ' ' * (insert_column - len(line)) + text
-        end_column = insert_column + len(text) - 2  # -2 because of bold symbols
+        end_column = insert_column + len(text) - 2  # -2 due to bold symbols
         # replace line before with cursor
         e = vim.eval('g:jedi#function_definition_escape')
         regex = "xjedi=%sx%sxjedix".replace('x', e)
 
         prefix, replace = line[:insert_column], line[insert_column:end_column]
-        # check the replace stuff for strings, to append them (don't want to break the syntax)
+
+        # Check the replace stuff for strings, to append them
+        # (don't want to break the syntax)
         regex_quotes = '\\\\*["\']+'
-        add = ''.join(re.findall(regex_quotes, replace))  # add are all the strings
+        # `add` are all the quotation marks.
+        add = ''.join(re.findall(regex_quotes, replace))
         if add:
             a = re.search(regex_quotes + '$', prefix)
             add = ('' if a is None else a.group(0)) + add
 
         tup = '%s, %s' % (len(add), replace)
-        repl = ("%s" + regex + "%s") % (prefix, tup, text, add + line[end_column:])
+        repl = ("%s" + regex + "%s") % \
+                                (prefix, tup, text, add + line[end_column:])
 
-        vim.eval('setline(%s, %s)' % (row_to_replace, repr(PythonToVimStr(repl))))
+        vim.eval('setline(%s, %s)' % \
+                            (row_to_replace, repr(PythonToVimStr(repl))))
     except Exception:
         print(traceback.format_exc())
+
 
 def rename():
     """ A vim function, can only be used from there """
@@ -258,7 +269,8 @@ def tabnew(path):
             try:
                 buf_path = vim.buffers[buf_nr].name
             except IndexError:
-                # just do good old asking for forgiveness. don't know why this happens :-)
+                # Just do good old asking for forgiveness.
+                # don't know why this happens :-)
                 pass
             else:
                 if buf_path == path:
