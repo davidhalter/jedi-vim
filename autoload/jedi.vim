@@ -2,38 +2,38 @@
 " functions that call python code
 " ------------------------------------------------------------------------
 function! jedi#goto()
-    python goto()
+    python jedi_vim.goto()
 endfunction
 
 
 function! jedi#get_definition()
-    python goto(is_definition=True)
+    python jedi_vim.goto(is_definition=True)
 endfunction
 
 
 function! jedi#related_names()
-    python goto(is_related_name=True)
+    python jedi_vim.goto(is_related_name=True)
 endfunction
 
 
 function! jedi#rename(...)
-    python rename()
+    python jedi_vim.rename()
 endfunction
 
 
 function! jedi#complete(findstart, base)
-    python complete()
+    python jedi_vim.complete()
 endfunction
 
 
 function jedi#show_func_def()
-    python show_func_def(get_script().get_in_function_call())
+    python jedi_vim.show_func_def(jedi_vim.get_script().get_in_function_call())
     return ''
 endfunction
 
 
 function jedi#clear_func_def()
-    python clear_func_def()
+    python jedi_vim.clear_func_def()
 endfunction
 
 
@@ -43,10 +43,10 @@ endfunction
 function! jedi#show_pydoc()
 python << PYTHONEOF
 if 1:
-    script = get_script()
+    script = jedi_vim.get_script()
     try:
         definitions = script.get_definition()
-    except jedi.NotFoundError:
+    except jedi_vim.jedi.NotFoundError:
         definitions = []
     except Exception:
         # print to stdout, will be in :messages
@@ -60,7 +60,7 @@ if 1:
         docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '='*40, d.doc) if d.doc
                     else '|No Docstring for %s|' % d for d in definitions]
         text = ('\n' + '-' * 79 + '\n').join(docs)
-        vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
+        vim.command('let l:doc = %s' % repr(jedi_vim.PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
 PYTHONEOF
     if bufnr("__doc__") > 0
@@ -105,7 +105,7 @@ endfunction
 " ------------------------------------------------------------------------
 function! jedi#new_buffer(path)
     if g:jedi#use_tabs_not_buffers
-        python tabnew(vim.eval('a:path'))
+        python jedi_vim.tabnew(vim.eval('a:path'))
     else
         if !&hidden && &modified
             w
@@ -133,7 +133,7 @@ function! jedi#goto_window_on_enter()
     if l:data.bufnr
         " close goto_window buffer
         normal ZQ
-        python tabnew(vim.eval("bufname(l:data.bufnr)"))
+        python jedi_vim.tabnew(vim.eval("bufname(l:data.bufnr)"))
         call cursor(l:data.lnum, l:data.col)
     else
         echohl WarningMsg | echo "Builtin module cannot be opened." | echohl None

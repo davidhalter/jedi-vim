@@ -67,17 +67,15 @@ python << PYTHONEOF
 """ here we initialize the jedi stuff """
 import vim
 
-# update the system path, to include the python scripts 
+# update the system path, to include the jedi path
 import sys
 import os
 from os.path import dirname, abspath, join
 sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('s:current_file')))), 'jedi'))
 
-import jedi
-import jedi.keywords
-
+# update the sys path to include the jedi_vim script
 sys.path.append(dirname(abspath(vim.eval('s:current_file'))))
-from jedi_vim import *
+import jedi_vim
 sys.path.pop()
 
 PYTHONEOF
