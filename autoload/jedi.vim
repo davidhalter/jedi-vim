@@ -1,168 +1,39 @@
 " ------------------------------------------------------------------------
-" completion
+" functions that call python code
 " ------------------------------------------------------------------------
-function! jedi#complete(findstart, base)
-python << PYTHONEOF
-if 1:
-    row, column = vim.current.window.cursor
-    vim.eval('jedi#clear_func_def()')
-    if vim.eval('a:findstart') == '1':
-        count = 0
-        for char in reversed(vim.current.line[:column]):
-            if not re.match('[\w\d]', char):
-                break
-            count += 1
-        vim.command('return %i' % (column - count))
-    else:
-        base = vim.eval('a:base')
-        source = ''
-        for i, line in enumerate(vim.current.buffer):
-            # enter this path again, otherwise source would be incomplete
-            if i == row - 1:
-                source += line[:column] + base + line[column:]
-            else:
-                source += line
-            source += '\n'
-        # here again, the hacks, because jedi has a different interface than vim
-        column += len(base)
-        try:
-            script = get_script(source=source, column=column)
-            completions = script.complete()
-            call_def = script.get_in_function_call()
-
-            out = []
-            for c in completions:
-                d = dict(word=c.word[:len(base)] + c.complete,
-                         abbr=c.word,
-                         # stuff directly behind the completion
-                         menu=PythonToVimStr(c.description),
-                         info=PythonToVimStr(c.doc),  # docstr
-                         icase=1,  # case insensitive
-                         dup=1  # allow duplicates (maybe later remove this)
-                )
-                out.append(d)
-
-            strout = str(out)
-        except Exception:
-            # print to stdout, will be in :messages
-            print(traceback.format_exc())
-            strout = ''
-            completions = []
-            call_def = None
-
-        #print 'end', strout
-        show_func_def(call_def, len(completions))
-        vim.command('return ' + strout)
-PYTHONEOF
+function! jedi#goto()
+    python goto()
 endfunction
 
 
-" ------------------------------------------------------------------------
-" func_def
-" ------------------------------------------------------------------------
+function! jedi#get_definition()
+    python goto(is_definition=True)
+endfunction
+
+
+function! jedi#related_names()
+    python goto(is_related_name=True)
+endfunction
+
+
+function! jedi#rename(...)
+    python rename()
+endfunction
+
+
+function! jedi#complete(findstart, base)
+    python complete()
+endfunction
+
+
 function jedi#show_func_def()
-python << PYTHONEOF
-if 1:
-    vim.eval('jedi#clear_func_def()')
-    try:
-        show_func_def(get_script().get_in_function_call())
-    except Exception:
-        print(traceback.format_exc())
-PYTHONEOF
+    python show_func_def(get_script().get_in_function_call())
     return ''
 endfunction
 
 
 function jedi#clear_func_def()
-python << PYTHONEOF
-if 1:
-    cursor = vim.current.window.cursor
-    e = vim.eval('g:jedi#function_definition_escape')
-    regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
-    for i, line in enumerate(vim.current.buffer):
-        match = re.search(r'%s' % regex, line)
-        if match is not None:
-            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' % int(match.group(1))
-            vim.command(r'try | %s,%ss/%s/\2/g | catch | endtry' % (i + 1, i + 1, vim_regex))
-            vim.command('call histdel("search", -1)')
-            vim.command('let @/ = histget("search", -1)')
-    vim.current.window.cursor = cursor
-PYTHONEOF
-endfunction
-
-
-" ------------------------------------------------------------------------
-" goto
-" ------------------------------------------------------------------------
-function! jedi#goto()
-    python _goto()
-endfunction
-
-
-" ------------------------------------------------------------------------
-" get_definition
-" ------------------------------------------------------------------------
-function! jedi#get_definition()
-    python _goto(is_definition=True)
-endfunction
-
-
-" ------------------------------------------------------------------------
-" related_names
-" ------------------------------------------------------------------------
-function! jedi#related_names()
-    python _goto(is_related_name=True)
-endfunction
-
-
-" ------------------------------------------------------------------------
-" rename
-" ------------------------------------------------------------------------
-function! jedi#rename(...)
-python << PYTHONEOF
-if 1:
-    if not int(vim.eval('a:0')):
-        temp_rename = _goto(is_related_name=True, no_output=True)
-        _rename_cursor = vim.current.window.cursor
-
-        vim.command('normal A ')  # otherwise startinsert doesn't work well
-        vim.current.window.cursor = _rename_cursor
-
-        vim.command('augroup jedi_rename')
-        vim.command('autocmd InsertLeave <buffer> call jedi#rename(1)')
-        vim.command('augroup END')
-
-        vim.command('normal! diw')
-        vim.command(':startinsert')
-    else:
-        cursor = vim.current.window.cursor
-        window_path = vim.current.buffer.name
-        # reset autocommand
-        vim.command('autocmd! jedi_rename InsertLeave')
-
-        replace = vim.eval("expand('<cword>')")
-        vim.command('normal! u')  # undo new word
-        vim.command('normal! u')  # 2u didn't work...
-
-        if replace is None:
-            echo_highlight('No rename possible, if no name is given.')
-        else:
-            for r in temp_rename:
-                if r.in_builtin_module():
-                    continue
-                start_pos = r.start_pos + (0, 1)  # vim cursor starts with 1 indent
-                if vim.current.buffer.name != r.module_path:
-                    vim.eval("jedi#new_buffer('%s')" % r.module_path)
-
-                vim.current.window.cursor = r.start_pos
-                vim.command('normal! cw%s' % replace)
-
-            vim.current.window.cursor = cursor
-            vim.eval("jedi#new_buffer('%s')" % window_path)
-            echo_highlight('Jedi did %s renames!' % len(temp_rename))
-        # reset rename variables
-        temp_rename = None
-PYTHONEOF
+    python clear_func_def()
 endfunction
 
 
@@ -234,7 +105,7 @@ endfunction
 " ------------------------------------------------------------------------
 function! jedi#new_buffer(path)
     if g:jedi#use_tabs_not_buffers
-        return jedi#tabnew(a:path)
+        python tabnew(vim.eval('a:path'))
     else
         if !&hidden && &modified
             w
@@ -242,34 +113,6 @@ function! jedi#new_buffer(path)
         execute 'edit '.a:path
     endif
 endfunction
-
-
-function! jedi#tabnew(path)
-python << PYTHONEOF
-if 1:
-    path = os.path.abspath(vim.eval('a:path'))
-    for tab_nr in range(int(vim.eval("tabpagenr('$')"))):
-        for buf_nr in vim.eval("tabpagebuflist(%i + 1)" % tab_nr):
-            buf_nr = int(buf_nr) - 1
-            try:
-                buf_path = vim.buffers[buf_nr].name
-            except IndexError:
-                # just do good old asking for forgiveness. don't know why this happens :-)
-                pass
-            else:
-                if buf_path == path:
-                    # tab exists, just switch to that tab
-                    vim.command('tabfirst | tabnext %i' % (tab_nr + 1))
-                    break
-        else:
-            continue
-        break
-    else:
-        # tab doesn't exist, add a new one.
-        vim.command('tabnew %s' % path)
-PYTHONEOF
-endfunction
-
 
 function! s:add_goto_window()
     set lazyredraw
@@ -290,7 +133,7 @@ function! jedi#goto_window_on_enter()
     if l:data.bufnr
         " close goto_window buffer
         normal ZQ
-        call jedi#tabnew(bufname(l:data.bufnr))
+        python tabnew(vim.eval("bufname(l:data.bufnr)"))
         call cursor(l:data.lnum, l:data.col)
     else
         echohl WarningMsg | echo "Builtin module cannot be opened." | echohl None

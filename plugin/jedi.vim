@@ -73,8 +73,6 @@ import os
 from os.path import dirname, abspath, join
 sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('s:current_file')))), 'jedi'))
 
-# normally you should import jedi. jedi-vim is an exception, because you can
-# copy that directly into the .vim directory.
 import jedi
 import jedi.keywords
 

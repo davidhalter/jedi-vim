@@ -3,11 +3,13 @@ The Python parts of the Jedi library for VIM. It is mostly about communicating
 with VIM.
 """
 
+import traceback  # for exception output
+import re
+import os
+
 import vim
 import jedi
 import jedi.keywords
-import traceback  # for exception output
-import re
 
 temp_rename = None  # used for jedi#rename
 
@@ -34,7 +36,59 @@ def get_script(source=None, column=None):
     return jedi.Script(source, row, column, buf_path)
 
 
-def _goto(is_definition=False, is_related_name=False, no_output=False):
+def complete():
+    row, column = vim.current.window.cursor
+    vim.eval('jedi#clear_func_def()')
+    if vim.eval('a:findstart') == '1':
+        count = 0
+        for char in reversed(vim.current.line[:column]):
+            if not re.match('[\w\d]', char):
+                break
+            count += 1
+        vim.command('return %i' % (column - count))
+    else:
+        base = vim.eval('a:base')
+        source = ''
+        for i, line in enumerate(vim.current.buffer):
+            # enter this path again, otherwise source would be incomplete
+            if i == row - 1:
+                source += line[:column] + base + line[column:]
+            else:
+                source += line
+            source += '\n'
+        # here again, the hacks, because jedi has a different interface than vim
+        column += len(base)
+        try:
+            script = get_script(source=source, column=column)
+            completions = script.complete()
+            call_def = script.get_in_function_call()
+
+            out = []
+            for c in completions:
+                d = dict(word=c.word[:len(base)] + c.complete,
+                         abbr=c.word,
+                         # stuff directly behind the completion
+                         menu=PythonToVimStr(c.description),
+                         info=PythonToVimStr(c.doc),  # docstr
+                         icase=1,  # case insensitive
+                         dup=1  # allow duplicates (maybe later remove this)
+                )
+                out.append(d)
+
+            strout = str(out)
+        except Exception:
+            # print to stdout, will be in :messages
+            print(traceback.format_exc())
+            strout = ''
+            completions = []
+            call_def = None
+
+        #print 'end', strout
+        show_func_def(call_def, len(completions))
+        vim.command('return ' + strout)
+
+
+def goto(is_definition=False, is_related_name=False, no_output=False):
     definitions = []
     script = get_script()
     try:
@@ -88,48 +142,132 @@ def _goto(is_definition=False, is_related_name=False, no_output=False):
     return definitions
 
 
-def show_func_def(call_def, completion_lines=0):
-    vim.eval('jedi#clear_func_def()')
-
-    if call_def is None:
-        return
-
-    row, column = call_def.bracket_start
-    if column < 2 or row == 0:
-        return  # edge cases, just ignore
-
-    # TODO check if completion menu is above or below
-    row_to_replace = row - 1
-    line = vim.eval("getline(%s)" % row_to_replace)
-
-    insert_column = column - 2 # because it has stuff at the beginning
-
-    params = [p.get_code().replace('\n', '') for p in call_def.params]
-    try:
-        params[call_def.index] = '*%s*' % params[call_def.index]
-    except (IndexError, TypeError):
-        pass
-
-    # This stuff is reaaaaally a hack! I cannot stress enough, that this is a
-    # stupid solution. But there is really no other yet. There is no
-    # possibility in VIM to draw on the screen, but there will be one
-    # (see :help todo Patch to access screen under Python. (Marko Mahni, 2010 Jul 18))
-    text = " (%s) " % ', '.join(params)
-    text = ' ' * (insert_column - len(line)) + text
-    end_column = insert_column + len(text) - 2  # -2 because of bold symbols
-    # replace line before with cursor
+def clear_func_def():
+    cursor = vim.current.window.cursor
     e = vim.eval('g:jedi#function_definition_escape')
-    regex = "xjedi=%sx%sxjedix".replace('x', e)
+    regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
+    for i, line in enumerate(vim.current.buffer):
+        match = re.search(r'%s' % regex, line)
+        if match is not None:
+            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' % int(match.group(1))
+            vim.command(r'try | %s,%ss/%s/\2/g | catch | endtry' % (i + 1, i + 1, vim_regex))
+            vim.command('call histdel("search", -1)')
+            vim.command('let @/ = histget("search", -1)')
+    vim.current.window.cursor = cursor
 
-    prefix, replace = line[:insert_column], line[insert_column:end_column]
-    # check the replace stuff for strings, to append them (don't want to break the syntax)
-    regex_quotes = '\\\\*["\']+'
-    add = ''.join(re.findall(regex_quotes, replace))  # add are all the strings
-    if add:
-        a = re.search(regex_quotes + '$', prefix)
-        add = ('' if a is None else a.group(0)) + add
 
-    tup = '%s, %s' % (len(add), replace)
-    repl = ("%s" + regex + "%s") % (prefix, tup, text, add + line[end_column:])
+def show_func_def(call_def, completion_lines=0):
+    try:
+        vim.eval('jedi#clear_func_def()')
 
-    vim.eval('setline(%s, %s)' % (row_to_replace, repr(PythonToVimStr(repl))))
+        if call_def is None:
+            return
+
+        row, column = call_def.bracket_start
+        if column < 2 or row == 0:
+            return  # edge cases, just ignore
+
+        # TODO check if completion menu is above or below
+        row_to_replace = row - 1
+        line = vim.eval("getline(%s)" % row_to_replace)
+
+        insert_column = column - 2 # because it has stuff at the beginning
+
+        params = [p.get_code().replace('\n', '') for p in call_def.params]
+        try:
+            params[call_def.index] = '*%s*' % params[call_def.index]
+        except (IndexError, TypeError):
+            pass
+
+        # This stuff is reaaaaally a hack! I cannot stress enough, that this is a
+        # stupid solution. But there is really no other yet. There is no
+        # possibility in VIM to draw on the screen, but there will be one
+        # (see :help todo Patch to access screen under Python. (Marko Mahni, 2010 Jul 18))
+        text = " (%s) " % ', '.join(params)
+        text = ' ' * (insert_column - len(line)) + text
+        end_column = insert_column + len(text) - 2  # -2 because of bold symbols
+        # replace line before with cursor
+        e = vim.eval('g:jedi#function_definition_escape')
+        regex = "xjedi=%sx%sxjedix".replace('x', e)
+
+        prefix, replace = line[:insert_column], line[insert_column:end_column]
+        # check the replace stuff for strings, to append them (don't want to break the syntax)
+        regex_quotes = '\\\\*["\']+'
+        add = ''.join(re.findall(regex_quotes, replace))  # add are all the strings
+        if add:
+            a = re.search(regex_quotes + '$', prefix)
+            add = ('' if a is None else a.group(0)) + add
+
+        tup = '%s, %s' % (len(add), replace)
+        repl = ("%s" + regex + "%s") % (prefix, tup, text, add + line[end_column:])
+
+        vim.eval('setline(%s, %s)' % (row_to_replace, repr(PythonToVimStr(repl))))
+    except Exception:
+        print(traceback.format_exc())
+
+def rename():
+    """ A vim function, can only be used from there """
+    global temp_rename
+    if not int(vim.eval('a:0')):
+        temp_rename = goto(is_related_name=True, no_output=True)
+        _rename_cursor = vim.current.window.cursor
+
+        vim.command('normal A ')  # otherwise startinsert doesn't work well
+        vim.current.window.cursor = _rename_cursor
+
+        vim.command('augroup jedi_rename')
+        vim.command('autocmd InsertLeave <buffer> call jedi#rename(1)')
+        vim.command('augroup END')
+
+        vim.command('normal! diw')
+        vim.command(':startinsert')
+    else:
+        cursor = vim.current.window.cursor
+        window_path = vim.current.buffer.name
+        # reset autocommand
+        vim.command('autocmd! jedi_rename InsertLeave')
+
+        replace = vim.eval("expand('<cword>')")
+        vim.command('normal! u')  # undo new word
+        vim.command('normal! u')  # 2u didn't work...
+
+        if replace is None:
+            echo_highlight('No rename possible, if no name is given.')
+        else:
+            for r in temp_rename:
+                if r.in_builtin_module():
+                    continue
+                if vim.current.buffer.name != r.module_path:
+                    vim.eval("jedi#new_buffer('%s')" % r.module_path)
+
+                vim.current.window.cursor = r.start_pos
+                vim.command('normal! cw%s' % replace)
+
+            vim.current.window.cursor = cursor
+            vim.eval("jedi#new_buffer('%s')" % window_path)
+            echo_highlight('Jedi did %s renames!' % len(temp_rename))
+        # reset rename variables
+        temp_rename = None
+
+
+def tabnew(path):
+    path = os.path.abspath(path)
+    for tab_nr in range(int(vim.eval("tabpagenr('$')"))):
+        for buf_nr in vim.eval("tabpagebuflist(%i + 1)" % tab_nr):
+            buf_nr = int(buf_nr) - 1
+            try:
+                buf_path = vim.buffers[buf_nr].name
+            except IndexError:
+                # just do good old asking for forgiveness. don't know why this happens :-)
+                pass
+            else:
+                if buf_path == path:
+                    # tab exists, just switch to that tab
+                    vim.command('tabfirst | tabnext %i' % (tab_nr + 1))
+                    break
+        else:
+            continue
+        break
+    else:
+        # tab doesn't exist, add a new one.
+        vim.command('tabnew %s' % path)
