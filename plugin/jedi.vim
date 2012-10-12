@@ -180,6 +180,10 @@ def show_func_def(call_def, completion_lines=0):
     except (IndexError, TypeError):
         pass
 
+    # This stuff is reaaaaally a hack! I cannot stress enough, that this is a
+    # stupid solution. But there is really no other yet. There is no
+    # possibility in VIM to draw on the screen, but there will be one
+    # (see :help todo Patch to access screen under Python. (Marko Mahni, 2010 Jul 18))
     text = " (%s) " % ', '.join(params)
     text = ' ' * (insert_column - len(line)) + text
     end_column = insert_column + len(text) - 2  # -2 because of bold symbols
@@ -187,11 +191,16 @@ def show_func_def(call_def, completion_lines=0):
     e = vim.eval('g:jedi#function_definition_escape')
     regex = "xjedi=%sx%sxjedix".replace('x', e)
 
+    prefix, replace = line[:insert_column], line[insert_column:end_column]
     # check the replace stuff for strings, to append them (don't want to break the syntax)
-    replace = line[insert_column:end_column]
-    add = ''.join(re.findall('\\\\*["\']+', replace))  # add are all the strings
+    regex_quotes = '\\\\*["\']+'
+    add = ''.join(re.findall(regex_quotes, replace))  # add are all the strings
+    if add:
+        a = re.search(regex_quotes + '$', prefix)
+        add = ('' if a is None else a.group(0)) + add
+
     tup = '%s, %s' % (len(add), replace)
-    repl = ("%s" + regex + "%s") % (line[:insert_column], tup, text, add + line[end_column:])
+    repl = ("%s" + regex + "%s") % (prefix, tup, text, add + line[end_column:])
 
     vim.eval('setline(%s, %s)' % (row_to_replace, repr(PythonToVimStr(repl))))
 PYTHONEOF

@@ -9,7 +9,7 @@ if g:jedi#show_function_definition == 1 && has('conceal')
   syn match jediFatSymbol "*" contained conceal
   syn match jediFat "\*[^*]\+\*" contained contains=jediFatSymbol
   syn match jediSpace "\v[ ]+( )@=" contained
-  exe 'syn match jediFunction "'.l1.'" contains=jediIgnore,jediFat,jediSpace'
+  exe 'syn match jediFunction "'.l1.'" keepend extend contains=jediIgnore,jediFat,jediSpace'
 
   hi def link jediIgnore Ignore
   hi def link jediFatSymbol Ignore
@@ -31,5 +31,4 @@ if g:jedi#show_function_definition == 1 && has('conceal')
   syn region pythonRawString
       \ start=+[uU]\=[rR]\z('''\|"""\)+ end="\z1" keepend
       \ contains=pythonSpaceError,pythonDoctest,@Spell,jediFunction
-
 endif
