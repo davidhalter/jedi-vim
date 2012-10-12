@@ -4,8 +4,8 @@
 function! jedi#complete(findstart, base)
 python << PYTHONEOF
 if 1:
-    vim.eval('jedi#clear_func_def()')
     row, column = vim.current.window.cursor
+    vim.eval('jedi#clear_func_def()')
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
@@ -63,6 +63,7 @@ endfunction
 function jedi#show_func_def()
 python << PYTHONEOF
 if 1:
+    vim.eval('jedi#clear_func_def()')
     try:
         show_func_def(get_script().get_in_function_call())
     except Exception:
