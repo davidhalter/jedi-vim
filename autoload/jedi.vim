@@ -28,12 +28,6 @@ endfunction
 
 function jedi#show_func_def()
     python jedi_vim.show_func_def(jedi_vim.get_script().get_in_function_call())
-    return ''
-endfunction
-
-
-function jedi#clear_func_def()
-    python jedi_vim.clear_func_def()
 endfunction
 
 
@@ -168,6 +162,6 @@ function! jedi#do_popup_on_dot()
 endfunc
 
 function! jedi#configure_function_definition()
-    autocmd InsertLeave <buffer> call jedi#clear_func_def()
+    autocmd InsertLeave <buffer> python jedi_vim.clear_func_def()
     autocmd CursorMovedI <buffer> call jedi#show_func_def()
 endfunction

@@ -217,7 +217,6 @@ def show_func_def(call_def, completion_lines=0):
 
 
 def rename():
-    """ A vim function, can only be used from there """
     global temp_rename
     if not int(vim.eval('a:0')):
         temp_rename = goto(is_related_name=True, no_output=True)
