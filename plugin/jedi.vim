@@ -16,48 +16,36 @@ if exists("g:loaded_jedi") || &cp
 endif
 let g:loaded_jedi = 1
 
-
 " ------------------------------------------------------------------------
 " defaults for jedi-vim
 " ------------------------------------------------------------------------
-if !exists("g:jedi#use_tabs_not_buffers ")
-    let g:jedi#use_tabs_not_buffers = 1
-endif
-if !exists("g:jedi#auto_initialization")
-    let g:jedi#auto_initialization = 1
-endif
-if !exists("g:jedi#goto_command")
-    let g:jedi#goto_command = "<leader>g"
-endif
-if !exists("g:jedi#get_definition_command")
-    let g:jedi#get_definition_command = "<leader>d"
-endif
-if !exists("g:jedi#related_names_command")
-    let g:jedi#related_names_command = "<leader>n"
-endif
-if !exists("g:jedi#rename_command")
-    let g:jedi#rename_command = "<leader>r"
-endif
-if !exists("g:jedi#popup_on_dot")
-    let g:jedi#popup_on_dot = 1
-endif
-if !exists("g:jedi#pydoc")
-    let g:jedi#pydoc = "K"
-endif
-if !exists("g:jedi#show_function_definition")
-    let g:jedi#show_function_definition = 1
-endif
-if !exists("g:jedi#function_definition_escape")
-    let g:jedi#function_definition_escape = '≡'
-endif
-if !exists("g:jedi#auto_close_doc")
-    let g:jedi#auto_close_doc = 1
-endif
+let s:settings = {
+    \ 'use_tabs_not_buffers': 1,
+    \ 'auto_initialization': 1,
+    \ 'goto_command': "'<leader>g'",
+    \ 'get_definition_command': "'<leader>d'",
+    \ 'related_names_command': "'<leader>n'",
+    \ 'rename_command': "'<leader>r'",
+    \ 'popup_on_dot': 1,
+    \ 'pydoc': "'K'",
+    \ 'show_function_definition': 1,
+    \ 'function_definition_escape': "'≡'",
+    \ 'auto_close_doc': 1
+\ }
+
+for [key, val] in items(s:settings)
+    if !exists('g:jedi#'.key)
+        exe 'let g:jedi#'.key.' = '.val
+    endif
+endfor
+
 
 set switchbuf=useopen  " needed for pydoc
-let s:current_file=expand("<sfile>")
 
 if g:jedi#auto_initialization 
+    " this is only here because in some cases the VIM library adds their
+    " autocompletion as a default, which may cause problems, depending on the
+    " order of invocation.
     autocmd FileType python setlocal omnifunc=jedi#complete
 endif
 
@@ -71,10 +59,10 @@ import vim
 import sys
 import os
 from os.path import dirname, abspath, join
-sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('s:current_file')))), 'jedi'))
+sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('expand("<sfile>")')))), 'jedi'))
 
 # update the sys path to include the jedi_vim script
-sys.path.append(dirname(abspath(vim.eval('s:current_file'))))
+sys.path.append(dirname(abspath(vim.eval('expand("<sfile>")'))))
 import jedi_vim
 sys.path.pop()
 

@@ -127,7 +127,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                     echo_highlight("Builtin modules cannot be displayed.")
             else:
                 if d.module_path != vim.current.buffer.name:
-                    vim.eval('jedi#new_buffer(%s)' % d.module_path)
+                    vim.eval('jedi#new_buffer(%s)' % repr(d.module_path))
                 vim.current.window.cursor = d.line_nr, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
