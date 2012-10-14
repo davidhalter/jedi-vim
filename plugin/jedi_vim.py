@@ -27,8 +27,8 @@ def echo_highlight(msg):
 
 
 def get_script(source=None, column=None):
-    jedi.settings.additional_dynamic_modules = \
-        [b.name for b in vim.buffers if b.name.endswith('.py')]
+    jedi.settings.additional_dynamic_modules = [b.name for b in vim.buffers
+                            if b.name is not None and b.name.endswith('.py')]
     if source is None:
         source = '\n'.join(vim.current.buffer)
     row = vim.current.window.cursor[0]
