@@ -199,10 +199,11 @@ def show_func_def(call_def, completion_lines=0):
 
         # Check the replace stuff for strings, to append them
         # (don't want to break the syntax)
-        regex_quotes = '\\\\*["\']+'
+        regex_quotes = r'''\\*["']+'''
         # `add` are all the quotation marks.
         add = ''.join(re.findall(regex_quotes, replace))
-        if add:
+        # search backwards
+        if add and replace[0] in ['"', "'"]:
             a = re.search(regex_quotes + '$', prefix)
             add = ('' if a is None else a.group(0)) + add
 
