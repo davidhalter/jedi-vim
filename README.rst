@@ -9,6 +9,23 @@ know, what you think about Jedi and jedi-vim.*
 
 jedi-vim is a is a VIM binding to the awesome autocompletion library *Jedi*.
 
+Here are some pictures:
+
+.. image:: https://github.com/davidhalter/jedi/raw/master/screenshot_complete.png
+
+Completion for almost anything (Ctrl+Space).
+
+.. image:: https://github.com/davidhalter/jedi/raw/master/screenshot_function.png
+
+Display of function/class bodies, docstrings.
+
+.. image:: https://github.com/davidhalter/jedi/raw/master/screenshot_pydoc.png
+
+Pydoc support (with highlighting, Shift+k).
+
+There is also support for goto and renaming.
+
+
 Get the latest from `github <http://github.com/davidhalter/jedi-vim>`_.
 
 You can get the Jedi library is documented
