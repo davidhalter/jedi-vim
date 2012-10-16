@@ -61,6 +61,9 @@ import os
 from os.path import dirname, abspath, join
 sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('expand("<sfile>")')))), 'jedi'))
 
+# to display errors correctly
+import traceback
+
 # update the sys path to include the jedi_vim script
 sys.path.append(dirname(abspath(vim.eval('expand("<sfile>")'))))
 import jedi_vim
