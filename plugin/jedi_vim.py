@@ -77,6 +77,8 @@ def complete():
                 )
                 out.append(d)
 
+            out.sort(key=lambda x: x['word'].lower())
+
             strout = str(out)
         except Exception:
             # print to stdout, will be in :messages
