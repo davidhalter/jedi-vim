@@ -27,7 +27,7 @@ endfunction
 
 
 function jedi#show_func_def()
-    python jedi_vim.show_func_def(jedi_vim.get_script().get_in_function_call())
+    python jedi_vim.show_func_def()
 endfunction
 
 

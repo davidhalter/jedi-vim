@@ -162,8 +162,10 @@ def clear_func_def():
     vim.current.window.cursor = cursor
 
 
-def show_func_def(call_def, completion_lines=0):
+def show_func_def(call_def=None, completion_lines=0):
     try:
+        if call_def == None:
+            call_def = get_script().get_in_function_call()
         clear_func_def()
 
         if call_def is None:
