@@ -163,6 +163,8 @@ def clear_func_def():
 
 
 def show_func_def(call_def=None, completion_lines=0):
+    if vim.eval("has('conceal')") == '0':
+        return
     try:
         if call_def == None:
             call_def = get_script().get_in_function_call()
