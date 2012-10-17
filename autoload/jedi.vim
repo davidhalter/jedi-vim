@@ -152,7 +152,7 @@ function! jedi#do_popup_on_dot()
     endfor
 
     for a in highlight_groups
-        for b in ['pythonString', 'pythonComment']
+        for b in ['pythonString', 'pythonComment', 'pythonNumber']
             if a == b
                 return 0 
             endif
