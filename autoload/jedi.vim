@@ -26,7 +26,7 @@ function! jedi#complete(findstart, base)
 endfunction
 
 
-function jedi#show_func_def()
+function! jedi#show_func_def()
     python jedi_vim.show_func_def()
 endfunction
 
