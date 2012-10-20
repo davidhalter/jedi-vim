@@ -163,7 +163,7 @@ def clear_func_def():
 
 
 def show_func_def(call_def=None, completion_lines=0):
-    if vim.eval("has('conceal')") == '0':
+    if vim.eval("has('conceal') && g:jedi#show_function_definition") == '0':
         return
     try:
         if call_def == None:
