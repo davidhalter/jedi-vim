@@ -47,26 +47,4 @@ if g:jedi#auto_initialization
     autocmd FileType python setlocal omnifunc=jedi#complete switchbuf=useopen  " needed for pydoc
 endif
 
-
-
-python << PYTHONEOF
-""" here we initialize the jedi stuff """
-import vim
-
-# update the system path, to include the jedi path
-import sys
-import os
-from os.path import dirname, abspath, join
-sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('expand("<sfile>")')))), 'jedi'))
-
-# to display errors correctly
-import traceback
-
-# update the sys path to include the jedi_vim script
-sys.path.append(dirname(abspath(vim.eval('expand("<sfile>")'))))
-import jedi_vim
-sys.path.pop()
-
-PYTHONEOF
-
 " vim: set et ts=4:
