@@ -175,13 +175,13 @@ import vim
 import sys
 import os
 from os.path import dirname, abspath, join
-sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('expand("<sfile>")')))), 'jedi'))
+sys.path.insert(0, join(abspath(dirname(dirname(vim.eval('expand("<sfile>")')))+'/../plugin'), 'jedi'))
 
 # to display errors correctly
 import traceback
 
 # update the sys path to include the jedi_vim script
-sys.path.append(abspath(dirname(vim.eval('expand("<sfile>")')+'/../plugin')))
+sys.path.append(abspath(dirname(vim.eval('expand("<sfile>")'))+'/../plugin'))
 import jedi_vim
 sys.path.pop()
 
