@@ -40,13 +40,12 @@ for [key, val] in items(s:settings)
 endfor
 
 
-set switchbuf=useopen  " needed for pydoc
-
 if g:jedi#auto_initialization 
     " this is only here because in some cases the VIM library adds their
     " autocompletion as a default, which may cause problems, depending on the
     " order of invocation.
-    autocmd FileType python setlocal omnifunc=jedi#complete
+    autocmd FileType python setlocal omnifunc=jedi#complete switchbuf=useopen  " needed for pydoc
+
 endif
 
 
