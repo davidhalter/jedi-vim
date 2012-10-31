@@ -165,3 +165,26 @@ function! jedi#configure_function_definition()
     autocmd InsertLeave <buffer> python jedi_vim.clear_func_def()
     autocmd CursorMovedI <buffer> call jedi#show_func_def()
 endfunction
+
+
+python << PYTHONEOF
+""" here we initialize the jedi stuff """
+import vim
+
+# update the system path, to include the jedi path
+import sys
+import os
+from os.path import dirname, abspath, join
+sys.path.insert(0, join(dirname(dirname(abspath(vim.eval('expand("<sfile>")')))), 'jedi'))
+
+# to display errors correctly
+import traceback
+
+# update the sys path to include the jedi_vim script
+sys.path.append(abspath(dirname(vim.eval('expand("<sfile>")')+'/../plugin')))
+import jedi_vim
+sys.path.pop()
+
+PYTHONEOF
+
+" vim: set et ts=4:
