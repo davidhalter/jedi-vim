@@ -91,3 +91,8 @@ There's some support for refactoring::
 And you can list all names that are related (have the same origin)::
 
     let g:jedi#related_names_command = "<leader>n"
+
+By default you get a window that displays the function definition you're
+currently in. If you don't want that::
+
+    let g:jedi#show_function_definition = "0"
