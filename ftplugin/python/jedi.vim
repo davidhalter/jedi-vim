@@ -24,7 +24,7 @@ if g:jedi#auto_initialization
 end
 
 if g:jedi#popup_on_dot
-    inoremap <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>" : ""<CR>
+    inoremap <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<C-X>\<C-O>" : ""<CR>
 end
 
 if g:jedi#auto_close_doc
