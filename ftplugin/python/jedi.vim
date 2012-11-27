@@ -8,6 +8,7 @@ if g:jedi#auto_initialization
     setlocal omnifunc=jedi#complete
     " map ctrl+space for autocompletion
     inoremap <buffer> <Nul> <C-X><C-O>
+    inoremap <buffer> <C-Space> <C-X><C-O>
 
     " goto / get_definition / related_names
     execute "noremap <buffer>".g:jedi#goto_command." :call jedi#goto()<CR>"
