@@ -10,16 +10,24 @@ import os
 import vim
 import jedi
 import jedi.keywords
+from jedi._compatibility import is_py3k
 
 temp_rename = None  # used for jedi#rename
 
+encoding = str if is_py3k else unicode
 
-class PythonToVimStr(str):
+
+class PythonToVimStr(encoding):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
 
     def __repr__(self):
-        return '"%s"' % self.replace('\\', '\\\\').replace('"', r'\"')
+        # this is totally stupid and makes no sense but vim/python unicode
+        # support is pretty bad. don't ask how I came up with this... It just
+        # works...
+        # It seems to be related to that bug: http://bugs.python.org/issue5876
+        s = self.encode('UTF-8')
+        return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
 
 
 def echo_highlight(msg):
@@ -195,8 +203,11 @@ def show_func_def(call_def=None, completion_lines=0):
         text = " (%s) " % ', '.join(params)
         text = ' ' * (insert_column - len(line)) + text
         end_column = insert_column + len(text) - 2  # -2 due to bold symbols
+
+        # Need to decode it with utf8, because vim returns always a python 2
+        # string even if it is unicode.
+        e = vim.eval('g:jedi#function_definition_escape').decode('UTF-8')
         # replace line before with cursor
-        e = vim.eval('g:jedi#function_definition_escape')
         regex = "xjedi=%sx%sxjedix".replace('x', e)
 
         prefix, replace = line[:insert_column], line[insert_column:end_column]
@@ -212,8 +223,7 @@ def show_func_def(call_def=None, completion_lines=0):
             add = ('' if a is None else a.group(0)) + add
 
         tup = '%s, %s' % (len(add), replace)
-        repl = ("%s" + regex + "%s") % \
-                                (prefix, tup, text, add + line[end_column:])
+        repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
         vim.eval('setline(%s, %s)' % \
                             (row_to_replace, repr(PythonToVimStr(repl))))
