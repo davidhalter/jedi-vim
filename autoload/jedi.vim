@@ -30,6 +30,17 @@ function! jedi#show_func_def()
     python jedi_vim.show_func_def()
 endfunction
 
+function! jedi#enable_speed_debugging()
+    python jedi.set_debug_function(jedi.debug.print_to_stdout, speed=True, warnings=False, notices=False)
+endfunction
+
+function! jedi#enable_debugging()
+    python jedi.set_debug_function(jedi.debug.print_to_stdout, speed=True, warnings=False, notices=False)
+endfunction
+
+function! jedi#disable_debugging()
+    python jedi.set_debug_function(None)
+endfunction
 
 " ------------------------------------------------------------------------
 " show_pydoc
