@@ -287,3 +287,7 @@ def tabnew(path):
     else:
         # tab doesn't exist, add a new one.
         vim.command('tabnew %s' % path)
+
+
+def print_to_stdout(level, str_out):
+    print(str_out)

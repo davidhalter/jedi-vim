@@ -31,15 +31,15 @@ function! jedi#show_func_def()
 endfunction
 
 function! jedi#enable_speed_debugging()
-    python jedi.set_debug_function(jedi.debug.print_to_stdout, speed=True, warnings=False, notices=False)
+    python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 endfunction
 
 function! jedi#enable_debugging()
-    python jedi.set_debug_function(jedi.debug.print_to_stdout, speed=True, warnings=False, notices=False)
+    python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 endfunction
 
 function! jedi#disable_debugging()
-    python jedi.set_debug_function(None)
+    python jedi_vim.jedi.set_debug_function(None)
 endfunction
 
 " ------------------------------------------------------------------------
