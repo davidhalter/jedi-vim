@@ -25,7 +25,11 @@ if g:jedi#auto_initialization
 end
 
 if g:jedi#popup_on_dot
-    inoremap <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<C-X>\<C-O>" : ""<CR>
+    if stridx(&completeopt, 'longest') > -1
+        inoremap <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>" : ""<CR>
+    else
+        inoremap <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>\<lt>C-P>" : ""<CR>
+    end
 end
 
 if g:jedi#auto_close_doc
