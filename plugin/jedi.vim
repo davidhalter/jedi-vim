@@ -24,6 +24,7 @@ let s:settings = {
     \ 'auto_initialization': 1,
     \ 'auto_vim_configuration': 1,
     \ 'goto_command': "'<leader>g'",
+    \ 'autocompletion_command': "'<C-Space>'",
     \ 'get_definition_command': "'<leader>d'",
     \ 'related_names_command': "'<leader>n'",
     \ 'rename_command': "'<leader>r'",

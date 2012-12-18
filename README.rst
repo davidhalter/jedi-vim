@@ -97,6 +97,10 @@ And you can list all names that are related (have the same origin)::
 
     let g:jedi#related_names_command = "<leader>n"
 
+If you want to change the default autocompletion command::
+
+    let g:jedi#autocompletion_command = "<C-Space>"
+
 By default you get a window that displays the function definition you're
 currently in. If you don't want that::
 
