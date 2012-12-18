@@ -22,6 +22,7 @@ let g:loaded_jedi = 1
 let s:settings = {
     \ 'use_tabs_not_buffers': 1,
     \ 'auto_initialization': 1,
+    \ 'auto_vim_configuration': 1,
     \ 'goto_command': "'<leader>g'",
     \ 'get_definition_command': "'<leader>d'",
     \ 'related_names_command': "'<leader>n'",

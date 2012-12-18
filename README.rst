@@ -62,6 +62,11 @@ you disable the auto-initialization in your ``.vimrc``::
 
     let g:jedi#auto_initialization = 0
 
+There are also some VIM options (like ``completeopt``) which are automatically
+initialized, if you don't want that:
+
+    let g:jedi#auto_vim_configuration = 0
+
 The goto is by default on <leader g>. If you want to change that::
 
     let g:jedi#goto_command = "<leader>g"

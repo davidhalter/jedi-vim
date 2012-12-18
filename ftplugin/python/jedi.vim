@@ -24,6 +24,10 @@ if g:jedi#auto_initialization
     endif
 end
 
+if g:jedi#auto_vim_configuration
+    setlocal completeopt=menuone,longest,preview
+end
+
 if g:jedi#popup_on_dot
     if stridx(&completeopt, 'longest') > -1
         inoremap <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>" : ""<CR>
