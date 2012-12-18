@@ -21,6 +21,11 @@ class PythonToVimStr(encoding):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
 
+    def __new__(cls, s):
+        # VIM doesn't like UTF-8
+        s = s.decode('latin-1')
+        return super(PythonToVimStr, cls).__new__(cls, s)
+
     def __repr__(self):
         # this is totally stupid and makes no sense but vim/python unicode
         # support is pretty bad. don't ask how I came up with this... It just
