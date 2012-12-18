@@ -7,7 +7,6 @@ let b:did_ftplugin = 1
 if g:jedi#auto_initialization
     setlocal omnifunc=jedi#complete
 
-    echom g:jedi#autocompletion_command
     " map ctrl+space for autocompletion
     if g:jedi#autocompletion_command == "<C-Space>"
         " in terminals, <C-Space> sometimes equals <Nul>
