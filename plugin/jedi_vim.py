@@ -10,24 +10,14 @@ import os
 import vim
 import jedi
 import jedi.keywords
-from jedi._compatibility import is_py3k
+from jedi._compatibility import unicode
 
 temp_rename = None  # used for jedi#rename
 
-encoding = str if is_py3k else unicode
 
-
-class PythonToVimStr(encoding):
+class PythonToVimStr(unicode):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
-
-    def __new__(cls, s):
-        # Somehow I'm not getting anything unicode related in Python
-        try:
-            s = s.decode('utf-8')
-        except UnicodeDecodeError:
-            s = unicode(s, 'latin-1')
-        return super(PythonToVimStr, cls).__new__(cls, s)
 
     def __repr__(self):
         # this is totally stupid and makes no sense but vim/python unicode
@@ -51,7 +41,8 @@ def get_script(source=None, column=None):
     if column is None:
         column = vim.current.window.cursor[1]
     buf_path = vim.current.buffer.name
-    return jedi.Script(source, row, column, buf_path)
+    encoding = vim.eval('&encoding')
+    return jedi.Script(source, row, column, buf_path, encoding)
 
 
 def complete():
@@ -143,7 +134,8 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                     echo_highlight("Builtin modules cannot be displayed.")
             else:
                 if d.module_path != vim.current.buffer.name:
-                    vim.eval('jedi#new_buffer(%s)' % repr(d.module_path))
+                    vim.eval('jedi#new_buffer(%s)' % \
+                                        repr(PythonToVimStr(d.module_path)))
                 vim.current.window.cursor = d.line_nr, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
