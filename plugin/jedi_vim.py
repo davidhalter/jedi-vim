@@ -22,8 +22,11 @@ class PythonToVimStr(encoding):
     __slots__ = []
 
     def __new__(cls, s):
-        # VIM doesn't like UTF-8
-        s = s.decode('latin-1')
+        # Somehow I'm not getting anything unicode related in Python
+        try:
+            s = s.decode('utf-8')
+        except UnicodeDecodeError:
+            s = unicode(s, 'latin-1')
         return super(PythonToVimStr, cls).__new__(cls, s)
 
     def __repr__(self):
@@ -80,8 +83,8 @@ def complete():
 
             out = []
             for c in completions:
-                d = dict(word=c.word[:len(base)] + c.complete,
-                         abbr=c.word,
+                d = dict(word=PythonToVimStr(c.word[:len(base)] + c.complete),
+                         abbr=PythonToVimStr(c.word),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
                          info=PythonToVimStr(c.doc),  # docstr
