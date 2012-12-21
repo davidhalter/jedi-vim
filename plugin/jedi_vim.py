@@ -299,5 +299,9 @@ def tabnew(path):
         vim.command('tabnew %s' % path)
 
 
+def escape_file_path(path):
+    return path.replace(' ', r'\ ')
+
+
 def print_to_stdout(level, str_out):
     print(str_out)

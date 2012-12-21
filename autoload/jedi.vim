@@ -110,12 +110,12 @@ endfunction
 " ------------------------------------------------------------------------
 function! jedi#new_buffer(path)
     if g:jedi#use_tabs_not_buffers
-        python jedi_vim.tabnew(vim.eval('a:path'))
+        python jedi_vim.tabnew(jedi_vim.escape_file_path(vim.eval('a:path')))
     else
         if !&hidden && &modified
             w
         endif
-        execute 'edit '.a:path
+        python vim.execute('edit ' + vim.eval(jedi_vim.escape_file_path(vim.eval('a:path'))))
     endif
 endfunction
 
