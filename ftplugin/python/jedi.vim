@@ -30,6 +30,7 @@ end
 
 if g:jedi#auto_vim_configuration
     setlocal completeopt=menuone,longest,preview
+    inoremap <C-c> <ESC>
 end
 
 if g:jedi#popup_on_dot
