@@ -115,7 +115,7 @@ function! jedi#new_buffer(path)
         if !&hidden && &modified
             w
         endif
-        python vim.execute('edit ' + vim.eval(jedi_vim.escape_file_path(vim.eval('a:path'))))
+        python vim.command('edit ' + vim.eval(jedi_vim.escape_file_path(vim.eval('a:path'))))
     endif
 endfunction
 
