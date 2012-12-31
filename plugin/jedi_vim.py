@@ -143,11 +143,13 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
             lst = []
             for d in definitions:
                 if d.in_builtin_module():
-                    lst.append(dict(text='Builtin ' + d.description))
+                    lst.append(dict(text=
+                                PythonToVimStr('Builtin ' + d.description)))
                 else:
-                    lst.append(dict(filename=d.module_path, lnum=d.line_nr,
-                                        col=d.column + 1, text=d.description))
-            vim.eval('setqflist(%s)' % str(lst))
+                    lst.append(dict(filename=PythonToVimStr(d.module_path),
+                                    lnum=d.line_nr, col=d.column + 1,
+                                    text=PythonToVimStr(d.description)))
+            vim.eval('setqflist(%s)' % repr(lst))
             vim.eval('<sid>add_goto_window()')
     return definitions
 
