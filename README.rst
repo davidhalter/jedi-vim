@@ -11,15 +11,15 @@ jedi-vim is a is a VIM binding to the awesome autocompletion library *Jedi*.
 
 Here are some pictures:
 
-.. image:: https://github.com/davidhalter/jedi/raw/master/screenshot_complete.png
+.. image:: https://github.com/davidhalter/jedi/raw/master/docs/_screenshots/screenshot_complete.png
 
 Completion for almost anything (Ctrl+Space).
 
-.. image:: https://github.com/davidhalter/jedi/raw/master/screenshot_function.png
+.. image:: https://github.com/davidhalter/jedi/raw/master/docs/_screenshots/screenshot_function.png
 
 Display of function/class bodies, docstrings.
 
-.. image:: https://github.com/davidhalter/jedi/raw/master/screenshot_pydoc.png
+.. image:: https://github.com/davidhalter/jedi/raw/master/docs/_screenshots/screenshot_pydoc.png
 
 Pydoc support (with highlighting, Shift+k).
 
