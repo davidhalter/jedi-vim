@@ -262,6 +262,10 @@ def rename():
         if replace is None:
             echo_highlight('No rename possible, if no name is given.')
         else:
+            # sort the whole thing reverse (positions at the end of the line
+            # must be first, because they move the stuff before the position).
+            temp_rename = sorted(temp_rename, reverse=True,
+                                key=lambda x: (x.module_path, x.start_pos))
             for r in temp_rename:
                 if r.in_builtin_module():
                     continue
