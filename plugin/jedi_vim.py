@@ -218,7 +218,8 @@ def show_func_def(call_def=None, completion_lines=0):
         # (don't want to break the syntax)
         regex_quotes = r'''\\*["']+'''
         # `add` are all the quotation marks.
-        add = ''.join(re.findall(regex_quotes, replace))
+        # join them with a space to avoid producing '''
+        add = ' '.join(re.findall(regex_quotes, replace))
         # search backwards
         if add and replace[0] in ['"', "'"]:
             a = re.search(regex_quotes + '$', prefix)
