@@ -6,7 +6,9 @@
 " lies in the python files around it.
 
 if !has('python')
-    echomsg "Error: Required vim compiled with +python"
+    if !exists("g:jedi#squelch_py_warning")
+        echomsg "Error: Required vim compiled with +python"
+    endif
     finish
 endif
 
