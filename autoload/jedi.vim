@@ -46,28 +46,7 @@ endfunction
 " show_pydoc
 " ------------------------------------------------------------------------
 function! jedi#show_pydoc()
-Python << PYTHONEOF
-if 1:
-    script = jedi_vim.get_script()
-    try:
-        definitions = script.get_definition()
-    except jedi_vim.jedi.NotFoundError:
-        definitions = []
-    except Exception:
-        # print to stdout, will be in :messages
-        definitions = []
-        print("Exception, this shouldn't happen.")
-        print(traceback.format_exc())
-
-    if not definitions:
-        vim.command('return')
-    else:
-        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '='*40, d.doc) if d.doc
-                    else '|No Docstring for %s|' % d for d in definitions]
-        text = ('\n' + '-' * 79 + '\n').join(docs)
-        vim.command('let l:doc = %s' % repr(jedi_vim.PythonToVimStr(text)))
-        vim.command('let l:doc_lines = %s' % len(text.split('\n')))
-PYTHONEOF
+    Python jedi_vim.show_pydoc()
     if bufnr("__doc__") > 0
         " If the __doc__ buffer is open in the current window, jump to it
         silent execute "sbuffer ".bufnr("__doc__")

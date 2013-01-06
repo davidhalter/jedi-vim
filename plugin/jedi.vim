@@ -52,9 +52,9 @@ if g:jedi#auto_initialization
 endif
 
 if has('python')
-    command! Python python
+    command! -nargs=1 Python python <args>
 else
-    command! Python python3
+    command! -nargs=1 Python python3 <args>
 end
 
 " vim: set et ts=4:

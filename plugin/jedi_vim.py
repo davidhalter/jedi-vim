@@ -154,6 +154,28 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
     return definitions
 
 
+def show_pydoc():
+    script = get_script()
+    try:
+        definitions = script.get_definition()
+    except jedi.NotFoundError:
+        definitions = []
+    except Exception:
+        # print to stdout, will be in :messages
+        definitions = []
+        print("Exception, this shouldn't happen.")
+        print(traceback.format_exc())
+
+    if not definitions:
+        vim.command('return')
+    else:
+        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '='*40, d.doc) if d.doc
+                    else '|No Docstring for %s|' % d for d in definitions]
+        text = ('\n' + '-' * 79 + '\n').join(docs)
+        vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
+        vim.command('let l:doc_lines = %s' % len(text.split('\n')))
+
+
 def clear_func_def():
     cursor = vim.current.window.cursor
     e = vim.eval('g:jedi#function_definition_escape')
