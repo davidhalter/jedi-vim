@@ -1,6 +1,6 @@
 let b:did_ftplugin = 1
 
-if !has('python')
+if !has('python') && !has('python3')
     finish
 endif
 " ------------------------------------------------------------------------
