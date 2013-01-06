@@ -2,51 +2,51 @@
 " functions that call python code
 " ------------------------------------------------------------------------
 function! jedi#goto()
-    python jedi_vim.goto()
+    Python jedi_vim.goto()
 endfunction
 
 
 function! jedi#get_definition()
-    python jedi_vim.goto(is_definition=True)
+    Python jedi_vim.goto(is_definition=True)
 endfunction
 
 
 function! jedi#related_names()
-    python jedi_vim.goto(is_related_name=True)
+    Python jedi_vim.goto(is_related_name=True)
 endfunction
 
 
 function! jedi#rename(...)
-    python jedi_vim.rename()
+    Python jedi_vim.rename()
 endfunction
 
 
 function! jedi#complete(findstart, base)
-    python jedi_vim.complete()
+    Python jedi_vim.complete()
 endfunction
 
 
 function! jedi#show_func_def()
-    python jedi_vim.show_func_def()
+    Python jedi_vim.show_func_def()
 endfunction
 
 function! jedi#enable_speed_debugging()
-    python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
+    Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 endfunction
 
 function! jedi#enable_debugging()
-    python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
+    Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 endfunction
 
 function! jedi#disable_debugging()
-    python jedi_vim.jedi.set_debug_function(None)
+    Python jedi_vim.jedi.set_debug_function(None)
 endfunction
 
 " ------------------------------------------------------------------------
 " show_pydoc
 " ------------------------------------------------------------------------
 function! jedi#show_pydoc()
-python << PYTHONEOF
+Python << PYTHONEOF
 if 1:
     script = jedi_vim.get_script()
     try:
@@ -110,12 +110,12 @@ endfunction
 " ------------------------------------------------------------------------
 function! jedi#new_buffer(path)
     if g:jedi#use_tabs_not_buffers
-        python jedi_vim.tabnew(jedi_vim.escape_file_path(vim.eval('a:path')))
+        Python jedi_vim.tabnew(jedi_vim.escape_file_path(vim.eval('a:path')))
     else
         if !&hidden && &modified
             w
         endif
-        python vim.command('edit ' + jedi_vim.escape_file_path(vim.eval('a:path')))
+        Python vim.command('edit ' + jedi_vim.escape_file_path(vim.eval('a:path')))
     endif
 endfunction
 
@@ -173,12 +173,12 @@ function! jedi#do_popup_on_dot()
 endfunc
 
 function! jedi#configure_function_definition()
-    autocmd InsertLeave <buffer> python jedi_vim.clear_func_def()
+    autocmd InsertLeave <buffer> Python jedi_vim.clear_func_def()
     autocmd CursorMovedI <buffer> call jedi#show_func_def()
 endfunction
 
 
-python << PYTHONEOF
+Python << PYTHONEOF
 """ here we initialize the jedi stuff """
 import vim
 
@@ -196,7 +196,7 @@ import jedi_vim
 sys.path.pop(1)
 
 PYTHONEOF
-"python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
-"python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
+"Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
+"Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 
 " vim: set et ts=4:
