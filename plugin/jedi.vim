@@ -5,7 +5,7 @@
 " This part of the software is just the vim interface. The main source code
 " lies in the python files around it.
 
-if !has('python')
+if !has('python') && !has('python3')
     if !exists("g:jedi#squelch_py_warning")
         echomsg "Error: Required vim compiled with +python"
     endif
