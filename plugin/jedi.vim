@@ -51,4 +51,10 @@ if g:jedi#auto_initialization
     autocmd FileType python setlocal omnifunc=jedi#complete switchbuf=useopen  " needed for pydoc
 endif
 
+if has('python')
+    command! Python python
+else
+    command! Python python3
+end
+
 " vim: set et ts=4:
