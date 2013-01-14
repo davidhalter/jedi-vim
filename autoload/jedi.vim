@@ -96,6 +96,9 @@ function! jedi#new_buffer(path)
         endif
         Python vim.command('edit ' + jedi_vim.escape_file_path(vim.eval('a:path')))
     endif
+    " sometimes syntax is being disabled and the filetype not set.
+    syntax on
+    set filetype=python
 endfunction
 
 function! s:add_goto_window()
