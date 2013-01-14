@@ -268,14 +268,15 @@ def rename():
         vim.command('normal! diw')
         vim.command(':startinsert')
     else:
-        cursor = vim.current.window.cursor
         window_path = vim.current.buffer.name
         # reset autocommand
         vim.command('autocmd! jedi_rename InsertLeave')
 
         replace = vim.eval("expand('<cword>')")
         vim.command('normal! u')  # undo new word
-        vim.command('normal! u')  # 2u didn't work...
+        cursor = vim.current.window.cursor
+        vim.command('normal! u')  # undo the space at the end
+        vim.current.window.cursor = cursor
 
         if replace is None:
             echo_highlight('No rename possible, if no name is given.')
