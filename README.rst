@@ -106,6 +106,13 @@ you don't want this:
 
     let g:jedi#popup_on_dot = 0
 
+Jedi selects the first line of the completion menu: for a better typing-flow and
+usually saves one keypress.
+
+.. code-block:: vim
+
+    let g:jedi#popup_select_first = 0
+
 There's some support for refactoring:
 
 .. code-block:: vim
