@@ -53,6 +53,9 @@ in your jedi-vim repository.
 The autocompletion can be used with <ctrl+space>, if you want it to work with
 <tab> you can use `supertab <https://github.com/ervandew/supertab>`_.
 
+On Arch Linux, you can also install jedi-vim from AUR: `vim-jedi
+<https://aur.archlinux.org/packages/vim-jedi/>`__.
+
 
 Options
 =======
@@ -102,6 +105,13 @@ you don't want this:
 .. code-block:: vim
 
     let g:jedi#popup_on_dot = 0
+
+Jedi selects the first line of the completion menu: for a better typing-flow and
+usually saves one keypress.
+
+.. code-block:: vim
+
+    let g:jedi#popup_select_first = 0
 
 There's some support for refactoring:
 
