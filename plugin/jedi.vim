@@ -34,7 +34,8 @@ let s:settings = {
     \ 'pydoc': "'K'",
     \ 'show_function_definition': 1,
     \ 'function_definition_escape': "'≡'",
-    \ 'auto_close_doc': 1
+    \ 'auto_close_doc': 1,
+    \ 'popup_select_first': 1
 \ }
 
 for [key, val] in items(s:settings)
