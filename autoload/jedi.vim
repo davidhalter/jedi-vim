@@ -101,7 +101,7 @@ function! jedi#new_buffer(path)
     set filetype=python
 endfunction
 
-function! s:add_goto_window()
+function! jedi#add_goto_window()
     set lazyredraw
     cclose
     execute 'belowright copen 3'
@@ -120,7 +120,7 @@ function! jedi#goto_window_on_enter()
     if l:data.bufnr
         " close goto_window buffer
         normal ZQ
-        jedi#new_buffer(bufname(l:data.bufnr))
+        call jedi#new_buffer(bufname(l:data.bufnr))
         call cursor(l:data.lnum, l:data.col)
     else
         echohl WarningMsg | echo "Builtin module cannot be opened." | echohl None
