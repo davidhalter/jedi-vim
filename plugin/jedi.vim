@@ -51,11 +51,4 @@ if g:jedi#auto_initialization
     " order of invocation.
     autocmd FileType Python setlocal omnifunc=jedi#complete switchbuf=useopen  " needed for pydoc
 endif
-
-if has('python')
-    command! -nargs=1 Python python <args>
-else
-    command! -nargs=1 Python python3 <args>
-end
-
 " vim: set et ts=4:
