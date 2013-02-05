@@ -159,6 +159,11 @@ function! jedi#configure_function_definition()
     autocmd CursorMovedI <buffer> call jedi#show_func_def()
 endfunction
 
+if has('python')
+    command! -nargs=1 Python python <args>
+else
+    command! -nargs=1 Python python3 <args>
+end
 
 Python << PYTHONEOF
 """ here we initialize the jedi stuff """
