@@ -304,8 +304,7 @@ def rename():
 def tabnew(path):
     "Open a file in a new tab or switch to an existing one"
     path = os.path.abspath(path)
-    has_gui = vim.eval('has("gui")') == '1'
-    if has_gui:
+    if vim.eval('has("gui")') == '1':
         vim.command('tab drop %s' % path)
         return
 
