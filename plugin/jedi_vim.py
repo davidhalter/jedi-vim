@@ -302,7 +302,12 @@ def rename():
 
 
 def tabnew(path):
+    "Open a file in a new tab or switch to an existing one"
     path = os.path.abspath(path)
+    if vim.eval('has("gui")') == '1':
+        vim.command('tab drop %s' % path)
+        return
+
     for tab_nr in range(int(vim.eval("tabpagenr('$')"))):
         for buf_nr in vim.eval("tabpagebuflist(%i + 1)" % tab_nr):
             buf_nr = int(buf_nr) - 1
