@@ -304,7 +304,31 @@ def rename():
 def tabnew(path):
     "Open a file in a new tab or switch to an existing one"
     path = os.path.abspath(path)
-    vim.command('tab drop %s' % path)
+    has_gui = vim.eval('has("gui")') == '1'
+    if has_gui:
+        vim.command('tab drop %s' % path)
+        return
+
+    for tab_nr in range(int(vim.eval("tabpagenr('$')"))):
+        for buf_nr in vim.eval("tabpagebuflist(%i + 1)" % tab_nr):
+            buf_nr = int(buf_nr) - 1
+            try:
+                buf_path = vim.buffers[buf_nr].name
+            except IndexError:
+                # Just do good old asking for forgiveness.
+                # don't know why this happens :-)
+                pass
+            else:
+                if buf_path == path:
+                    # tab exists, just switch to that tab
+                    vim.command('tabfirst | tabnext %i' % (tab_nr + 1))
+                    break
+        else:
+            continue
+        break
+    else:
+        # tab doesn't exist, add a new one.
+        vim.command('tabnew %s' % path)
 
 
 def escape_file_path(path):
