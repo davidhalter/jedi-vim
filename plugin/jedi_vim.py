@@ -39,7 +39,7 @@ def get_script(source=None, column=None):
     if column is None:
         column = vim.current.window.cursor[1]
     buf_path = vim.current.buffer.name
-    encoding = vim.eval('&encoding')
+    encoding = vim.eval('&encoding') or 'latin1'
     return jedi.Script(source, row, column, buf_path, encoding)
 
 
