@@ -14,7 +14,11 @@ Contents				*jedi-vim-contents*
 
 1. Introduction				|jedi-vim-introduction|
 2. Installation				|jedi-vim-installation|
-3. Support				|jedi-vim-support|
+    2.0. Requirements			|jedi-vim-installation-requirements|
+    2.1. Manually			|jedi-vim-installation-manually|
+    2.2. Using Pathogen			|jedi-vim-installation-pathogen|
+    2.3. Using Vundle			|jedi-vim-installation-vundle|
+3. Supported Python features		|jedi-vim-support|
 4. Usage				|jedi-vim-usage|
 5. Mappings				|jedi-vim-mappings|
     5.1. Start completion		|g:jedi#autocompletion_command|
@@ -38,43 +42,118 @@ Contents				*jedi-vim-contents*
 ==============================================================================
 1. Introduction				*jedi-vim-introduction*
 
-jedi-vim is a is a Vim binding to the awesome autocompletion library `Jedi`.
+jedi-vim is a is a Vim binding to the awesome Python autocompletion library
+`Jedi`. Among Jedi's (and, therefore, Jedi-Vim's) features are:
 
-- Completion for almost anything.
-- Display of function/class bodies, docstrings.
-- Pydoc support with highlighting.
-- Support for goto and renaming.
+- Completion for a wide array of Python features (see |jedi-vim-support|)
+- Robust in dealing with syntax errors and wrong indentation
+- Parses complex module/function/class structures
+- Infers function arguments from Sphinx/Epydoc strings
+- Doesn't execute Python code
+- Supports Virtualenv
+- Supports Python 2.5+ and 3.2+
+
+By leveraging this library, Jedi-Vim adds the following capabilities to Vim:
+
+- Displaying function/class bodies
+- "Go to definition" command
+- Displaying docstrings
+- Renaming and refactoring
+- Looking up related names
 
 ==============================================================================
 2. Installation				*jedi-vim-installation*
 
-Get the latest from http://github.com/davidhalter/jedi-vim.
+------------------------------------------------------------------------------
+2.0. Requirements			*jedi-vim-installation-requirements*
 
-You can get the Jedi library at http://github.com/davidhalter/jedi.
+First of all, Jedi-Vim requires Vim to be compiled with the `+python` option.
 
-You might want to use Pathogen http://github.com/tpope/vim-pathogen to
-install Jedi in Vim. Also you need Vim compiled with +python, which is
-typical for most distributions on Linux.
-
-The first thing you need after that is an up-to-date version of Jedi. You can
-either get it via >
+The Jedi library has to be installed for Jedi-Vim to work properly.  You can
+install it first, by using your e.g. your distribution's package manager, or
+by using pip: >
 
     pip install jedi
 
-or with >
+However, you can also install it as a git submodule if you don't want to use
+Jedi for anything but this plugin. How to do this is detailed below.
 
-    git submodule update --init
+------------------------------------------------------------------------------
+2.1. Installing manually		*jedi-vim-installation-manually*
 
-in your jedi-vim repository.
+1a. Get the latest repository from Github: >
 
-On Arch Linux, you can also install jedi-vim from AUR, with the `vim-jedi`
-package.
+        git clone http://github.com/davidhalter/jedi-vim
+
+1b. If you want to install Jedi as a submodule, issue this command instead:
+>
+        git clone --recursive http://github/davidhalter/jedi-vim
+
+2. Put the plugin files into their corresponding folders in your vim runtime
+   directory (usually ~/.vim). Be sure to pay attention to the directory
+   structure!
+3. Update the Vim help tags with >
+
+    :helptags <path/to/vimruntime>/doc
+
+------------------------------------------------------------------------------
+2.1. Installing using Pathogen		*jedi-vim-installation-pathogen*
+
+Pathogen simplifies installation considerably.
+
+1.a Clone the git repository into your bundles directory: >
+
+        git clone http://github.com/davidhalter/jedi-vim
+
+1b. Again, if you want to install `Jedi` as a submodule, use this command
+   instead: >
+
+        git clone --recursive http://github/davidhalter/jedi-vim
+
+------------------------------------------------------------------------------
+2.3. Installing using Vundle		*jedi-vim-installation-vundle*
+
+1. Vundle automatically downloads subrepositories as git submodules, so you
+   will automatically get the Jedi library with the Jedi-Vim plugin. Add the
+   following to the correct section in your .vimrc file: >
+
+        Bundle 'git://github.com/davidhalter/jedi-vim'
+
+2. Issue the following command in Vim: >
+
+        :BundleInstall
+
+Help tags are generated automatically, so you should be good to go.
 
 ==============================================================================
-3. Support				*jedi-vim-support*
+3. Supported Python features		*jedi-vim-support*
 
-The Jedi library supports most of Python's core features. From decorators to
-generators, there is broad support.
+The Jedi library does all the hard work behind the scenes. It supports a large
+number of Python features to be completed, among them:
+
+- builtins
+- multiple `return`s or `yield`s
+- tuple assignments/array indexing/dictionary indexing
+- `with`-statement/exception handling
+- `*args`/`**kwargs`
+- decorators/lambdas/closures
+- generators/iterators
+- some descriptors: `property`/`staticmethod`/`classmethod`
+- some magic methods: `__call__`, `__iter__`, `__next__`, `__get__`,
+  `__getitem__`, `__init__`
+- `list.append()`, `set.add()`, `list.extend()`, etc.
+- (nested) list comprehensions/ternary expressions
+- relative `import`s
+- `getattr()`/`__getattr__`/`__getattribute__`
+- function annotations (py3k feature, are ignored right now, but being parsed)
+- class decorators (py3k feature, are being ignored too at the moment)
+- simple/usual `sys.path` modifications
+- `isinstance` checks for `if`/`while`/`assert`
+  case, that doesn’t work with Jedi)
+
+Note: This list is not necessarily up to date. For a complete list of
+features, please refer to the Jedi documentation at
+http://jedi.readthedocs.org.
 
 ==============================================================================
 4. Usage				*jedi-vim-usage*
