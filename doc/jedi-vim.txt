@@ -259,6 +259,11 @@ definition of the name under the cursor.
 ==============================================================================
 6. Configuration			*jedi-vim-configuration*
 
+Note: You currently have to set these options in your .vimrc. Setting them in
+an ftplugin (e.g. ~/.vim/ftplugin/python/jedi-vim-settings.vim) will not work
+because Jedi-Vim is not set up as an filetype plugin, but as a "regular"
+plugin.
+
 ------------------------------------------------------------------------------
 6.1. `g:jedi#auto_initialization`	*g:jedi#auto_initialization*
 
