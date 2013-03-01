@@ -158,8 +158,17 @@ http://jedi.readthedocs.org.
 ==============================================================================
 4. Usage				*jedi-vim-usage*
 
-The autocompletion can be used with <Ctrl-Space>, if you want it to work with
-<Tab> you can use the Supertab plugin.
+With the default settings, autocompletion can be triggered by typing
+<Ctrl-Space>. The first entry will automatically be selected, so you can press
+<Return> to insert it into your code or keep typing and narrow down your
+completion options. The usual <C-X><C-O> and <C-P>/<C-N> keybindings work as
+well. Autocompletion is also triggered by typing a period in insert mode.
+Since periods rarely occur in Python code outside of method/import lookups,
+this is handy to have (but can be disabled).
+
+When it encounters a new module, Jedi might take a few seconds to parse its
+contents. Afterwards, the contents are cached and completion will be almost
+instantaneous.
 
 ==============================================================================
 5. Key Bindings		    		*jedi-vim-keybindings*
@@ -191,7 +200,8 @@ Starts completion.
 Function: `jedi#goto()`
 Default: <leader>g			Go to definition
 
-This finds the first definition of the function/class under the cursor.
+This function finds the first definition of the function/class under the
+cursor. It produces an error if the definition is not in a Python file.
 
 ------------------------------------------------------------------------------
 5.3. `g:jedi#get_definition_command`	*g:jedi#get_definition_command*
@@ -199,9 +209,26 @@ Function: `jedi#get_definition()`
 Default: <leader>d			Go to original definition
 
 This command tries to find the original definition of the function/class under
-the cursor. If the function is e.g. imported from another module, this tries
-to follow the "import chain" to the end. It does not work with modules written
-in C.
+the cursor. As for the previous function, it does not work if the definition
+isn't in a Python source file.
+
+The difference between this and the previous function is that the previous
+function doesn't perform recursive lookups. Take, for example, the following
+structure: >
+
+    # file1.py:
+    from file2 import foo
+
+    # file2.py:
+    from file3 import bar as foo
+
+    # file3.py
+    def bar():
+        pass
+
+The `jedi#goto()` function will take you to the "from file2 import foo"
+statement in file1.py, while the `jedi#get_definition()` function will take
+you all the way to the "def bar():" line in file3.py.
 
 ------------------------------------------------------------------------------
 5.4. `g:jedi#pydoc`			*g:jedi#pydoc_command*
