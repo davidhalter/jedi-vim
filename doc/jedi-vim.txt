@@ -37,6 +37,7 @@ Contents				*jedi-vim-contents*
     6.7. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
     6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
 7. Contributing				|jedi-vim-contributing|
+8. License				|jedi-vim-license|
 
 
 ==============================================================================
@@ -370,5 +371,10 @@ Default: 0 (Warning is shown)
 
 If you have any comments or feature requests, please tell me! I really want
 to know, what you think about Jedi and jedi-vim.
+
+==============================================================================
+8. License				*jedi-vim-license*
+
+Jedi-Vim is licensed under the GNU LGPL v3 license or later.
 
  vim: textwidth=78 tabstop=8 filetype=help:norightleft:
