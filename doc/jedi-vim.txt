@@ -10,19 +10,33 @@
                      **now in beta testing phase**
 
 ==============================================================================
-CONTENTS                                                   *jedi-vim-contents*
+Contents				*jedi-vim-contents*
 
-    1. Introduction		|jedi-vim-introduction|
-    2. Installation		|jedi-vim-installation|
-    3. Support			|jedi-vim-support|
-    4. Usage			|jedi-vim-usage|
-    5. Mappings			|jedi-vim-mappings|
-    6. Configuration		|jedi-vim-configuration|
-    7. Contributing		|jedi-vim-contributing|
+1. Introduction				|jedi-vim-introduction|
+2. Installation				|jedi-vim-installation|
+3. Support				|jedi-vim-support|
+4. Usage				|jedi-vim-usage|
+5. Mappings				|jedi-vim-mappings|
+    5.1. Start completion		|g:jedi#autocompletion_command|
+    5.2. Go to definition		|g:jedi#goto_command|
+    5.3. Get original definition	|g:jedi#get_definition_command|
+    5.4. Show documentation		|g:jedi#pydoc_command|
+    5.5. Rename variables		|g:jedi#rename_command|
+    5.6. Show related names		|g:jedi#related_names_command|
+6. Configuration			|jedi-vim-configuration|
+    6.1. auto_initialization		|g:jedi#auto_initialization|
+    6.2. auto_vim_configuration		|g:jedi#auto_vim_configuration|
+    6.3. popup_on_dot			|g:jedi#popup_on_dot|
+    6.4. popup_select_first		|g:jedi#popup_select_first|
+    6.5. auto_close_doc			|g:jedi#auto_close_doc|
+    6.6. show_function_definition	|g:jedi#show_function_def|
+    6.7. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
+    6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
+7. Contributing				|jedi-vim-contributing|
 
 
 ==============================================================================
-1. Introduction					*jedi-vim-introduction*
+1. Introduction				*jedi-vim-introduction*
 
 jedi-vim is a is a Vim binding to the awesome autocompletion library `Jedi`.
 
@@ -32,7 +46,7 @@ jedi-vim is a is a Vim binding to the awesome autocompletion library `Jedi`.
 - Support for goto and renaming.
 
 ==============================================================================
-2. Installation					*jedi-vim-installation*
+2. Installation				*jedi-vim-installation*
 
 Get the latest from http://github.com/davidhalter/jedi-vim.
 
@@ -57,79 +71,191 @@ On Arch Linux, you can also install jedi-vim from AUR, with the `vim-jedi`
 package.
 
 ==============================================================================
-3. Support					*jedi-vim-support*
+3. Support				*jedi-vim-support*
 
 The Jedi library supports most of Python's core features. From decorators to
 generators, there is broad support.
 
 ==============================================================================
-4. Usage					*jedi-vim-usage*
+4. Usage				*jedi-vim-usage*
 
 The autocompletion can be used with <Ctrl-Space>, if you want it to work with
 <Tab> you can use the Supertab plugin.
 
 ==============================================================================
-5. Mappings		    			*jedi-vim-mappings*
+5. Key Bindings		    		*jedi-vim-keybindings*
+
+All keybindings can be mapped by setting the appropriate global option. For
+example, to set the keybinding for starting omnicompletion to <Tab> instead of
+<Ctrl-Space>, add the following setting to your .vimrc file: >
+
+    let g:jedi#autocompletion_command = "<tab>"
+
+Note: If you have |g:jedi#auto_initialization| set to 0, you have to create
+the mappings yourself by calling the corresponding functions: >
+
+    " Using <tab> for omnicompletion
+    inoremap <silent> <buffer> <tab> <c-x><c-o>
+    " Use <localleader>r (by default <\-r>) for renaming
+    nnoremap <silent> <buffer> <localleader>r :call jedi#rename()<cr>
+    " etc.
+
+------------------------------------------------------------------------------
+5.1. `g:jedi#autocompletion_command`	*g:jedi#autocompletion_command*
+Function: n/a; see above
+Default: <Ctrl-Space>			Start completion
+
+Starts completion.
+
+------------------------------------------------------------------------------
+5.2. `g:jedi#goto_command`		*g:jedi#goto_command*
+Function: `jedi#goto()`
+Default: <leader>g			Go to definition
+
+This finds the first definition of the function/class under the cursor.
+
+------------------------------------------------------------------------------
+5.3. `g:jedi#get_definition_command`	*g:jedi#get_definition_command*
+Function: `jedi#get_definition()`
+Default: <leader>d			Go to original definition
+
+This command tries to find the original definition of the function/class under
+the cursor. If the function is e.g. imported from another module, this tries
+to follow the "import chain" to the end. It does not work with modules written
+in C.
+
+------------------------------------------------------------------------------
+5.4. `g:jedi#pydoc`			*g:jedi#pydoc_command*
+Function: `jedi#show_pydoc()`
+Default: <K>				Show pydoc documentation
+
+This shows the pydoc documentation for the item currently under the cursor.
+The documentation is opened in a horizontally split buffer.
+
+------------------------------------------------------------------------------
+5.5. `g:jedi#rename_command`		*g:jedi#rename_command*
+Function: `jedi#rename()`
+Default: <leader>r			Rename variables
+
+Jedi-Vim deletes the word currently under the cursor and puts Vim in insert
+mode, where the user is expected to enter the new variable name. Upon leaving
+insert mode, Jedi-Vim then renames all occurences of the old variable name
+with the new one. The number of renames is displayed in the command line.
+
+------------------------------------------------------------------------------
+5.6. `g:jedi#related_names_command`	*g:jedi#related_names_command*
+Function: `jedi#related_names()`
+Default: <leader>n			Show related names
+
+The quickfix window is populated with a list of all names which point to the
+definition of the name under the cursor.
 
 ==============================================================================
-6. Configuration				*jedi-vim-configuration*
+6. Configuration			*jedi-vim-configuration*
 
-Jedi is by default automatically initialized. If you don't want that I suggest
-you disable the auto-initialization in your .vimrc: >
+------------------------------------------------------------------------------
+6.1. `g:jedi#auto_initialization`	*g:jedi#auto_initialization*
 
-    let g:jedi#auto_initialization = 0
+Upon initialization, Jedi-Vim performs the following steps:
 
-There are also some Vim options (like completeopt) which are automatically
-initialized, if you don't want that: >
+1. Set the current buffers 'omnifunc' to its own completion function
+   `jedi#complete`
+2. Create mappings to commands specified in |jedi-vim-mappings|
+3. Call `jedi#configure_function_definition()` if
+   `g:jedi#show_function_definition` is set
 
-    let g:jedi#auto_vim_configuration = 0
+You can disable the default initialization routine by setting this option to
+0. Beware that you have to perform the above steps yourself, though.
 
-The goto is by default on <leader-g>. If you want to change that: >
+Options: 0 or 1
+Default: 1 (Perform automatic initialization)
 
-    let g:jedi#goto_command = "<leader>g"
+------------------------------------------------------------------------------
+6.2. `g:jedi#auto_vim_configuration`	*g:jedi#auto_vim_configuration*
 
-get_definition is by default on <leader-d>. If you want to change that: >
+Jedi-Vim sets 'completeopt' to `menuone,longest,preview` by default. It also
+remaps <Ctrl-C> to <Esc> in insert mode. If you want to keep your own
+configuration, disable this setting.
 
-    let g:jedi#get_definition_command = "<leader>d"
+Options: 0 or 1
+Default: 1 (Set 'completeopt' and mapping as described above)
 
-Showing the pydoc is by default on <K>. If you want to change that: >
+------------------------------------------------------------------------------
+6.3. `g:jedi#popup_on_dot`		*g:jedi#popup_on_dot*
 
-    let g:jedi#pydoc = "K"
+Jedi automatically starts completion upon typing a period in insert mode.
 
-If you are a person who likes to use Vim buffers not tabs, you might want to
-put that in your .vimrc: >
+However, when working with large modules, this can slow down your typing flow
+since you have to wait for Jedi to parse the module and show the completion
+menu. By disabling this setting, completion is only started when you manually
+press the completion key.
 
-    let g:jedi#use_tabs_not_buffers = 0
+Options: 0 or 1
+Default: 1 (Start completion on typing a period)
 
-Jedi automatically starts the completion if you type a dot, e.g. "str.", if
-you don't want this: >
+------------------------------------------------------------------------------
+6.4. `g:jedi#popup_select_first`	*g:jedi#popup_select_first*
 
-    let g:jedi#popup_on_dot = 0
+Upon starting completion, Jedi-Vim can automatically select the first entry
+that pops up (but without actually inserting it).
 
-Jedi selects the first line of the completion menu: for a better typing-flow and
-usually saves one keypress. >
+This leads to a better typing flow: As you type more characters, the entries
+in the completion menu are narrowed down. If they are narrowed down enough,
+you can just press <Return> to insert the first match.
 
-    let g:jedi#popup_select_first = 0
+Options: 0 or 1
+Default: 1 (Automatically select first completion entry)
 
-There's some support for refactoring: >
+------------------------------------------------------------------------------
+6.5. `g:jedi#auto_close_doc`		*g:jedi#auto_close_doc*
 
-    let g:jedi#rename_command = "<leader>r"
+When doing completion, Jedi-Vim shows the docstring of the currently selected
+item in a preview window. This window is by default closed when inserting a
+completion item.
 
-And you can list all names that are related (have the same origin): >
+Set this to 1 to leave the preview window open. This could be useful if you
+want to browse longer docstrings.
 
-    let g:jedi#related_names_command = "<leader>n"
+Options: 0 or 1
+Default: 1 (Automatically close preview window upon finishing completion)
 
-If you want to change the default autocompletion command: >
+------------------------------------------------------------------------------
+6.6. `g:jedi#show_function_definition`	*g:jedi#show_function_def*
 
-    let g:jedi#autocompletion_command = "<c-space>"
+Vim-Jedi can display a small window detailing the arguments of the currently
+completed function and highlighting the currently selected argument. This can
+be disabled by setting this option to 0.
 
-By default you get a window that displays the function definition you're
-currently in. If you don't want that: >
+Options: 0 or 1
+Default: 1 (Show function definition window)
 
-    let g:jedi#show_function_definition = "0"
+Note: This setting is ignored if |g:jedi#auto_initialization| is set to 0. In
+that case, if you want to see function definitions, you have to set this up
+manually by calling a function in your configuration file: >
+
+    call jedi#configure_function_definition()
+
+------------------------------------------------------------------------------
+6.7. `g:jedi#use_tabs_not_buffers`	*g:jedi#use_tabs_not_buffers*
+
+By default, Jedi-Vim opens a new tab if you use the "go to", "show
+definition", or "related names" commands. When you set this option to 0, they
+open in the current buffer instead.
+
+Options: 0 or 1
+Default: 1 (Command output is put in a new tab)
+
+------------------------------------------------------------------------------
+6.8. `g:jedi#squelch_py_warning`	*g:jedi#squelch_py_warning*
+
+When Vim has not been compiled with +python, Jedi shows a warning to that
+effect and aborts loading itself. Set this to 1 to suppress that warning.
+
+Options: 0 or 1
+Default: 0 (Warning is shown)
 
 ==============================================================================
-7. Contributing					*jedi-vim-contributing*
+7. Contributing				*jedi-vim-contributing*
 
 If you have any comments or feature requests, please tell me! I really want
 to know, what you think about Jedi and jedi-vim.
