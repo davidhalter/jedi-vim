@@ -173,7 +173,7 @@ sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
 import traceback
 
 # update the sys path to include the jedi_vim script
-sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'plugin'))
+sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'ftplugin', 'python'))
 import jedi_vim
 sys.path.pop(1)
 
