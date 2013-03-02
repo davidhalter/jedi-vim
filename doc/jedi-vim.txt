@@ -7,7 +7,6 @@
  \______/  |_______||_______/ |__|          \__/     |__| |__|  |__|~
 
           jedi-vim - awesome Python autocompletion with Vim
-                     **now in beta testing phase**
 
 ==============================================================================
 Contents				*jedi-vim-contents*
