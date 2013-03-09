@@ -1,10 +1,3 @@
-"py_fuzzycomplete.vim - Omni Completion for python in vim
-" Maintainer: David Halter <davidhalter88@gmail.com>
-" Version: 0.1
-"
-" This part of the software is just the vim interface. The main source code
-" lies in the python files around it.
-"
 let b:did_ftplugin = 1
 
 if !has('python') && !has('python3')
@@ -14,9 +7,6 @@ if !has('python') && !has('python3')
     finish
 endif
 
-" ------------------------------------------------------------------------
-" Initialization of jedi-vim
-" ------------------------------------------------------------------------
 " ------------------------------------------------------------------------
 " defaults for jedi-vim
 " ------------------------------------------------------------------------
@@ -43,6 +33,9 @@ for [key, val] in items(s:settings)
     endif
 endfor
 
+" ------------------------------------------------------------------------
+" Initialization of jedi-vim
+" ------------------------------------------------------------------------
 if g:jedi#auto_initialization
     setlocal omnifunc=jedi#complete
 
