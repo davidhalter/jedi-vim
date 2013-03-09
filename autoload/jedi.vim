@@ -159,6 +159,11 @@ function! jedi#configure_function_definition()
     autocmd CursorMovedI <buffer> call jedi#show_func_def()
 endfunction
 
+if has('python')
+    command! -nargs=1 Python python <args>
+else
+    command! -nargs=1 Python python3 <args>
+end
 
 Python << PYTHONEOF
 """ here we initialize the jedi stuff """
@@ -173,7 +178,7 @@ sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
 import traceback
 
 # update the sys path to include the jedi_vim script
-sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'plugin'))
+sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'ftplugin', 'python'))
 import jedi_vim
 sys.path.pop(1)
 

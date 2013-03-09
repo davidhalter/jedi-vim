@@ -1,12 +1,41 @@
 let b:did_ftplugin = 1
 
 if !has('python') && !has('python3')
+    if !exists("g:jedi#squelch_py_warning")
+        echomsg "Error: Required vim compiled with +python"
+    endif
     finish
 endif
+
+" ------------------------------------------------------------------------
+" defaults for jedi-vim
+" ------------------------------------------------------------------------
+let s:settings = {
+    \ 'use_tabs_not_buffers': 1,
+    \ 'auto_initialization': 1,
+    \ 'auto_vim_configuration': 1,
+    \ 'goto_command': "'<leader>g'",
+    \ 'autocompletion_command': "'<C-Space>'",
+    \ 'get_definition_command': "'<leader>d'",
+    \ 'related_names_command': "'<leader>n'",
+    \ 'rename_command': "'<leader>r'",
+    \ 'popup_on_dot': 1,
+    \ 'pydoc': "'K'",
+    \ 'show_function_definition': 1,
+    \ 'function_definition_escape': "'≡'",
+    \ 'auto_close_doc': 1,
+    \ 'popup_select_first': 1
+\ }
+
+for [key, val] in items(s:settings)
+    if !exists('g:jedi#'.key)
+        exe 'let g:jedi#'.key.' = '.val
+    endif
+endfor
+
 " ------------------------------------------------------------------------
 " Initialization of jedi-vim
 " ------------------------------------------------------------------------
-
 if g:jedi#auto_initialization
     setlocal omnifunc=jedi#complete
 
