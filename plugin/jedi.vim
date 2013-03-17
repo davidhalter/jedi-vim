@@ -51,4 +51,51 @@ if g:jedi#auto_initialization
     " order of invocation.
     autocmd FileType Python setlocal omnifunc=jedi#complete switchbuf=useopen  " needed for pydoc
 endif
+
+fun! Pyedit(cmd, args)
+" args are the same as for the :edit command
+" cmd: one of edit, split, vsplit, tabedit, ...
+py << EOF
+import vim
+import jedi
+import os.path as osp
+from shlex import split as shsplit
+
+cmd = vim.eval('a:cmd')
+args = shsplit(vim.eval('a:args'))
+text = 'import %s' % args.pop()
+scr = jedi.Script(text, 1, len(text), '')
+try:
+    path = scr.goto()[0].module_path
+except IndexError:
+    path = None
+if path and osp.isfile(path):
+    cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
+    vim.command('%s %s %s' % (cmd, cmd_args , path.replace(' ', '\ ')))
+EOF
+endfun
+
+fun! Pyedit_comp(argl, cmdl, pos)
+py << EOF
+import vim
+import re
+import json
+argl = vim.eval('a:argl')
+try:
+    import jedi
+except ImportError as err:
+    print('Pyedit completion requires jedi module: https://github.com/davidhalter/jedi')
+    comps = []
+else:
+    text = 'import %s' % argl
+    script=jedi.Script(text, 1, len(text), '')
+    comps = [ '%s%s' % (argl, c.complete) for c in script.complete()]
+vim.command("let comps = '%s'" % '\n'.join(comps))
+EOF
+return comps
+endfun
+command! -nargs=1 -complete=custom,Pyedit_comp Pyedit :call Pyedit('edit', <q-args>)
+" command! -nargs=1 -complete=custom,Pyedit_comp Pysplit :call Pyedit('split', <q-args>)
+" command! -nargs=1 -complete=custom,Pyedit_comp Pyvsplit :call Pyedit('vsplit', <q-args>)
+" command! -nargs=1 -complete=custom,Pyedit_comp Pytabe :call Pyedit('tabe', <q-args>)
 " vim: set et ts=4:
