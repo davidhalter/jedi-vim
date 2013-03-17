@@ -35,7 +35,8 @@ let s:settings = {
     \ 'show_function_definition': 1,
     \ 'function_definition_escape': "'≡'",
     \ 'auto_close_doc': 1,
-    \ 'popup_select_first': 1
+    \ 'popup_select_first': 1,
+    \ 'quickfix_window_height': 10
 \ }
 
 for [key, val] in items(s:settings)
