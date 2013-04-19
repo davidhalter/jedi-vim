@@ -160,24 +160,20 @@ function! jedi#configure_function_definition()
 endfunction
 
 
-Python << PYTHONEOF
-""" here we initialize the jedi stuff """
-import vim
+" here we initialize the jedi stuff
+Python import vim
+" update the system path, to include the jedi path
+Python import sys, os
+Python sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi', 'jedi'))
 
-# update the system path, to include the jedi path
-import sys
-import os
-sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
+" to display errors correctly
+Python import traceback
 
-# to display errors correctly
-import traceback
+" update the sys path to include the jedi_vim script
+Python sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'plugin'))
+Python import jedi_vim
+Python sys.path.pop(1)
 
-# update the sys path to include the jedi_vim script
-sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'plugin'))
-import jedi_vim
-sys.path.pop(1)
-
-PYTHONEOF
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 
