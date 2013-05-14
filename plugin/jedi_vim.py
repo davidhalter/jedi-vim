@@ -13,6 +13,14 @@ import jedi.keywords
 from jedi._compatibility import unicode
 
 
+def echo_highlight(msg):
+    vim.command('echohl WarningMsg | echom "%s" | echohl None' % msg)
+
+
+if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 6, 0):
+    echo_highlight('Please update your Jedi version, it is to old.')
+
+
 class PythonToVimStr(unicode):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
@@ -24,10 +32,6 @@ class PythonToVimStr(unicode):
         # It seems to be related to that bug: http://bugs.python.org/issue5876
         s = self.encode('UTF-8')
         return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
-
-
-def echo_highlight(msg):
-    vim.command('echohl WarningMsg | echo "%s" | echohl None' % msg)
 
 
 def get_script(source=None, column=None):
