@@ -53,7 +53,7 @@ if g:jedi#auto_initialization
     autocmd FileType Python setlocal omnifunc=jedi#complete switchbuf=useopen  " needed for pydoc
 endif
 
-fun! Pyedit(cmd, args)
+fun! Pyimport(cmd, args)
 py << EOF
     # args are the same as for the :edit command
     # cmd: one of edit, split, vsplit, tabedit, ...
@@ -77,7 +77,7 @@ if 1:
 EOF
 endfun
 
-fun! Pyedit_comp(argl, cmdl, pos)
+fun! Pyimport_comp(argl, cmdl, pos)
 py << EOF
 if 1:
     import vim
@@ -87,7 +87,7 @@ if 1:
     try:
         import jedi
     except ImportError as err:
-        print('Pyedit completion requires jedi module: https://github.com/davidhalter/jedi')
+        print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
         comps = []
     else:
         text = 'import %s' % argl
@@ -98,8 +98,8 @@ EOF
     return comps
 endfun
 
-command! -nargs=1 -complete=custom,Pyedit_comp Pyedit :call Pyedit('edit', <q-args>)
-" command! -nargs=1 -complete=custom,Pyedit_comp Pysplit :call Pyedit('split', <q-args>)
-" command! -nargs=1 -complete=custom,Pyedit_comp Pyvsplit :call Pyedit('vsplit', <q-args>)
-" command! -nargs=1 -complete=custom,Pyedit_comp Pytabe :call Pyedit('tabe', <q-args>)
+command! -nargs=1 -complete=custom,Pyimport_comp Pyimport :call Pyimport('edit', <q-args>)
+" command! -nargs=1 -complete=custom,Pyimport_comp Pysplit :call Pyimport('split', <q-args>)
+" command! -nargs=1 -complete=custom,Pyimport_comp Pyvsplit :call Pyimport('vsplit', <q-args>)
+" command! -nargs=1 -complete=custom,Pyimport_comp Pytabe :call Pyimport('tabe', <q-args>)
 " vim: set et ts=4:
