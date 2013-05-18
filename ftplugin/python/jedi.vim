@@ -13,7 +13,11 @@ if g:jedi#auto_initialization
     " map ctrl+space for autocompletion
     if g:jedi#autocompletion_command == "<C-Space>"
         " in terminals, <C-Space> sometimes equals <Nul>
-        inoremap <buffer><Nul> <C-X><C-O>
+        inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
+                \ "\<lt>C-n>" :
+                \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
+                \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
+                \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
     endif
     execute "inoremap <buffer>".g:jedi#autocompletion_command." <C-X><C-O>"
 
