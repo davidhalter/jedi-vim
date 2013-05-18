@@ -129,7 +129,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
 
             d = list(definitions)[0]
             if d.in_builtin_module():
-                if isinstance(d.definition, jedi.keywords.Keyword):
+                if d.is_keyword:
                     echo_highlight(
                             "Cannot get the definition of Python keywords.")
                 else:
