@@ -30,7 +30,10 @@ class PythonToVimStr(unicode):
         # support is pretty bad. don't ask how I came up with this... It just
         # works...
         # It seems to be related to that bug: http://bugs.python.org/issue5876
-        s = self.encode('UTF-8')
+        if unicode is str:
+            s = self
+        else:
+            s = self.encode('UTF-8')
         return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
 
 
@@ -232,7 +235,9 @@ def show_func_def(call_def=None, completion_lines=0):
 
         # Need to decode it with utf8, because vim returns always a python 2
         # string even if it is unicode.
-        e = vim.eval('g:jedi#function_definition_escape').decode('UTF-8')
+        e = vim.eval('g:jedi#function_definition_escape')
+        if hasattr(e, 'decode'):
+            e = e.decode('UTF-8')
         # replace line before with cursor
         regex = "xjedi=%sx%sxjedix".replace('x', e)
 
