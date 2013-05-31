@@ -160,7 +160,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
 def show_pydoc():
     script = get_script()
     try:
-        definitions = script.get_definition()
+        definitions = script.goto_definitions()
     except jedi.NotFoundError:
         definitions = []
     except Exception:
