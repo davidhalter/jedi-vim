@@ -74,13 +74,14 @@ def complete():
         column += len(base)
         try:
             script = get_script(source=source, column=column)
-            completions = script.complete()
-            call_def = script.get_in_function_call()
+            completions = script.completions()
+            sig = script.call_signatures()
+            call_def =sig[0] if sig else None
 
             out = []
             for c in completions:
-                d = dict(word=PythonToVimStr(c.word[:len(base)] + c.complete),
-                         abbr=PythonToVimStr(c.word),
+                d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
+                         abbr=PythonToVimStr(c.name),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
                          info=PythonToVimStr(c.doc),  # docstr
@@ -107,11 +108,11 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
     script = get_script()
     try:
         if is_related_name:
-            definitions = script.related_names()
+            definitions = script.usages()
         elif is_definition:
-            definitions = script.get_definition()
+            definitions = script.goto_definitions()
         else:
-            definitions = script.goto()
+            definitions = script.goto_assignments()
     except jedi.NotFoundError:
         echo_highlight(
                     "Cannot follow nothing. Put your cursor on a valid name.")
@@ -141,7 +142,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                 if d.module_path != vim.current.buffer.name:
                     vim.eval('jedi#new_buffer(%s)' % \
                                         repr(PythonToVimStr(d.module_path)))
-                vim.current.window.cursor = d.line_nr, d.column
+                vim.current.window.cursor = d.line, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
             # multiple solutions
@@ -152,7 +153,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                                 PythonToVimStr('Builtin ' + d.description)))
                 else:
                     lst.append(dict(filename=PythonToVimStr(d.module_path),
-                                    lnum=d.line_nr, col=d.column + 1,
+                                    lnum=d.line, col=d.column + 1,
                                     text=PythonToVimStr(d.description)))
             vim.eval('setqflist(%s)' % repr(lst))
             vim.eval('jedi#add_goto_window()')
@@ -162,7 +163,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
 def show_pydoc():
     script = get_script()
     try:
-        definitions = script.get_definition()
+        definitions = script.goto_definitions()
     except jedi.NotFoundError:
         definitions = []
     except Exception:
@@ -202,7 +203,8 @@ def show_func_def(call_def=None, completion_lines=0):
         return
     try:
         if call_def == None:
-            call_def = get_script().get_in_function_call()
+            sig = get_script().call_signatures()
+            call_def = sig[0] if sig else None
         clear_func_def()
 
         if call_def is None:
