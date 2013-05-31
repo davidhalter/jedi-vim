@@ -105,7 +105,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
     script = get_script()
     try:
         if is_related_name:
-            definitions = script.related_names()
+            definitions = script.usages()
         elif is_definition:
             definitions = script.goto_definitions()
         else:
