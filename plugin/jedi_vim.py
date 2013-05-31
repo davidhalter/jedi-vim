@@ -109,7 +109,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
         elif is_definition:
             definitions = script.goto_definitions()
         else:
-            definitions = script.goto()
+            definitions = script.goto_assignments()
     except jedi.NotFoundError:
         echo_highlight(
                     "Cannot follow nothing. Put your cursor on a valid name.")
@@ -139,7 +139,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                 if d.module_path != vim.current.buffer.name:
                     vim.eval('jedi#new_buffer(%s)' % \
                                         repr(PythonToVimStr(d.module_path)))
-                vim.current.window.cursor = d.line_nr, d.column
+                vim.current.window.cursor = d.line, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
             # multiple solutions
