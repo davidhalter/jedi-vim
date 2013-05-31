@@ -200,7 +200,8 @@ def show_func_def(call_def=None, completion_lines=0):
         return
     try:
         if call_def == None:
-            call_def = get_script().get_in_function_call()
+            sig = get_script().call_signatures()
+            call_def = sig[0] if sig else None
         clear_func_def()
 
         if call_def is None:
