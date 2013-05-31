@@ -71,13 +71,14 @@ def complete():
         column += len(base)
         try:
             script = get_script(source=source, column=column)
-            completions = script.complete()
-            call_def = script.get_in_function_call()
+            completions = script.completions()
+            sig = script.call_signatures()
+            call_def =sig[0] if sig else None
 
             out = []
             for c in completions:
-                d = dict(word=PythonToVimStr(c.word[:len(base)] + c.complete),
-                         abbr=PythonToVimStr(c.word),
+                d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
+                         abbr=PythonToVimStr(c.name),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
                          info=PythonToVimStr(c.doc),  # docstr

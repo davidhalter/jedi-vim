@@ -92,7 +92,7 @@ if 1:
     else:
         text = 'import %s' % argl
         script=jedi.Script(text, 1, len(text), '')
-        comps = [ '%s%s' % (argl, c.complete) for c in script.complete()]
+        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
     vim.command("let comps = '%s'" % '\n'.join(comps))
 EOF
     return comps
