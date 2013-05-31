@@ -107,7 +107,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
         if is_related_name:
             definitions = script.related_names()
         elif is_definition:
-            definitions = script.get_definition()
+            definitions = script.goto_definitions()
         else:
             definitions = script.goto()
     except jedi.NotFoundError:
@@ -150,7 +150,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                                 PythonToVimStr('Builtin ' + d.description)))
                 else:
                     lst.append(dict(filename=PythonToVimStr(d.module_path),
-                                    lnum=d.line_nr, col=d.column + 1,
+                                    lnum=d.line, col=d.column + 1,
                                     text=PythonToVimStr(d.description)))
             vim.eval('setqflist(%s)' % repr(lst))
             vim.eval('jedi#add_goto_window()')
