@@ -68,7 +68,7 @@ if 1:
     text = 'import %s' % args.pop()
     scr = jedi.Script(text, 1, len(text), '')
     try:
-        path = scr.goto()[0].module_path
+        path = scr.goto_assignments()[0].module_path
     except IndexError:
         path = None
     if path and osp.isfile(path):
