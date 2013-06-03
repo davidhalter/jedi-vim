@@ -76,7 +76,7 @@ def complete():
             script = get_script(source=source, column=column)
             completions = script.completions()
             sig = script.call_signatures()
-            call_def =sig[0] if sig else None
+            call_def = sig[0] if sig else None
 
             out = []
             for c in completions:
