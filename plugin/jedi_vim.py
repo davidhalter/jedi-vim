@@ -324,7 +324,7 @@ def tabnew(path):
             buf_nr = int(buf_nr) - 1
             try:
                 buf_path = vim.buffers[buf_nr].name
-            except IndexError:
+            except LookupError:
                 # Just do good old asking for forgiveness.
                 # don't know why this happens :-)
                 pass
