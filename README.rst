@@ -26,7 +26,7 @@ There is also support for goto and renaming.
 
 Get the latest from `github <http://github.com/davidhalter/jedi-vim>`_.
 
-You can get the Jedi library is documented
+You can get the Jedi library documentation
 `here <http://github.com/davidhalter/jedi>`_.
 
 
