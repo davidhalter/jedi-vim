@@ -138,7 +138,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                 if d.module_path != vim.current.buffer.name:
                     vim.eval('jedi#new_buffer(%s)' % \
                                         repr(PythonToVimStr(d.module_path)))
-                vim.current.window.cursor = d.line_nr, d.column
+                vim.current.window.cursor = d.line, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
             # multiple solutions
@@ -149,7 +149,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                                 PythonToVimStr('Builtin ' + d.description)))
                 else:
                     lst.append(dict(filename=PythonToVimStr(d.module_path),
-                                    lnum=d.line_nr, col=d.column + 1,
+                                    lnum=d.line, col=d.column + 1,
                                     text=PythonToVimStr(d.description)))
             vim.eval('setqflist(%s)' % repr(lst))
             vim.eval('jedi#add_goto_window()')
