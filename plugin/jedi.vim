@@ -1,6 +1,5 @@
-"py_fuzzycomplete.vim - Omni Completion for python in vim
+"jedi.vim - Omni Completion for python in vim
 " Maintainer: David Halter <davidhalter88@gmail.com>
-" Version: 0.1
 "
 " This part of the software is just the vim interface. The main source code
 " lies in the python files around it.
