@@ -137,7 +137,8 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                     echo_highlight(
                             "Cannot get the definition of Python keywords.")
                 else:
-                    echo_highlight("Builtin modules cannot be displayed.")
+                    echo_highlight("Builtin modules cannot be displayed (%s)."
+                                   % d.module_path)
             else:
                 if d.module_path != vim.current.buffer.name:
                     vim.eval('jedi#new_buffer(%s)' % \
