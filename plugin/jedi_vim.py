@@ -212,14 +212,14 @@ def show_func_def(call_def=None, completion_lines=0):
             return
 
         row, column = call_def.bracket_start
-        if column < 2 or row == 0:
+        if column < 1 or row == 0:
             return  # edge cases, just ignore
 
         # TODO check if completion menu is above or below
         row_to_replace = row - 1
         line = vim.eval("getline(%s)" % row_to_replace)
 
-        insert_column = column - 2  # because it has stuff at the beginning
+        insert_column = column - 1  # because there's a space before the bracket
 
         params = [p.get_code().replace('\n', '') for p in call_def.params]
         try:
