@@ -10,16 +10,29 @@ endif
 if g:jedi#auto_initialization
     setlocal omnifunc=jedi#complete
 
-    " map ctrl+space for autocompletion
+    " map autocompletion key
     if g:jedi#autocompletion_command == "<C-Space>"
-        " in terminals, <C-Space> sometimes equals <Nul>
-        inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
-                \ "\<lt>C-n>" :
-                \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
-                \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
-                \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+        " special-case for ctrl+space:  we want it to also cycle through menu
+        " options
+        if has("gui_running")
+            inoremap <expr> <C-Space> pumvisible() \|\| &omnifunc == '' ?
+                    \ "\<lt>C-n>" :
+                    \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
+                    \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
+                    \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+
+            inoremap <C-S-space> <C-p>
+        else
+            " in terminals, <C-Space> sometimes equals <Nul>
+            inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
+                    \ "\<lt>C-n>" :
+                    \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
+                    \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
+                    \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+        endif
+    else
+        execute "inoremap <buffer>".g:jedi#autocompletion_command." <C-X><C-O>" 
     endif
-    execute "inoremap <buffer>".g:jedi#autocompletion_command." <C-X><C-O>"
 
     " goto / get_definition / related_names
     execute "noremap <buffer>".g:jedi#goto_command." :call jedi#goto()<CR>"
