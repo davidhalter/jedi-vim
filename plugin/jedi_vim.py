@@ -185,7 +185,7 @@ def show_pydoc():
 
 def clear_call_signatures():
     cursor = vim.current.window.cursor
-    e = vim.eval('g:jedi#function_definition_escape')
+    e = vim.eval('g:jedi#call_signature_escape')
     regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
     for i, line in enumerate(vim.current.buffer):
         match = re.search(r'%s' % regex, line)
@@ -238,7 +238,7 @@ def show_call_signatures(call_def=None, completion_lines=0):
 
         # Need to decode it with utf8, because vim returns always a python 2
         # string even if it is unicode.
-        e = vim.eval('g:jedi#function_definition_escape')
+        e = vim.eval('g:jedi#call_signature_escape')
         if hasattr(e, 'decode'):
             e = e.decode('UTF-8')
         # replace line before with cursor

@@ -32,7 +32,7 @@ let s:settings = {
     \ 'popup_on_dot': 1,
     \ 'pydoc': "'K'",
     \ 'show_function_definition': 1,
-    \ 'function_definition_escape': "'≡'",
+    \ 'call_signature_escape': "'≡'",
     \ 'auto_close_doc': 1,
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10
