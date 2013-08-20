@@ -52,7 +52,7 @@ if g:jedi#auto_initialization
     " this is only here because in some cases the VIM library adds their
     " autocompletion as a default, which may cause problems, depending on the
     " order of invocation.
-    autocmd FileType Python setlocal omnifunc=jedi#complete switchbuf=useopen  " needed for pydoc
+    autocmd FileType Python setlocal omnifunc=jedi#completions switchbuf=useopen  " needed for pydoc
 endif
 
 fun! Pyimport(cmd, args)

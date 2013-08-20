@@ -8,7 +8,7 @@ endif
 " ------------------------------------------------------------------------
 
 if g:jedi#auto_initialization
-    setlocal omnifunc=jedi#complete
+    setlocal omnifunc=jedi#completions
 
     " map ctrl+space for autocompletion
     if g:jedi#autocompletion_command == "<C-Space>"

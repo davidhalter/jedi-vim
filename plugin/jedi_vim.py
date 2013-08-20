@@ -50,7 +50,7 @@ def get_script(source=None, column=None):
     return jedi.Script(source, row, column, buf_path, encoding)
 
 
-def complete():
+def completions():
     row, column = vim.current.window.cursor
     clear_func_def()
     if vim.eval('a:findstart') == '1':

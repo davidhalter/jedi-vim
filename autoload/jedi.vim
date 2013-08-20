@@ -21,8 +21,8 @@ function! jedi#rename(...)
 endfunction
 
 
-function! jedi#complete(findstart, base)
-    Python jedi_vim.complete()
+function! jedi#completions(findstart, base)
+    Python jedi_vim.completions()
 endfunction
 
 
