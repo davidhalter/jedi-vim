@@ -26,8 +26,8 @@ function! jedi#completions(findstart, base)
 endfunction
 
 
-function! jedi#show_func_def()
-    Python jedi_vim.show_func_def()
+function! jedi#show_call_signatures()
+    Python jedi_vim.show_call_signatures()
 endfunction
 
 function! jedi#enable_speed_debugging()
@@ -158,9 +158,9 @@ function! jedi#do_popup_on_dot()
     return 1
 endfunc
 
-function! jedi#configure_function_definition()
-    autocmd InsertLeave <buffer> Python jedi_vim.clear_func_def()
-    autocmd CursorMovedI <buffer> call jedi#show_func_def()
+function! jedi#configure_call_signature()
+    autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
+    autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
 endfunction
 
 if has('python')

@@ -31,7 +31,7 @@ if g:jedi#auto_initialization
     execute "nnoremap <silent> <buffer>".g:jedi#pydoc." :call jedi#show_pydoc()<CR>"
 
     if g:jedi#show_function_definition == 1 && has('conceal')
-        call jedi#configure_function_definition()
+        call jedi#configure_call_signature()
     endif
 end
 

@@ -52,7 +52,7 @@ def get_script(source=None, column=None):
 
 def completions():
     row, column = vim.current.window.cursor
-    clear_func_def()
+    clear_call_signatures()
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
@@ -99,7 +99,7 @@ def completions():
             call_def = None
 
         #print 'end', strout
-        show_func_def(call_def, len(completions))
+        show_call_signatures(call_def, len(completions))
         vim.command('return ' + strout)
 
 
@@ -183,7 +183,7 @@ def show_pydoc():
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
 
 
-def clear_func_def():
+def clear_call_signatures():
     cursor = vim.current.window.cursor
     e = vim.eval('g:jedi#function_definition_escape')
     regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
@@ -199,14 +199,14 @@ def clear_func_def():
     vim.current.window.cursor = cursor
 
 
-def show_func_def(call_def=None, completion_lines=0):
+def show_call_signatures(call_def=None, completion_lines=0):
     if vim.eval("has('conceal') && g:jedi#show_function_definition") == '0':
         return
     try:
         if call_def == None:
             sig = get_script().call_signatures()
             call_def = sig[0] if sig else None
-        clear_func_def()
+        clear_call_signatures()
 
         if call_def is None:
             return
