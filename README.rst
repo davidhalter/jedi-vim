@@ -19,7 +19,7 @@ Display of function/class bodies, docstrings.
 
 .. image:: https://github.com/davidhalter/jedi/raw/master/docs/_screenshots/screenshot_pydoc.png
 
-Pydoc support (with highlighting, Shift+k).
+Documentation (Pydoc) support (with highlighting, Shift+k).
 
 There is also support for goto and renaming.
 
@@ -65,30 +65,30 @@ you disable the auto-initialization in your ``.vimrc``:
 
     let g:jedi#auto_initialization = 0
 
-There are also some VIM options (like ``completeopt``) which are automatically
-initialized, if you don't want that:
+There are also some VIM options (like ``completeopt`` and key defaults) which
+are automatically initialized, but you can change all of them:
 
 .. code-block:: vim
 
     let g:jedi#auto_vim_configuration = 0
 
-The goto is by default on <leader g>. If you want to change that:
+``goto_assignments`` is by default on ``<leader g>``:
 
 .. code-block:: vim
 
-    let g:jedi#goto_command = "<leader>g"
+    let g:jedi#goto_assignments_command = "<leader>g"
 
-``get_definition`` is by default on <leader d>. If you want to change that:
-
-.. code-block:: vim
-
-    let g:jedi#get_definition_command = "<leader>d"
-
-Showing the pydoc is by default on ``K`` If you want to change that:
+``goto_definitions`` is by default on ``<leader d>``:
 
 .. code-block:: vim
 
-    let g:jedi#pydoc = "K"
+    let g:jedi#goto_definitions_command = "<leader>d"
+
+Showing the pydoc documentation is by default on ``K``:
+
+.. code-block:: vim
+
+    let g:jedi#documentation_command = "K"
 
 If you are a person who likes to use VIM-buffers not tabs, you might want to
 put that in your ``.vimrc``:
@@ -117,21 +117,20 @@ There's some support for refactoring:
 
     let g:jedi#rename_command = "<leader>r"
 
-And you can list all names that are related (have the same origin):
+And you can list the usages of a name:
 
 .. code-block:: vim
 
-    let g:jedi#related_names_command = "<leader>n"
+    let g:jedi#usages_command = "<leader>n"
 
 If you want to change the default autocompletion command:
 
 .. code-block:: vim
 
-    let g:jedi#autocompletion_command = "<C-Space>"
+    let g:jedi#completions_command = "<C-Space>"
 
-By default you get a window that displays the function definition you're
-currently in. If you don't want that:
+By default jedi-vim will display call signatures. If you don't want that:
 
 .. code-block:: vim
 
-    let g:jedi#show_function_definition = "0"
+    let g:jedi#show_call_signatures = "0"
