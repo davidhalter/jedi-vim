@@ -29,9 +29,9 @@ let s:deprecations = {
     \ 'related_names_command':      'usages_command',
     \ 'autocompletion_command':     'completions_command',
     \ 'show_function_definition':   'show_call_signatures',
-}
+\ }
 
-for [key, val] in items(s:settings)
+for [key, val] in items(s:deprecations)
     if exists('g:jedi#'.key)
         echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".value."' instead. Sorry for the inconvenience."
         exe 'let g:jedi#'.val.' = g:jedi#'.key

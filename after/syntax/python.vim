@@ -1,7 +1,7 @@
 if g:jedi#show_call_signatures == 1 && has('conceal')
   " conceal is normal for vim >= 7.3
 
-  let e = g:jedi#function_definition_escape
+  let e = g:jedi#call_signature_escape
   let l1 = e.'jedi=[^'.e.']*'.e.'[^'.e.']*'.e.'jedi'.e
   let l2 = e.'jedi=\?[^'.e.']*'.e
   exe 'syn match jediIgnore "'.l2.'" contained conceal'
