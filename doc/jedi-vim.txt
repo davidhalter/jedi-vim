@@ -20,19 +20,19 @@ Contents				*jedi-vim-contents*
 3. Supported Python features		|jedi-vim-support|
 4. Usage				|jedi-vim-usage|
 5. Mappings				|jedi-vim-mappings|
-    5.1. Start completion		|g:jedi#autocompletion_command|
-    5.2. Go to definition		|g:jedi#goto_command|
-    5.3. Get original definition	|g:jedi#get_definition_command|
-    5.4. Show documentation		|g:jedi#pydoc_command|
+    5.1. Start completion		|g:jedi#completions_command|
+    5.2. Go to assignment		|g:jedi#goto_assignments_command|
+    5.3. Get original definition	|g:jedi#get_definitions_command|
+    5.4. Show documentation		|g:jedi#documentation_command|
     5.5. Rename variables		|g:jedi#rename_command|
-    5.6. Show related names		|g:jedi#related_names_command|
+    5.6. Show name usages       |g:jedi#usages_command|
 6. Configuration			|jedi-vim-configuration|
     6.1. auto_initialization		|g:jedi#auto_initialization|
     6.2. auto_vim_configuration		|g:jedi#auto_vim_configuration|
     6.3. popup_on_dot			|g:jedi#popup_on_dot|
     6.4. popup_select_first		|g:jedi#popup_select_first|
     6.5. auto_close_doc			|g:jedi#auto_close_doc|
-    6.6. show_function_definition	|g:jedi#show_function_def|
+    6.6. show_call_signatures	|g:jedi#show_call_signatures|
     6.7. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
     6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
 7. Contributing				|jedi-vim-contributing|
@@ -152,10 +152,11 @@ completion of a large number of Python features, among them:
 - Simple/usual `sys.path` modifications
 - `isinstance` checks for `if`/`while`/`assert` case, that doesn’t work with
   Jedi
+- And more...
 
 Note: This list is not necessarily up to date. For a complete list of
 features, please refer to the Jedi documentation at
-http://jedi.readthedocs.org.
+http://jedi.jedidjah.ch.
 
 ==============================================================================
 4. Usage				*jedi-vim-usage*
@@ -176,47 +177,50 @@ almost instantaneous.
 5. Key Bindings		    		*jedi-vim-keybindings*
 
 All keybindings can be mapped by setting the appropriate global option. For
-example, to set the keybinding for starting omnicompletion to <Tab> instead of
+example, to set the keybinding for starting omnicompletion to <C-N> instead of
 <Ctrl-Space>, add the following setting to your .vimrc file: >
 
-    let g:jedi#autocompletion_command = "<tab>"
+    let g:jedi#completions_command = "<C-N>"
 
 Note: If you have |g:jedi#auto_initialization| set to 0, you have to create
 a mapping yourself by calling a function: >
 
-    " Using <tab> for omnicompletion
-    inoremap <silent> <buffer> <tab> <c-x><c-o>
+    " Using <C-N> for omnicompletion
+    inoremap <silent> <buffer> <C-N> <c-x><c-o>
     " Use <localleader>r (by default <\-r>) for renaming
     nnoremap <silent> <buffer> <localleader>r :call jedi#rename()<cr>
     " etc.
 
 ------------------------------------------------------------------------------
-5.1. `g:jedi#autocompletion_command`	*g:jedi#autocompletion_command*
+5.1. `g:jedi#completions_command`	*g:jedi#completions_command*
 Function: n/a; see above
 Default: <Ctrl-Space>			Start completion
 
 Performs autocompletion (or omnicompletion, to be precise).
 
+Note: If you want to use <Tab> for completion, please install Supertab:
+https://github.com/ervandew/supertab.
+
 ------------------------------------------------------------------------------
-5.2. `g:jedi#goto_command`		*g:jedi#goto_command*
-Function: `jedi#goto()`
+5.2. `g:jedi#goto_assignments_command`		*g:jedi#goto_assignments_command*
+Function: `jedi#goto_assignments()`
 Default: <leader>g			Go to definition
 
 This function finds the first definition of the function/class under the
 cursor. It produces an error if the definition is not in a Python file.
 
 ------------------------------------------------------------------------------
-5.3. `g:jedi#get_definition_command`	*g:jedi#get_definition_command*
-Function: `jedi#get_definition()`
+5.3. `g:jedi#goto_definitions_command`	*g:jedi#goto_definitions_command*
+Function: `jedi#goto_definitions()`
 Default: <leader>d			Go to original definition
 
 This command tries to find the original definition of the function/class under
-the cursor. Just like the `jedi#goto()` function, it does not work if the
-definition isn't in a Python source file.
+the cursor. Just like the `jedi#goto_assignments()` function, it does not work
+if the definition isn't in a Python source file.
 
-The difference between `jedi#goto()` and `jedi#get_definition()` is that the
-former doesn't perform recursive lookups. Take, for example, the following
-module structure: >
+The difference between `jedi#goto_assignments()` and `jedi#goto_definitions()`
+is that the former doesn't perform recursive lookups. Take, for example, the
+following module structure: >
 
     # file1.py:
     from file2 import foo
@@ -228,13 +232,13 @@ module structure: >
     def bar():
         pass
 
-The `jedi#goto()` function will take you to the "from file2 import foo"
-statement in file1.py, while the `jedi#get_definition()` function will take
+The `jedi#goto_definitions()` function will take you to the "from file2 import foo"
+statement in file1.py, while the `jedi#goto_definitions()` function will take
 you all the way to the "def bar():" line in file3.py.
 
 ------------------------------------------------------------------------------
-5.4. `g:jedi#pydoc`			*g:jedi#pydoc_command*
-Function: `jedi#show_pydoc()`
+5.4. `g:jedi#documentation_command`			*g:jedi#documentation_command*
+Function: `jedi#show_documentation()`
 Default: <K>				Show pydoc documentation
 
 This shows the pydoc documentation for the item currently under the cursor.
@@ -252,9 +256,9 @@ with the new one. The number of performed renames is displayed in the command
 line.
 
 ------------------------------------------------------------------------------
-5.6. `g:jedi#related_names_command`	*g:jedi#related_names_command*
-Function: `jedi#related_names()`
-Default: <leader>n			Show related names
+5.6. `g:jedi#usages_command`	*g:jedi#usages_command*
+Function: `jedi#usages()`
+Default: <leader>n			Show usages of a name.
 
 The quickfix window is populated with a list of all names which point to the
 definition of the name under the cursor.
@@ -275,8 +279,8 @@ Upon initialization, jedi-vim performs the following steps:
 1. Set the current buffers 'omnifunc' to its own completion function
    `jedi#complete`
 2. Create mappings to commands specified in |jedi-vim-mappings|
-3. Call `jedi#configure_function_definition()` if
-   `g:jedi#show_function_definition` is set
+3. Call `jedi#configure_call_signatures()` if
+   `g:jedi#show_call_signatures` is set
 
 You can disable the default initialization routine by setting this option to
 0. Beware that you have to perform the above steps yourself, though.
@@ -334,20 +338,20 @@ Options: 0 or 1
 Default: 1 (Automatically close preview window upon leaving insert mode)
 
 ------------------------------------------------------------------------------
-6.6. `g:jedi#show_function_definition`	*g:jedi#show_function_def*
+6.6. `g:jedi#show_call_signatures`	*g:jedi#show_call_signatures*
 
 Jedi-vim can display a small window detailing the arguments of the currently
 completed function and highlighting the currently selected argument. This can
 be disabled by setting this option to 0.
 
 Options: 0 or 1
-Default: 1 (Show function definition window)
+Default: 1 (Show call signatures window)
 
 Note: This setting is ignored if |g:jedi#auto_initialization| is set to 0. In
-that case, if you want to see function definitions, you have to set it up
+that case, if you want to see call signatures, you have to set it up
 manually by calling a function in your configuration file: >
 
-    call jedi#configure_function_definition()
+    call jedi#configure_call_signatures()
 
 ------------------------------------------------------------------------------
 6.7. `g:jedi#use_tabs_not_buffers`	*g:jedi#use_tabs_not_buffers*
@@ -371,7 +375,7 @@ Default: 0 (Warning is shown)
 ==============================================================================
 7. Contributing				*jedi-vim-contributing*
 
-If you have any comments or feature requests, please tell me! I really want to
+If you have any comments or feature requests, please tell us! I really want to
 know what you think about jedi and jedi-vim.
 
 ==============================================================================
