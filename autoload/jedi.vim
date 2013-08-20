@@ -11,7 +11,7 @@ function! jedi#get_definition()
 endfunction
 
 
-function! jedi#related_names()
+function! jedi#usages()
     Python jedi_vim.goto(is_related_name=True)
 endfunction
 
@@ -43,10 +43,10 @@ function! jedi#disable_debugging()
 endfunction
 
 " ------------------------------------------------------------------------
-" show_pydoc
+" show_documentation
 " ------------------------------------------------------------------------
-function! jedi#show_pydoc()
-    Python jedi_vim.show_pydoc()
+function! jedi#show_documentation()
+    Python jedi_vim.show_documentation()
     if bufnr("__doc__") > 0
         " If the __doc__ buffer is open in the current window, jump to it
         silent execute "sbuffer ".bufnr("__doc__")
@@ -158,7 +158,7 @@ function! jedi#do_popup_on_dot()
     return 1
 endfunc
 
-function! jedi#configure_call_signature()
+function! jedi#configure_call_signatures()
     autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
     autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
 endfunction

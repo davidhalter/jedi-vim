@@ -161,7 +161,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
     return definitions
 
 
-def show_pydoc():
+def show_documentation():
     script = get_script()
     try:
         definitions = script.goto_definitions()
@@ -200,7 +200,7 @@ def clear_call_signatures():
 
 
 def show_call_signatures(call_def=None, completion_lines=0):
-    if vim.eval("has('conceal') && g:jedi#show_function_definition") == '0':
+    if vim.eval("has('conceal') && g:jedi#show_call_signatures") == '0':
         return
     try:
         if call_def == None:

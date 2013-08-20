@@ -17,21 +17,45 @@ if exists("g:loaded_jedi") || &cp
 endif
 let g:loaded_jedi = 1
 
+
+" ------------------------------------------------------------------------
+" deprecations
+" ------------------------------------------------------------------------
+
+let s:deprecations = {
+    \ 'get_definition_command':     'goto_definitions_command',
+    \ 'goto_command':               'goto_assignments_command',
+    \ 'pydoc':                      'documentation_command',
+    \ 'related_names_command':      'usages_command',
+    \ 'autocompletion_command':     'completions_command',
+    \ 'show_function_definition':   'show_call_signatures',
+}
+
+for [key, val] in items(s:settings)
+    if exists('g:jedi#'.key)
+        echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".value."' instead. Sorry for the inconvenience."
+        exe 'let g:jedi#'.val.' = g:jedi#'.key
+    end
+endfor
+
+
 " ------------------------------------------------------------------------
 " defaults for jedi-vim
 " ------------------------------------------------------------------------
+
 let s:settings = {
     \ 'use_tabs_not_buffers': 1,
     \ 'auto_initialization': 1,
     \ 'auto_vim_configuration': 1,
-    \ 'goto_command': "'<leader>g'",
-    \ 'autocompletion_command': "'<C-Space>'",
-    \ 'get_definition_command': "'<leader>d'",
-    \ 'related_names_command': "'<leader>n'",
+    \ 'goto_assignments_command': "'<leader>g'",
+    \ 'completions_command': "'<C-Space>'",
+    \ 'goto_definitions_command': "'<leader>d'",
+    \ 'call_signatures_command': "'<leader>n'",
+    \ 'usages_command': "'<leader>n'",
     \ 'rename_command': "'<leader>r'",
     \ 'popup_on_dot': 1,
-    \ 'pydoc': "'K'",
-    \ 'show_function_definition': 1,
+    \ 'documentation_command': "'K'",
+    \ 'show_call_signatures': 1,
     \ 'call_signature_escape': "'≡'",
     \ 'auto_close_doc': 1,
     \ 'popup_select_first': 1,
@@ -52,7 +76,7 @@ if g:jedi#auto_initialization
     " this is only here because in some cases the VIM library adds their
     " autocompletion as a default, which may cause problems, depending on the
     " order of invocation.
-    autocmd FileType Python setlocal omnifunc=jedi#completions switchbuf=useopen  " needed for pydoc
+    autocmd FileType Python setlocal omnifunc=jedi#completions switchbuf=useopen  " needed for documentation/pydoc
 endif
 
 fun! Pyimport(cmd, args)

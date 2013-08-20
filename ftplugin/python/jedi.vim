@@ -11,7 +11,7 @@ if g:jedi#auto_initialization
     setlocal omnifunc=jedi#completions
 
     " map ctrl+space for autocompletion
-    if g:jedi#autocompletion_command == "<C-Space>"
+    if g:jedi#completions_command == "<C-Space>"
         " in terminals, <C-Space> sometimes equals <Nul>
         inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
                 \ "\<lt>C-n>" :
@@ -19,19 +19,19 @@ if g:jedi#auto_initialization
                 \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
                 \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
     endif
-    execute "inoremap <buffer>".g:jedi#autocompletion_command." <C-X><C-O>"
+    execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
 
     " goto / get_definition / related_names
-    execute "noremap <buffer>".g:jedi#goto_command." :call jedi#goto()<CR>"
-    execute "noremap <buffer>".g:jedi#get_definition_command." :call jedi#get_definition()<CR>"
-    execute "noremap <buffer>".g:jedi#related_names_command." :call jedi#related_names()<CR>"
+    execute "noremap <buffer>".g:jedi#goto_assignments_command." :call jedi#goto()<CR>"
+    execute "noremap <buffer>".g:jedi#goto_definitions_command." :call jedi#get_definition()<CR>"
+    execute "noremap <buffer>".g:jedi#usages_command." :call jedi#related_names()<CR>"
     " rename
     execute "noremap <buffer>".g:jedi#rename_command." :call jedi#rename()<CR>"
-    " pydoc
-    execute "nnoremap <silent> <buffer>".g:jedi#pydoc." :call jedi#show_pydoc()<CR>"
+    " documentation/pydoc
+    execute "nnoremap <silent> <buffer>".g:jedi#documentation_command." :call jedi#show_documentation()<CR>"
 
-    if g:jedi#show_function_definition == 1 && has('conceal')
-        call jedi#configure_call_signature()
+    if g:jedi#show_call_signatures == 1 && has('conceal')
+        call jedi#configure_call_signatures()
     endif
 end
 
