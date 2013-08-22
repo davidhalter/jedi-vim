@@ -159,14 +159,14 @@ function! jedi#add_goto_window()
     execute 'belowright copen '.g:jedi#quickfix_window_height
     set nolazyredraw
     if g:jedi#use_tabs_not_buffers == 1
-        map <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
+        map <buffer> <CR> :call s:goto_window_on_enter()<CR>
     endif
     au WinLeave <buffer> q  " automatically leave, if an option is chosen
     redraw!
 endfunction
 
 
-function! jedi#goto_window_on_enter()
+function! s:goto_window_on_enter()
     let l:list = getqflist()
     let l:data = l:list[line('.') - 1]
     if l:data.bufnr
@@ -180,7 +180,7 @@ function! jedi#goto_window_on_enter()
 endfunction
 
 
-function! jedi#syn_stack()
+function! s:syn_stack()
     if !exists("*synstack")
         return []
     endif
@@ -189,7 +189,7 @@ endfunc
 
 
 function! jedi#do_popup_on_dot()
-    let highlight_groups = jedi#syn_stack()
+    let highlight_groups = s:syn_stack()
     for a in highlight_groups
         if a == 'pythonDoctest'
             return 1
