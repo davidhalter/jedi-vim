@@ -14,7 +14,7 @@ class IntegrationTestFile(object):
         self.path = path
 
     def run(self):
-        output = subprocess.check_output([VSPEC_RUNNER, VSPEC_FOLDER, self.path])
+        output = subprocess.check_output([VSPEC_RUNNER, '.', VSPEC_FOLDER, self.path])
         for line in output.splitlines():
             if line.startswith('not ok') or line.startswith('Error'):
                 print(output)
