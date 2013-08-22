@@ -83,6 +83,6 @@ endif
 " ------------------------------------------------------------------------
 " PyImport command
 " ------------------------------------------------------------------------
-command! -nargs=1 -complete=custom,jedi#py_import_completion Pyimport :call jedi#py_import(<q-args>)
+command! -nargs=1 -complete=custom,jedi#py_import_completions Pyimport :call jedi#py_import(<q-args>)
 
 " vim: set et ts=4:

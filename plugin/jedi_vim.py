@@ -6,6 +6,7 @@ with VIM.
 import traceback  # for exception output
 import re
 import os
+from shlex import split as shsplit
 
 import vim
 import jedi
@@ -310,6 +311,31 @@ def rename():
             vim.current.window.cursor = cursor
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
 
+def py_import():
+    # args are the same as for the :edit command
+    args = shsplit(vim.eval('a:args'))
+    text = 'import %s' % args.pop()
+    scr = jedi.Script(text, 1, len(text), '')
+    try:
+        path = scr.goto_assignments()[0].module_path
+    except IndexError:
+        path = None
+    if path and os.path.isfile(path):
+        cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
+        new_buffer(path, cmd_args)
+
+def py_import_completions():
+    argl = vim.eval('a:argl')
+    try:
+        import jedi
+    except ImportError:
+        print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
+        comps = []
+    else:
+        text = 'import %s' % argl
+        script=jedi.Script(text, 1, len(text), '')
+        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
+    vim.command("return '%s'" % '\n'.join(comps))
 
 def new_buffer(path, options=''):
     path = repr(PythonToVimStr(path))

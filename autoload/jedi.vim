@@ -42,6 +42,15 @@ function! jedi#disable_debugging()
     Python jedi_vim.jedi.set_debug_function(None)
 endfunction
 
+function! jedi#py_import(args)
+    Python jedi_vim.py_import()
+endfun
+
+function! jedi#py_import_completions(argl, cmdl, pos)
+    Python jedi_vim.py_import_completions()
+endfun
+
+
 " ------------------------------------------------------------------------
 " show_documentation
 " ------------------------------------------------------------------------
@@ -82,53 +91,6 @@ function! jedi#show_documentation()
     syn region rstPythonRegion matchgroup=pythonDoctest start=/^>>>\s*/ end=/\n/ contains=@rstPythonScript
     let b:current_syntax = "rst"
 endfunction
-
-" ------------------------------------------------------------------------
-" helper functions
-" ------------------------------------------------------------------------
-function! jedi#py_import(args)
-Python << EOF
-    # args are the same as for the :edit command
-if 1:
-    import vim
-    import jedi
-    import os.path as osp
-    from shlex import split as shsplit
-
-    args = shsplit(vim.eval('a:args'))
-    text = 'import %s' % args.pop()
-    scr = jedi.Script(text, 1, len(text), '')
-    try:
-        path = scr.goto_assignments()[0].module_path
-    except IndexError:
-        path = None
-    if path and osp.isfile(path):
-        cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-        jedi_vim.new_buffer(path, cmd_args)
-EOF
-endfun
-
-function! jedi#py_import_completion(argl, cmdl, pos)
-Python << EOF
-if 1:
-    import vim
-    import re
-    import json
-    argl = vim.eval('a:argl')
-    try:
-        import jedi
-    except ImportError as err:
-        print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
-        comps = []
-    else:
-        text = 'import %s' % argl
-        script=jedi.Script(text, 1, len(text), '')
-        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
-    vim.command("let comps = '%s'" % '\n'.join(comps))
-EOF
-    return comps
-endfun
-
 
 " ------------------------------------------------------------------------
 " helper functions
