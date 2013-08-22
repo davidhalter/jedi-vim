@@ -79,8 +79,8 @@ if g:jedi#auto_initialization
     autocmd FileType Python setlocal omnifunc=jedi#completions switchbuf=useopen  " needed for documentation/pydoc
 endif
 
-fun! Pyimport(cmd, args)
-py << EOF
+fun! Pyimport(args)
+Python << EOF
     # args are the same as for the :edit command
     # cmd: one of edit, split, vsplit, tabedit, ...
 if 1:
@@ -99,12 +99,12 @@ if 1:
         path = None
     if path and osp.isfile(path):
         cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-        vim.command('%s %s %s' % (cmd, cmd_args , path.replace(' ', '\ ')))
+        vim.eval("jedi#new_buffer('%s')" % path)
 EOF
 endfun
 
-fun! Pyimport_comp(argl, cmdl, pos)
-py << EOF
+fun! Pyimport_completion(argl, cmdl, pos)
+Python << EOF
 if 1:
     import vim
     import re
@@ -124,8 +124,5 @@ EOF
     return comps
 endfun
 
-command! -nargs=1 -complete=custom,Pyimport_comp Pyimport :call Pyimport('edit', <q-args>)
-" command! -nargs=1 -complete=custom,Pyimport_comp Pysplit :call Pyimport('split', <q-args>)
-" command! -nargs=1 -complete=custom,Pyimport_comp Pyvsplit :call Pyimport('vsplit', <q-args>)
-" command! -nargs=1 -complete=custom,Pyimport_comp Pytabe :call Pyimport('tabe', <q-args>)
+command! -nargs=1 -complete=custom,Pyimport_completion Pyimport :call Pyimport(<q-args>)
 " vim: set et ts=4:

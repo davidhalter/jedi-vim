@@ -75,8 +75,7 @@ def completions():
         try:
             script = get_script(source=source, column=column)
             completions = script.completions()
-            sig = script.call_signatures()
-            call_def = sig[0] if sig else None
+            signatures = script.call_signatures()
 
             out = []
             for c in completions:
@@ -96,10 +95,10 @@ def completions():
             print(traceback.format_exc())
             strout = ''
             completions = []
-            call_def = None
+            signatures = []
 
         #print 'end', strout
-        show_call_signatures(call_def, len(completions))
+        show_call_signatures(signatures, len(completions))
         vim.command('return ' + strout)
 
 
@@ -199,11 +198,11 @@ def clear_call_signatures():
     vim.current.window.cursor = cursor
 
 
-def show_call_signatures(call_def=None, completion_lines=0):
+def show_call_signatures(signatures=()):
     if vim.eval("has('conceal') && g:jedi#show_call_signatures") == '0':
         return
     try:
-        if call_def == None:
+        if signatures == None:
             sig = get_script().call_signatures()
             call_def = sig[0] if sig else None
         clear_call_signatures()
