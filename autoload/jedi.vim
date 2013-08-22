@@ -26,7 +26,7 @@ function! jedi#completions(findstart, base)
 endfunction
 
 
-function! jedi#show_call_signatures()
+function! jedi#show_call_signatures_func()
     Python jedi_vim.show_call_signatures()
 endfunction
 
@@ -171,7 +171,7 @@ endfunc
 
 function! jedi#configure_call_signatures()
     autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
-    autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
+    autocmd CursorMovedI <buffer> call jedi#show_call_signatures_func()
 endfunction
 
 if has('python')
