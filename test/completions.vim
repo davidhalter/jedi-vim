@@ -7,12 +7,28 @@ describe 'completions'
         set filetype=python
     end
 
+    after
+        close!
+    end
+
     it 'import'
         " X is the completion command
         normal oimporX
         Expect getline('.') == 'import'
-        normal! a subproX
+        normal a subproX
         Expect getline('.') == 'import subprocess'
+    end
+
+    it 'exception'
+        normal oIndentationErrX
+        Expect getline('.') == 'IndentationError'
+        normal a().filenaX
+        Expect getline('.') == 'IndentationError().filename'
+    end
+
+    it 'typing'
+        normal oraisX ImpXErrX()
+        Expect getline('.') == 'raise ImportError()'
     end
 end
 
