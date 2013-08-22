@@ -12,12 +12,13 @@ TEST_DIR = 'test'
 class IntegrationTestFile(object):
     def __init__(self, path):
         self.path = path
-        self.skip = None
 
     def run(self):
         output = subprocess.check_output([VSPEC_RUNNER, VSPEC_FOLDER, self.path])
-        print output
-        assert False
+        for line in output.splitlines():
+            if line.startswith('not ok'):
+                print(output)
+                assert False
 
     def __repr__(self):
         return "<%s: %s>"  % (type(self), self.path)
