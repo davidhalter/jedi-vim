@@ -83,18 +83,65 @@ function! jedi#show_documentation()
     let b:current_syntax = "rst"
 endfunction
 
+" ------------------------------------------------------------------------
+" helper functions
+" ------------------------------------------------------------------------
+function! jedi#py_import(args)
+Python << EOF
+    # args are the same as for the :edit command
+if 1:
+    import vim
+    import jedi
+    import os.path as osp
+    from shlex import split as shsplit
+
+    args = shsplit(vim.eval('a:args'))
+    text = 'import %s' % args.pop()
+    scr = jedi.Script(text, 1, len(text), '')
+    try:
+        path = scr.goto_assignments()[0].module_path
+    except IndexError:
+        path = None
+    if path and osp.isfile(path):
+        cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
+        jedi_vim.new_buffer(path, cmd_args)
+EOF
+endfun
+
+function! jedi#py_import_completion(argl, cmdl, pos)
+Python << EOF
+if 1:
+    import vim
+    import re
+    import json
+    argl = vim.eval('a:argl')
+    try:
+        import jedi
+    except ImportError as err:
+        print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
+        comps = []
+    else:
+        text = 'import %s' % argl
+        script=jedi.Script(text, 1, len(text), '')
+        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
+    vim.command("let comps = '%s'" % '\n'.join(comps))
+EOF
+    return comps
+endfun
+
 
 " ------------------------------------------------------------------------
 " helper functions
 " ------------------------------------------------------------------------
-function! jedi#new_buffer(path)
+function! jedi#new_buffer(path, options)
+    " options are what you can to edit the edit options
     if g:jedi#use_tabs_not_buffers
-        Python jedi_vim.tabnew(jedi_vim.escape_file_path(vim.eval('a:path')))
+        Python jedi_vim.tabnew(jedi_vim.escape_file_path(vim.eval('a:path')), vim.eval('a:options'))
     else
         if !&hidden && &modified
             w
         endif
-        Python vim.command('edit ' + jedi_vim.escape_file_path(vim.eval('a:path')))
+        Python vim.command('edit ' + vim.eval('a:options') + jedi_vim.escape_file_path(vim.eval('a:path')))
     endif
     " sometimes syntax is being disabled and the filetype not set.
     if !exists("g:syntax_on")
@@ -104,6 +151,7 @@ function! jedi#new_buffer(path)
       set filetype=python
     endif
 endfunction
+
 
 function! jedi#add_goto_window()
     set lazyredraw
@@ -157,6 +205,7 @@ function! jedi#do_popup_on_dot()
     endfor
     return 1
 endfunc
+
 
 function! jedi#configure_call_signatures()
     autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()

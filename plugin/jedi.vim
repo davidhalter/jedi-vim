@@ -79,50 +79,10 @@ if g:jedi#auto_initialization
     autocmd FileType Python setlocal omnifunc=jedi#completions switchbuf=useopen  " needed for documentation/pydoc
 endif
 
-fun! Pyimport(args)
-Python << EOF
-    # args are the same as for the :edit command
-    # cmd: one of edit, split, vsplit, tabedit, ...
-if 1:
-    import vim
-    import jedi
-    import os.path as osp
-    from shlex import split as shsplit
 
-    cmd = vim.eval('a:cmd')
-    args = shsplit(vim.eval('a:args'))
-    text = 'import %s' % args.pop()
-    scr = jedi.Script(text, 1, len(text), '')
-    try:
-        path = scr.goto_assignments()[0].module_path
-    except IndexError:
-        path = None
-    if path and osp.isfile(path):
-        cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-        vim.eval("jedi#new_buffer('%s')" % path)
-EOF
-endfun
+" ------------------------------------------------------------------------
+" PyImport command
+" ------------------------------------------------------------------------
+command! -nargs=1 -complete=custom,jedi#py_import_completion Pyimport :call jedi#py_import(<q-args>)
 
-fun! Pyimport_completion(argl, cmdl, pos)
-Python << EOF
-if 1:
-    import vim
-    import re
-    import json
-    argl = vim.eval('a:argl')
-    try:
-        import jedi
-    except ImportError as err:
-        print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
-        comps = []
-    else:
-        text = 'import %s' % argl
-        script=jedi.Script(text, 1, len(text), '')
-        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
-    vim.command("let comps = '%s'" % '\n'.join(comps))
-EOF
-    return comps
-endfun
-
-command! -nargs=1 -complete=custom,Pyimport_completion Pyimport :call Pyimport(<q-args>)
 " vim: set et ts=4:

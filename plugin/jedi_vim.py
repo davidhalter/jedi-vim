@@ -140,8 +140,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                                    % d.module_path)
             else:
                 if d.module_path != vim.current.buffer.name:
-                    vim.eval('jedi#new_buffer(%s)' % \
-                                        repr(PythonToVimStr(d.module_path)))
+                    new_buffer(d.module_path)
                 vim.current.window.cursor = d.line, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
@@ -302,21 +301,30 @@ def rename():
                     continue
 
                 if vim.current.buffer.name != r.module_path:
-                    vim.eval("jedi#new_buffer('%s')" % r.module_path)
+                    new_buffer(r.module_path)
 
                 vim.current.window.cursor = r.start_pos
                 vim.command('normal! cw%s' % replace)
 
-            vim.eval("jedi#new_buffer('%s')" % window_path)
+            new_buffer(window_path)
             vim.current.window.cursor = cursor
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
 
 
-def tabnew(path):
-    "Open a file in a new tab or switch to an existing one"
+def new_buffer(path, options=''):
+    path = repr(PythonToVimStr(path))
+    vim.eval("jedi#new_buffer(%s, '%s')" % (path, options))
+
+
+def tabnew(path, options=''):
+    """
+    Open a file in a new tab or switch to an existing one.
+
+    :param options: `:tabnew` options, read vim help.
+    """
     path = os.path.abspath(path)
     if vim.eval('has("gui")') == '1':
-        vim.command('tab drop %s' % path)
+        vim.command('tab drop %s %s' % (options, path))
         return
 
     for tab_nr in range(int(vim.eval("tabpagenr('$')"))):
