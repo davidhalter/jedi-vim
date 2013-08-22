@@ -14,7 +14,7 @@ describe '...'
   end
 
   it 'blub'
-    Expect range(1) == [1]
+    Expect range(1) == [0]
   end
 
   it 'bla'
