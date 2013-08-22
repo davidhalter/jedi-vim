@@ -18,7 +18,7 @@ def echo_highlight(msg):
     vim.command('echohl WarningMsg | echom "%s" | echohl None' % msg)
 
 
-if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 6, 0):
+if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
     echo_highlight('Please update your Jedi version, it is to old.')
 
 
@@ -311,6 +311,7 @@ def rename():
             vim.current.window.cursor = cursor
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
 
+
 def py_import():
     # args are the same as for the :edit command
     args = shsplit(vim.eval('a:args'))
@@ -324,6 +325,7 @@ def py_import():
         cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
         new_buffer(path, cmd_args)
 
+
 def py_import_completions():
     argl = vim.eval('a:argl')
     try:
@@ -336,6 +338,7 @@ def py_import_completions():
         script=jedi.Script(text, 1, len(text), '')
         comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
     vim.command("return '%s'" % '\n'.join(comps))
+
 
 def new_buffer(path, options=''):
     path = repr(PythonToVimStr(path))
