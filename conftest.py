@@ -16,7 +16,7 @@ class IntegrationTestFile(object):
     def run(self):
         output = subprocess.check_output([VSPEC_RUNNER, VSPEC_FOLDER, self.path])
         for line in output.splitlines():
-            if line.startswith('not ok'):
+            if line.startswith('not ok') or line.startswith('Error'):
                 print(output)
                 assert False
 
@@ -52,6 +52,7 @@ def pytest_generate_tests(metafunc):
     """
     def collect_tests():
         for f in os.listdir(TEST_DIR):
-            yield IntegrationTestFile(os.path.join(TEST_DIR, f))
+            if f.endswith('.vim'):
+                yield IntegrationTestFile(os.path.join(TEST_DIR, f))
 
     metafunc.parametrize('case', list(collect_tests()))
