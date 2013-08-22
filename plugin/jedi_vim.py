@@ -98,8 +98,7 @@ def completions():
             completions = []
             signatures = []
 
-        #print 'end', strout
-        show_call_signatures(signatures, len(completions))
+        show_call_signatures(signatures)
         vim.command('return ' + strout)
 
 
@@ -200,65 +199,68 @@ def clear_call_signatures():
 def show_call_signatures(signatures=()):
     if vim.eval("has('conceal') && g:jedi#show_call_signatures") == '0':
         return
+
     try:
-        if signatures == None:
-            sig = get_script().call_signatures()
-            call_def = sig[0] if sig else None
+        if signatures == ():
+            signatures = get_script().call_signatures()
         clear_call_signatures()
 
-        if call_def is None:
+        if not signatures:
             return
 
-        row, column = call_def.bracket_start
-        if column < 1 or row == 0:
-            return  # edge cases, just ignore
+        for i, signature in enumerate(signatures):
+            line, column = signature.bracket_start
+            # signatures are listed above each other
+            line_to_replace = line - i - 1
+            # because there's a space before the bracket
+            insert_column = column - 1
+            if insert_column < 0 or line_to_replace <= 0:
+                # Edge cases, when the call signature has no space on the screen.
+                break
 
-        # TODO check if completion menu is above or below
-        row_to_replace = row - 1
-        line = vim.eval("getline(%s)" % row_to_replace)
+            # TODO check if completion menu is above or below
+            line = vim.eval("getline(%s)" % line_to_replace)
 
-        insert_column = column - 1  # because there's a space before the bracket
+            params = [p.get_code().replace('\n', '') for p in signature.params]
+            try:
+                params[signature.index] = '*%s*' % params[signature.index]
+            except (IndexError, TypeError):
+                pass
 
-        params = [p.get_code().replace('\n', '') for p in call_def.params]
-        try:
-            params[call_def.index] = '*%s*' % params[call_def.index]
-        except (IndexError, TypeError):
-            pass
+            # This stuff is reaaaaally a hack! I cannot stress enough, that
+            # this is a stupid solution. But there is really no other yet.
+            # There is no possibility in VIM to draw on the screen, but there
+            # will be one (see :help todo Patch to access screen under Python.
+            # (Marko Mahni, 2010 Jul 18))
+            text = " (%s) " % ', '.join(params)
+            text = ' ' * (insert_column - len(line)) + text
+            end_column = insert_column + len(text) - 2  # -2 due to bold symbols
 
-        # This stuff is reaaaaally a hack! I cannot stress enough, that this is
-        # a stupid solution. But there is really no other yet. There is no
-        # possibility in VIM to draw on the screen, but there will be one (see
-        # :help todo Patch to access screen under Python. (Marko Mahni, 2010
-        # Jul 18))
-        text = " (%s) " % ', '.join(params)
-        text = ' ' * (insert_column - len(line)) + text
-        end_column = insert_column + len(text) - 2  # -2 due to bold symbols
+            # Need to decode it with utf8, because vim returns always a python 2
+            # string even if it is unicode.
+            e = vim.eval('g:jedi#call_signature_escape')
+            if hasattr(e, 'decode'):
+                e = e.decode('UTF-8')
+            # replace line before with cursor
+            regex = "xjedi=%sx%sxjedix".replace('x', e)
 
-        # Need to decode it with utf8, because vim returns always a python 2
-        # string even if it is unicode.
-        e = vim.eval('g:jedi#call_signature_escape')
-        if hasattr(e, 'decode'):
-            e = e.decode('UTF-8')
-        # replace line before with cursor
-        regex = "xjedi=%sx%sxjedix".replace('x', e)
+            prefix, replace = line[:insert_column], line[insert_column:end_column]
 
-        prefix, replace = line[:insert_column], line[insert_column:end_column]
+            # Check the replace stuff for strings, to append them
+            # (don't want to break the syntax)
+            regex_quotes = r'''\\*["']+'''
+            # `add` are all the quotation marks.
+            # join them with a space to avoid producing '''
+            add = ' '.join(re.findall(regex_quotes, replace))
+            # search backwards
+            if add and replace[0] in ['"', "'"]:
+                a = re.search(regex_quotes + '$', prefix)
+                add = ('' if a is None else a.group(0)) + add
 
-        # Check the replace stuff for strings, to append them
-        # (don't want to break the syntax)
-        regex_quotes = r'''\\*["']+'''
-        # `add` are all the quotation marks.
-        # join them with a space to avoid producing '''
-        add = ' '.join(re.findall(regex_quotes, replace))
-        # search backwards
-        if add and replace[0] in ['"', "'"]:
-            a = re.search(regex_quotes + '$', prefix)
-            add = ('' if a is None else a.group(0)) + add
+            tup = '%s, %s' % (len(add), replace)
+            repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
-        tup = '%s, %s' % (len(add), replace)
-        repl = prefix + (regex % (tup, text)) + add + line[end_column:]
-
-        vim.eval('setline(%s, %s)' % (row_to_replace, repr(PythonToVimStr(repl))))
+            vim.eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
     except Exception:
         print(traceback.format_exc())
 
