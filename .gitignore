@@ -9,3 +9,4 @@
 .ropeproject
 .idea
 doc/tags
+.cache
