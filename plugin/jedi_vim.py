@@ -114,8 +114,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
         else:
             definitions = script.goto_assignments()
     except jedi.NotFoundError:
-        echo_highlight(
-                    "Cannot follow nothing. Put your cursor on a valid name.")
+        echo_highlight( "Cannot follow nothing. Put your cursor on a valid name.")
     except Exception:
         # print to stdout, will be in :messages
         echo_highlight("Some different eror, this shouldn't happen.")
@@ -259,8 +258,7 @@ def show_call_signatures(signatures=()):
         tup = '%s, %s' % (len(add), replace)
         repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
-        vim.eval('setline(%s, %s)' % \
-                            (row_to_replace, repr(PythonToVimStr(repl))))
+        vim.eval('setline(%s, %s)' % (row_to_replace, repr(PythonToVimStr(repl))))
     except Exception:
         print(traceback.format_exc())
 
@@ -315,15 +313,19 @@ def rename():
 def py_import():
     # args are the same as for the :edit command
     args = shsplit(vim.eval('a:args'))
-    text = 'import %s' % args.pop()
+    import_path = args.pop()
+    text = 'import %s' % import_path
     scr = jedi.Script(text, 1, len(text), '')
     try:
-        path = scr.goto_assignments()[0].module_path
+        completion = scr.goto_assignments()[0]
     except IndexError:
-        path = None
-    if path and os.path.isfile(path):
-        cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-        new_buffer(path, cmd_args)
+        echo_highlight('Cannot find %s in sys.path!' % import_path)
+    else:
+        if completion.in_builtin_module():
+            echo_highlight('%s is a builtin module.' % import_path)
+        else:
+            cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
+            new_buffer(completion.module_path, cmd_args)
 
 
 def py_import_completions():
