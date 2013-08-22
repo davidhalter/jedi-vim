@@ -1,5 +1,6 @@
 let mapleader = '\'
 source plugin/jedi.vim
+source test/utils.vim
 
 describe 'goto_simple'
     before
@@ -21,7 +22,6 @@ describe 'goto_simple'
     end
 
     it 'goto_definitions'
-        echo &runtimepath
         silent normal \d
         Expect line('.') == 1
         "Expect col('.') == 5
@@ -42,6 +42,31 @@ describe 'goto_simple'
         silent normal \g
         Expect line('.') == 1
         Expect col('.') == 5
+    end
+end
+
+describe 'goto_with_new_tabs'
+    before
+        new
+        set filetype=python
+    end
+
+    after
+        close!
+    end
+
+    it 'follow_import'
+        put = ['import subprocess', 'subprocess']
+        silent normal G\g
+        Expect getline('.') == 'import subprocess'
+        Expect line('.') == 2
+        Expect col('.') == 8
+
+        silent normal G\d
+        Expect g:current_buffer_is_module('subprocess') == 1
+        Expect line('.') == 1
+        Expect col('.') == 1
+        Expect tabpagenr('$') == 2
     end
 end
 
