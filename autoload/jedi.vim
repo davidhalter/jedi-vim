@@ -1,12 +1,12 @@
 " ------------------------------------------------------------------------
 " functions that call python code
 " ------------------------------------------------------------------------
-function! jedi#goto()
+function! jedi#goto_assignments()
     Python jedi_vim.goto()
 endfunction
 
 
-function! jedi#get_definition()
+function! jedi#goto_definitions()
     Python jedi_vim.goto(is_definition=True)
 endfunction
 

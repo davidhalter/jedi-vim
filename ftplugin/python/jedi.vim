@@ -21,10 +21,10 @@ if g:jedi#auto_initialization
     endif
     execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
 
-    " goto / get_definition / related_names
-    execute "noremap <buffer>".g:jedi#goto_assignments_command." :call jedi#goto()<CR>"
-    execute "noremap <buffer>".g:jedi#goto_definitions_command." :call jedi#get_definition()<CR>"
-    execute "noremap <buffer>".g:jedi#usages_command." :call jedi#related_names()<CR>"
+    " goto / get_definition / usages
+    execute "noremap <buffer>".g:jedi#goto_assignments_command." :call jedi#goto_assignments()<CR>"
+    execute "noremap <buffer>".g:jedi#goto_definitions_command." :call jedi#goto_definitions()<CR>"
+    execute "noremap <buffer>".g:jedi#usages_command." :call jedi#usages()<CR>"
     " rename
     execute "noremap <buffer>".g:jedi#rename_command." :call jedi#rename()<CR>"
     " documentation/pydoc
