@@ -4,7 +4,7 @@ source test/utils.vim
 
 describe 'goto_simple'
     before
-        new
+        new  " open a new split
         set filetype=python
         put =[
         \   'def a(): pass',
@@ -47,12 +47,13 @@ end
 
 describe 'goto_with_new_tabs'
     before
-        new
         set filetype=python
     end
 
     after
         close!
+        bd!
+        bd!
     end
 
     it 'follow_import'
@@ -67,6 +68,8 @@ describe 'goto_with_new_tabs'
         Expect line('.') == 1
         Expect col('.') == 1
         Expect tabpagenr('$') == 2
+        tabprevious
+        Expect bufname('%') == ''
     end
 end
 
