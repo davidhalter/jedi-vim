@@ -18,7 +18,7 @@ describe 'goto_simple'
     end
 
     after
-        close!
+        bd!
     end
 
     it 'goto_definitions'
@@ -45,13 +45,12 @@ describe 'goto_simple'
     end
 end
 
-describe 'goto_with_new_tabs'
+describe 'goto_with_tabs'
     before
         set filetype=python
     end
 
     after
-        close!
         bd!
         bd!
     end
@@ -70,6 +69,35 @@ describe 'goto_with_new_tabs'
         Expect tabpagenr('$') == 2
         tabprevious
         Expect bufname('%') == ''
+    end
+end
+
+describe 'goto_with_buffers'
+    before
+        set filetype=python
+        let g:jedi#use_tabs_not_buffers = 0
+    end
+
+    after
+        bd!
+        bd!
+        set nohidden
+    end
+
+    it 'no_new_tabs'
+        put = ['import os']
+        normal G$
+        call jedi#goto_assignments()
+        python jedi_vim.goto()
+        Expect g:current_buffer_is_module('os') == 0
+        " Without hidden, it's not possible to open a new buffer, when the old
+        " one is not saved.
+        set hidden
+        call jedi#goto_assignments()
+        Expect g:current_buffer_is_module('os') == 1
+        Expect tabpagenr('$') == 1
+        Expect line('.') == 1
+        Expect col('.') == 1
     end
 end
 
