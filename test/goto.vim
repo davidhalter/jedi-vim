@@ -45,6 +45,7 @@ describe 'goto_simple'
     end
 end
 
+
 describe 'goto_with_tabs'
     before
         set filetype=python
@@ -71,6 +72,7 @@ describe 'goto_with_tabs'
         Expect bufname('%') == ''
     end
 end
+
 
 describe 'goto_with_buffers'
     before

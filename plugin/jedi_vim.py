@@ -55,7 +55,7 @@ def vim_command(string):
 
 
 def echo_highlight(msg):
-    vim.command('echohl WarningMsg | echom "%s" | echohl None' % msg)
+    vim_command('echohl WarningMsg | echom "%s" | echohl None' % msg)
 
 
 if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
@@ -88,7 +88,7 @@ def get_script(source=None, column=None):
     if column is None:
         column = vim.current.window.cursor[1]
     buf_path = vim.current.buffer.name
-    encoding = vim.eval('&encoding') or 'latin1'
+    encoding = vim_eval('&encoding') or 'latin1'
     return jedi.Script(source, row, column, buf_path, encoding)
 
 
@@ -166,7 +166,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
             # just add some mark to add the current position to the jumplist.
             # this is ugly, because it overrides the mark for '`', so if anyone
             # has a better idea, let me know.
-            vim.command('normal! m`')
+            vim_command('normal! m`')
 
             d = list(definitions)[0]
             if d.in_builtin_module():
@@ -182,7 +182,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                     if not result:
                         return
                 vim.current.window.cursor = d.line, d.column
-                vim.command('normal! zt')  # cursor at top of screen
+                vim_command('normal! zt')  # cursor at top of screen
         else:
             # multiple solutions
             lst = []
@@ -194,8 +194,8 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                     lst.append(dict(filename=PythonToVimStr(d.module_path),
                                     lnum=d.line, col=d.column + 1,
                                     text=PythonToVimStr(d.description)))
-            vim.eval('setqflist(%s)' % repr(lst))
-            vim.eval('jedi#add_goto_window()')
+            vim_eval('setqflist(%s)' % repr(lst))
+            vim_eval('jedi#add_goto_window()')
     return definitions
 
 
@@ -225,23 +225,23 @@ def show_documentation():
 @catch_and_print_exceptions
 def clear_call_signatures():
     cursor = vim.current.window.cursor
-    e = vim.eval('g:jedi#call_signature_escape')
+    e = vim_eval('g:jedi#call_signature_escape')
     regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
     for i, line in enumerate(vim.current.buffer):
         match = re.search(r'%s' % regex, line)
         if match is not None:
             vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' % \
                                                         int(match.group(1))
-            vim.command(r'try | %s,%ss/%s/\2/g | catch | endtry' \
+            vim_command(r'try | %s,%ss/%s/\2/g | catch | endtry' \
                                                 % (i + 1, i + 1, vim_regex))
-            vim.eval('histdel("search", -1)')
-            vim.command('let @/ = histget("search", -1)')
+            vim_eval('histdel("search", -1)')
+            vim_command('let @/ = histget("search", -1)')
     vim.current.window.cursor = cursor
 
 
 @catch_and_print_exceptions
 def show_call_signatures(signatures=()):
-    if vim.eval("has('conceal') && g:jedi#show_call_signatures") == '0':
+    if vim_eval("has('conceal') && g:jedi#show_call_signatures") == '0':
         return
 
     if signatures == ():
@@ -262,7 +262,7 @@ def show_call_signatures(signatures=()):
             break
 
         # TODO check if completion menu is above or below
-        line = vim.eval("getline(%s)" % line_to_replace)
+        line = vim_eval("getline(%s)" % line_to_replace)
 
         params = [p.get_code().replace('\n', '') for p in signature.params]
         try:
@@ -281,7 +281,7 @@ def show_call_signatures(signatures=()):
 
         # Need to decode it with utf8, because vim returns always a python 2
         # string even if it is unicode.
-        e = vim.eval('g:jedi#call_signature_escape')
+        e = vim_eval('g:jedi#call_signature_escape')
         if hasattr(e, 'decode'):
             e = e.decode('UTF-8')
         # replace line before with cursor
@@ -303,7 +303,7 @@ def show_call_signatures(signatures=()):
         tup = '%s, %s' % (len(add), replace)
         repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
-        vim.eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
+        vim_eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
 
 
 @catch_and_print_exceptions
@@ -311,24 +311,24 @@ def rename():
     if not int(vim.eval('a:0')):
         _rename_cursor = vim.current.window.cursor
 
-        vim.command('normal A ')  # otherwise startinsert doesn't work well
+        vim_command('normal A ')  # otherwise startinsert doesn't work well
         vim.current.window.cursor = _rename_cursor
 
-        vim.command('augroup jedi_rename')
-        vim.command('autocmd InsertLeave <buffer> call jedi#rename(1)')
-        vim.command('augroup END')
+        vim_command('augroup jedi_rename')
+        vim_command('autocmd InsertLeave <buffer> call jedi#rename(1)')
+        vim_command('augroup END')
 
-        vim.command('normal! diw')
-        vim.command(':startinsert')
+        vim_command('normal! diw')
+        vim_command(':startinsert')
     else:
         window_path = vim.current.buffer.name
         # reset autocommand
-        vim.command('autocmd! jedi_rename InsertLeave')
+        vim_command('autocmd! jedi_rename InsertLeave')
 
-        replace = vim.eval("expand('<cword>')")
-        vim.command('normal! u')  # undo new word
+        replace = vim_eval("expand('<cword>')")
+        vim_command('normal! u')  # undo new word
         cursor = vim.current.window.cursor
-        vim.command('normal! u')  # undo the space at the end
+        vim_command('normal! u')  # undo the space at the end
         vim.current.window.cursor = cursor
 
         if replace is None:
@@ -349,7 +349,7 @@ def rename():
                         return
 
                 vim.current.window.cursor = r.start_pos
-                vim.command('normal! cw%s' % replace)
+                vim_command('normal! cw%s' % replace)
 
             result = new_buffer(window_path)
             if not result:
@@ -395,7 +395,7 @@ def py_import_completions():
 @catch_and_print_exceptions
 def new_buffer(path, options=''):
     # options are what you can to edit the edit options
-    if vim.eval('g:jedi#use_tabs_not_buffers') == '1':
+    if vim_eval('g:jedi#use_tabs_not_buffers') == '1':
         _tabnew(path, options)
     else:
         if vim_eval("!&hidden && &modified") == '1':
@@ -403,13 +403,13 @@ def new_buffer(path, options=''):
                 echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
                 return False
             else:
-                vim.command('w')
+                vim_command('w')
         vim_command('edit %s %s' % (options, escape_file_path(path)))
     # sometimes syntax is being disabled and the filetype not set.
-    if vim.eval('!exists("g:syntax_on")') == '1':
-      vim.command('syntax enable')
-    if vim.eval("&filetype != 'python'") == '1':
-      vim.command('set filetype=python')
+    if vim_eval('!exists("g:syntax_on")') == '1':
+      vim_command('syntax enable')
+    if vim_eval("&filetype != 'python'") == '1':
+      vim_command('set filetype=python')
     return True
 
 
@@ -421,12 +421,12 @@ def _tabnew(path, options=''):
     :param options: `:tabnew` options, read vim help.
     """
     path = os.path.abspath(path)
-    if vim.eval('has("gui")') == '1':
-        vim.command('tab drop %s %s' % (options, escape_file_path(path)))
+    if vim_eval('has("gui")') == '1':
+        vim_command('tab drop %s %s' % (options, escape_file_path(path)))
         return
 
-    for tab_nr in range(int(vim.eval("tabpagenr('$')"))):
-        for buf_nr in vim.eval("tabpagebuflist(%i + 1)" % tab_nr):
+    for tab_nr in range(int(vim_eval("tabpagenr('$')"))):
+        for buf_nr in vim_eval("tabpagebuflist(%i + 1)" % tab_nr):
             buf_nr = int(buf_nr) - 1
             try:
                 buf_path = vim.buffers[buf_nr].name
@@ -437,14 +437,14 @@ def _tabnew(path, options=''):
             else:
                 if buf_path == path:
                     # tab exists, just switch to that tab
-                    vim.command('tabfirst | tabnext %i' % (tab_nr + 1))
+                    vim_command('tabfirst | tabnext %i' % (tab_nr + 1))
                     break
         else:
             continue
         break
     else:
         # tab doesn't exist, add a new one.
-        vim.command('tabnew %s' % escape_file_path(path))
+        vim_command('tabnew %s' % escape_file_path(path))
 
 
 def escape_file_path(path):
