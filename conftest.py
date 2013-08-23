@@ -25,7 +25,6 @@ class IntegrationTestFile(object):
 
 
 def pytest_configure(config):
-    print(subprocess.check_output(['vim', '--version']))
     if not os.path.isdir(CACHE_FOLDER):
         os.mkdir(CACHE_FOLDER)
 
