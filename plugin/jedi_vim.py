@@ -14,6 +14,16 @@ import jedi.keywords
 from jedi._compatibility import unicode
 
 
+def catch_and_print_exceptions(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            print(traceback.format_exc())
+            return None
+    return wrapper
+
+
 def echo_highlight(msg):
     vim.command('echohl WarningMsg | echom "%s" | echohl None' % msg)
 
@@ -38,6 +48,7 @@ class PythonToVimStr(unicode):
         return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
 
 
+@catch_and_print_exceptions
 def get_script(source=None, column=None):
     jedi.settings.additional_dynamic_modules = [b.name for b in vim.buffers
                             if b.name is not None and b.name.endswith('.py')]
@@ -51,6 +62,7 @@ def get_script(source=None, column=None):
     return jedi.Script(source, row, column, buf_path, encoding)
 
 
+@catch_and_print_exceptions
 def completions():
     row, column = vim.current.window.cursor
     clear_call_signatures()
@@ -102,6 +114,7 @@ def completions():
         vim.command('return ' + strout)
 
 
+@catch_and_print_exceptions
 def goto(is_definition=False, is_related_name=False, no_output=False):
     definitions = []
     script = get_script()
@@ -114,10 +127,6 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
             definitions = script.goto_assignments()
     except jedi.NotFoundError:
         echo_highlight( "Cannot follow nothing. Put your cursor on a valid name.")
-    except Exception:
-        # print to stdout, will be in :messages
-        echo_highlight("Some different eror, this shouldn't happen.")
-        print(traceback.format_exc())
     else:
         if no_output:
             return definitions
@@ -158,6 +167,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
     return definitions
 
 
+@catch_and_print_exceptions
 def show_documentation():
     script = get_script()
     try:
@@ -180,6 +190,7 @@ def show_documentation():
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
 
 
+@catch_and_print_exceptions
 def clear_call_signatures():
     cursor = vim.current.window.cursor
     e = vim.eval('g:jedi#call_signature_escape')
@@ -196,75 +207,74 @@ def clear_call_signatures():
     vim.current.window.cursor = cursor
 
 
+@catch_and_print_exceptions
 def show_call_signatures(signatures=()):
     if vim.eval("has('conceal') && g:jedi#show_call_signatures") == '0':
         return
 
-    try:
-        if signatures == ():
-            signatures = get_script().call_signatures()
-        clear_call_signatures()
+    if signatures == ():
+        signatures = get_script().call_signatures()
+    clear_call_signatures()
 
-        if not signatures:
-            return
+    if not signatures:
+        return
 
-        for i, signature in enumerate(signatures):
-            line, column = signature.bracket_start
-            # signatures are listed above each other
-            line_to_replace = line - i - 1
-            # because there's a space before the bracket
-            insert_column = column - 1
-            if insert_column < 0 or line_to_replace <= 0:
-                # Edge cases, when the call signature has no space on the screen.
-                break
+    for i, signature in enumerate(signatures):
+        line, column = signature.bracket_start
+        # signatures are listed above each other
+        line_to_replace = line - i - 1
+        # because there's a space before the bracket
+        insert_column = column - 1
+        if insert_column < 0 or line_to_replace <= 0:
+            # Edge cases, when the call signature has no space on the screen.
+            break
 
-            # TODO check if completion menu is above or below
-            line = vim.eval("getline(%s)" % line_to_replace)
+        # TODO check if completion menu is above or below
+        line = vim.eval("getline(%s)" % line_to_replace)
 
-            params = [p.get_code().replace('\n', '') for p in signature.params]
-            try:
-                params[signature.index] = '*%s*' % params[signature.index]
-            except (IndexError, TypeError):
-                pass
+        params = [p.get_code().replace('\n', '') for p in signature.params]
+        try:
+            params[signature.index] = '*%s*' % params[signature.index]
+        except (IndexError, TypeError):
+            pass
 
-            # This stuff is reaaaaally a hack! I cannot stress enough, that
-            # this is a stupid solution. But there is really no other yet.
-            # There is no possibility in VIM to draw on the screen, but there
-            # will be one (see :help todo Patch to access screen under Python.
-            # (Marko Mahni, 2010 Jul 18))
-            text = " (%s) " % ', '.join(params)
-            text = ' ' * (insert_column - len(line)) + text
-            end_column = insert_column + len(text) - 2  # -2 due to bold symbols
+        # This stuff is reaaaaally a hack! I cannot stress enough, that
+        # this is a stupid solution. But there is really no other yet.
+        # There is no possibility in VIM to draw on the screen, but there
+        # will be one (see :help todo Patch to access screen under Python.
+        # (Marko Mahni, 2010 Jul 18))
+        text = " (%s) " % ', '.join(params)
+        text = ' ' * (insert_column - len(line)) + text
+        end_column = insert_column + len(text) - 2  # -2 due to bold symbols
 
-            # Need to decode it with utf8, because vim returns always a python 2
-            # string even if it is unicode.
-            e = vim.eval('g:jedi#call_signature_escape')
-            if hasattr(e, 'decode'):
-                e = e.decode('UTF-8')
-            # replace line before with cursor
-            regex = "xjedi=%sx%sxjedix".replace('x', e)
+        # Need to decode it with utf8, because vim returns always a python 2
+        # string even if it is unicode.
+        e = vim.eval('g:jedi#call_signature_escape')
+        if hasattr(e, 'decode'):
+            e = e.decode('UTF-8')
+        # replace line before with cursor
+        regex = "xjedi=%sx%sxjedix".replace('x', e)
 
-            prefix, replace = line[:insert_column], line[insert_column:end_column]
+        prefix, replace = line[:insert_column], line[insert_column:end_column]
 
-            # Check the replace stuff for strings, to append them
-            # (don't want to break the syntax)
-            regex_quotes = r'''\\*["']+'''
-            # `add` are all the quotation marks.
-            # join them with a space to avoid producing '''
-            add = ' '.join(re.findall(regex_quotes, replace))
-            # search backwards
-            if add and replace[0] in ['"', "'"]:
-                a = re.search(regex_quotes + '$', prefix)
-                add = ('' if a is None else a.group(0)) + add
+        # Check the replace stuff for strings, to append them
+        # (don't want to break the syntax)
+        regex_quotes = r'''\\*["']+'''
+        # `add` are all the quotation marks.
+        # join them with a space to avoid producing '''
+        add = ' '.join(re.findall(regex_quotes, replace))
+        # search backwards
+        if add and replace[0] in ['"', "'"]:
+            a = re.search(regex_quotes + '$', prefix)
+            add = ('' if a is None else a.group(0)) + add
 
-            tup = '%s, %s' % (len(add), replace)
-            repl = prefix + (regex % (tup, text)) + add + line[end_column:]
+        tup = '%s, %s' % (len(add), replace)
+        repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
-            vim.eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
-    except Exception:
-        print(traceback.format_exc())
+        vim.eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
 
 
+@catch_and_print_exceptions
 def rename():
     if not int(vim.eval('a:0')):
         _rename_cursor = vim.current.window.cursor
@@ -312,6 +322,7 @@ def rename():
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
 
 
+@catch_and_print_exceptions
 def py_import():
     # args are the same as for the :edit command
     args = shsplit(vim.eval('a:args'))
@@ -330,6 +341,7 @@ def py_import():
             new_buffer(completion.module_path, cmd_args)
 
 
+@catch_and_print_exceptions
 def py_import_completions():
     argl = vim.eval('a:argl')
     try:
@@ -344,12 +356,25 @@ def py_import_completions():
     vim.command("return '%s'" % '\n'.join(comps))
 
 
+@catch_and_print_exceptions
 def new_buffer(path, options=''):
-    path = repr(PythonToVimStr(path))
-    vim.eval("jedi#new_buffer(%s, '%s')" % (path, options))
+    # options are what you can to edit the edit options
+    if vim.eval('g:jedi#use_tabs_not_buffers') == '1':
+        _tabnew(path, options)
+    else:
+        if vim.eval("!&hidden && &modified && bufname('%') != ") == '1':
+            vim.command('w')
+        print 'x'
+        vim.command('edit %s %s' (options, escape_file_path(path)))
+    # sometimes syntax is being disabled and the filetype not set.
+    if vim.eval('!exists("g:syntax_on")') == '1':
+      vim.command('syntax enable')
+    if vim.eval("&filetype != 'python'") == '1':
+      vim.command('set filetype=python')
 
 
-def tabnew(path, options=''):
+@catch_and_print_exceptions
+def _tabnew(path, options=''):
     """
     Open a file in a new tab or switch to an existing one.
 
@@ -357,7 +382,7 @@ def tabnew(path, options=''):
     """
     path = os.path.abspath(path)
     if vim.eval('has("gui")') == '1':
-        vim.command('tab drop %s %s' % (options, path))
+        vim.command('tab drop %s %s' % (options, escape_file_path(path)))
         return
 
     for tab_nr in range(int(vim.eval("tabpagenr('$')"))):
@@ -379,7 +404,7 @@ def tabnew(path, options=''):
         break
     else:
         # tab doesn't exist, add a new one.
-        vim.command('tabnew %s' % path)
+        vim.command('tabnew %s' % escape_file_path(path))
 
 
 def escape_file_path(path):

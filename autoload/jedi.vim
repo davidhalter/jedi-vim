@@ -95,25 +95,6 @@ endfunction
 " ------------------------------------------------------------------------
 " helper functions
 " ------------------------------------------------------------------------
-function! jedi#new_buffer(path, options)
-    " options are what you can to edit the edit options
-    if g:jedi#use_tabs_not_buffers
-        Python jedi_vim.tabnew(jedi_vim.escape_file_path(vim.eval('a:path')), vim.eval('a:options'))
-    else
-        if !&hidden && &modified
-            w
-        endif
-        Python vim.command('edit ' + vim.eval('a:options') + jedi_vim.escape_file_path(vim.eval('a:path')))
-    endif
-    " sometimes syntax is being disabled and the filetype not set.
-    if !exists("g:syntax_on")
-      syntax enable
-    endif
-    if &filetype != 'python'
-      set filetype=python
-    endif
-endfunction
-
 
 function! jedi#add_goto_window()
     set lazyredraw
@@ -134,7 +115,7 @@ function! s:goto_window_on_enter()
     if l:data.bufnr
         " close goto_window buffer
         normal ZQ
-        call jedi#new_buffer(bufname(l:data.bufnr))
+        Python jedi_vim.new_buffer(vim.eval('bufname(l:data.bufnr)'))
         call cursor(l:data.lnum, l:data.col)
     else
         echohl WarningMsg | echo "Builtin module cannot be opened." | echohl None
