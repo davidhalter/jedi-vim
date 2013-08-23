@@ -18,10 +18,40 @@ def catch_and_print_exceptions(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except Exception:
+        except (Exception, vim.error):
             print(traceback.format_exc())
             return None
     return wrapper
+
+
+class VimError(Exception):
+    def __init__(self, message, throwpoint, executing):
+        super(type(self), self).__init__(message)
+        self.throwpoint = throwpoint
+        self.executing = executing
+
+    def __str__(self):
+        return self.message + '; created by: ' +  repr(self.executing)
+
+
+def _catch_exception(string, is_eval):
+    """
+    Interface between vim and python calls back to it.
+    Necessary, because the exact error message is not given by `vim.error`.
+    """
+    e = 'jedi#_vim_exceptions(%s, %s)'
+    result = vim.eval(e % (repr(PythonToVimStr(string)), is_eval))
+    if 'exception' in result:
+        raise VimError(result['exception'], result['throwpoint'], string)
+    return result['result']
+
+
+def vim_eval(string):
+    return _catch_exception(string, 1)
+
+
+def vim_command(string):
+    _catch_exception(string, 0)
 
 
 def echo_highlight(msg):
@@ -148,7 +178,9 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                                    % d.module_path)
             else:
                 if d.module_path != vim.current.buffer.name:
-                    new_buffer(d.module_path)
+                    result = new_buffer(d.module_path)
+                    if not result:
+                        return
                 vim.current.window.cursor = d.line, d.column
                 vim.command('normal! zt')  # cursor at top of screen
         else:
@@ -312,12 +344,16 @@ def rename():
                     continue
 
                 if vim.current.buffer.name != r.module_path:
-                    new_buffer(r.module_path)
+                    result = new_buffer(r.module_path)
+                    if not result:
+                        return
 
                 vim.current.window.cursor = r.start_pos
                 vim.command('normal! cw%s' % replace)
 
-            new_buffer(window_path)
+            result = new_buffer(window_path)
+            if not result:
+                return
             vim.current.window.cursor = cursor
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
 
@@ -362,15 +398,19 @@ def new_buffer(path, options=''):
     if vim.eval('g:jedi#use_tabs_not_buffers') == '1':
         _tabnew(path, options)
     else:
-        if vim.eval("!&hidden && &modified && bufname('%') != ") == '1':
-            vim.command('w')
-        print 'x'
-        vim.command('edit %s %s' (options, escape_file_path(path)))
+        if vim_eval("!&hidden && &modified") == '1':
+            if vim_eval("bufname('%')") is None:
+                echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
+                return False
+            else:
+                vim.command('w')
+        vim_command('edit %s %s' % (options, escape_file_path(path)))
     # sometimes syntax is being disabled and the filetype not set.
     if vim.eval('!exists("g:syntax_on")') == '1':
       vim.command('syntax enable')
     if vim.eval("&filetype != 'python'") == '1':
       vim.command('set filetype=python')
+    return True
 
 
 @catch_and_print_exceptions

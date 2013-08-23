@@ -155,6 +155,24 @@ function! jedi#configure_call_signatures()
     autocmd CursorMovedI <buffer> call jedi#show_call_signatures_func()
 endfunction
 
+" Helper function instead of `python vim.eval()`, and `.command()` because
+" these also return error definitions.
+function! jedi#_vim_exceptions(str, is_eval)
+    let l:result = {}
+    try
+        if a:is_eval
+            let l:result.result = eval(a:str)
+        else
+            execute a:str
+            let l:result.result = ''
+        endif
+    catch
+        let l:result.exception = v:exception
+        let l:result.throwpoint = v:throwpoint
+    endtry
+    return l:result
+endfunction
+
 if has('python')
     command! -nargs=1 Python python <args>
 else
