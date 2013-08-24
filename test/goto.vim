@@ -71,6 +71,22 @@ describe 'goto_with_tabs'
         tabprevious
         Expect bufname('%') == ''
     end
+
+    it 'multi_definitions'
+        put = ['import tokenize']
+        silent normal G$\d
+        Expect g:current_buffer_is_module('tokenize') == 0
+        Expect g:current_buffer_is_module('token') == 0
+        execute "normal \<CR>"
+        Expect tabpagenr('$') == 2
+        Expect g:current_buffer_is_module('token') == 1
+
+        bd
+        silent normal G$\d
+        execute "normal j\<CR>"
+        Expect tabpagenr('$') == 2
+        Expect g:current_buffer_is_module('tokenize') == 1
+    end
 end
 
 
@@ -100,6 +116,23 @@ describe 'goto_with_buffers'
         Expect tabpagenr('$') == 1
         Expect line('.') == 1
         Expect col('.') == 1
+    end
+
+    it 'multi_definitions'
+        set hidden
+        put = ['import tokenize']
+        silent normal G$\d
+        Expect g:current_buffer_is_module('tokenize') == 0
+        Expect g:current_buffer_is_module('token') == 0
+        execute "normal \<CR>"
+        Expect tabpagenr('$') == 1
+        Expect g:current_buffer_is_module('token') == 1
+
+        bd
+        silent normal G$\d
+        execute "normal j\<CR>"
+        Expect tabpagenr('$') == 1
+        Expect g:current_buffer_is_module('tokenize') == 1
     end
 end
 
