@@ -8,7 +8,7 @@ describe 'completions'
     end
 
     after
-        close!
+        bd!
     end
 
     it 'import'

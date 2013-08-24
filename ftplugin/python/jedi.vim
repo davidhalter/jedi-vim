@@ -8,20 +8,21 @@ endif
 " ------------------------------------------------------------------------
 
 if g:jedi#auto_initialization
-    setlocal omnifunc=jedi#completions
+    if g:jedi#completions_enabled
+        setlocal omnifunc=jedi#completions
 
-    " map ctrl+space for autocompletion
-
-    if g:jedi#completions_command == "<C-Space>"
-        " in terminals, <C-Space> sometimes equals <Nul>
-        inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
-                \ "\<lt>C-n>" :
-                \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
-                \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
-                \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
-    endif
-    if g:jedi#completions_command != ""
-        execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
+        " map ctrl+space for autocompletion
+        if g:jedi#completions_command == "<C-Space>"
+            " in terminals, <C-Space> sometimes equals <Nul>
+            inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
+                    \ "\<lt>C-n>" :
+                    \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
+                    \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
+                    \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+        endif
+        if g:jedi#completions_command != ""
+            execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
+        endif
     endif
 
     " goto / get_definition / usages

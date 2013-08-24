@@ -59,7 +59,8 @@ let s:settings = {
     \ 'call_signature_escape': "'≡'",
     \ 'auto_close_doc': 1,
     \ 'popup_select_first': 1,
-    \ 'quickfix_window_height': 10
+    \ 'quickfix_window_height': 10,
+    \ 'completions_enabled': 1
 \ }
 
 for [key, val] in items(s:settings)
@@ -76,7 +77,9 @@ if g:jedi#auto_initialization
     " this is only here because in some cases the VIM library adds their
     " autocompletion as a default, which may cause problems, depending on the
     " order of invocation.
-    autocmd FileType Python setlocal omnifunc=jedi#completions switchbuf=useopen  " needed for documentation/pydoc
+    if g:jedi#completions_enabled
+        autocmd FileType Python setlocal omnifunc=jedi#completions switchbuf=useopen  " needed for documentation/pydoc
+    endif
 endif
 
 
