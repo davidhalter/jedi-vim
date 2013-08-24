@@ -152,3 +152,17 @@ By default jedi-vim will display call signatures. If you don't want that:
 .. code-block:: vim
 
     let g:jedi#show_call_signatures = "0"
+
+
+Testing
+=======
+
+jedi-vim is being tested with a combination of `vspec
+<https://github.com/kana/vim-vspec>`_ and `py.test <http://pytest.org/>`_.
+
+The tests are in the ``test`` subdirectory, you can run them calling::
+
+    py.test
+
+The tests are automatically run with `travis
+<https://travis-ci.org/davidhalter/jedi-vim>`_.
