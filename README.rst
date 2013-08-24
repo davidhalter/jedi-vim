@@ -53,8 +53,8 @@ Apart from that, jedi-vim supports the following commands
 
 - Completion ``<C-Space>``
 - Goto assignments ``<leader>g`` (typical goto function)
-- Goto definitions ``<leader>d`` (follow identifier as far as possible, includes
-    imports and statements)
+- Goto definitions ``<leader>d`` (follow identifier as far as possible,
+  includes imports and statements)
 - Show Documentation/Pydoc ``K`` (shows a popup with assignments)
 - Renaming ``<leader>r``
 - Usages ``<leader>n`` (shows all the usages of a name)
@@ -99,6 +99,7 @@ are automatically initialized, but you can change all of them:
 
 If you are a person who likes to use VIM-buffers not tabs, you might want to
 put that in your ``.vimrc``:
+
 .. code-block:: vim
 
     let g:jedi#use_tabs_not_buffers = 0
