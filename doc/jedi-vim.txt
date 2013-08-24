@@ -388,8 +388,7 @@ The tests are automatically run with `travis
 ==============================================================================
 8. Contributing				*jedi-vim-contributing*
 
-If you have any comments or feature requests, please tell us! I really want to
-know what you think about jedi and jedi-vim.
+We love Pull Requests! Read the instructions in `CONTRIBUTING.md`.
 
 ==============================================================================
 9. License				*jedi-vim-license*
