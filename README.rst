@@ -37,6 +37,12 @@ it up `on github <http://github.com/davidhalter/jedi-vim>`_.
 You can read the Jedi library documentation `here <http://jedi.jedidjah.ch>`_.
 
 
+Contributing
+============
+
+We love Pull Requests! Read the instructions in ``CONTRIBUTING.md``.
+
+
 Features
 ========
 
