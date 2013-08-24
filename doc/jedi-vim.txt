@@ -130,7 +130,7 @@ Help tags are generated automatically, so you should be good to go.
 ==============================================================================
 3. Supported Python features		*jedi-vim-support*
 
-The jedi library does all the hard work behind the scenes. It supports
+The Jedi library does all the hard work behind the scenes. It supports
 completion of a large number of Python features, among them:
 
 - Builtins
