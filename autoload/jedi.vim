@@ -102,14 +102,14 @@ function! jedi#add_goto_window()
     execute 'belowright copen '.g:jedi#quickfix_window_height
     set nolazyredraw
     if g:jedi#use_tabs_not_buffers == 1
-        map <buffer> <CR> :call s:goto_window_on_enter()<CR>
+        map <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
     endif
     au WinLeave <buffer> q  " automatically leave, if an option is chosen
     redraw!
 endfunction
 
 
-function! s:goto_window_on_enter()
+function! jedi#goto_window_on_enter()
     let l:list = getqflist()
     let l:data = l:list[line('.') - 1]
     if l:data.bufnr
