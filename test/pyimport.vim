@@ -2,6 +2,10 @@ source plugin/jedi.vim
 source test/utils.vim
 
 describe 'pyimport'
+    before
+        bd!
+    end
+
     after
         bd!
         bd!
