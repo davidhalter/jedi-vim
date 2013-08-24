@@ -35,8 +35,9 @@ Contents				*jedi-vim-contents*
     6.6. show_call_signatures		|g:jedi#show_call_signatures|
     6.7. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
     6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
-7. Contributing				|jedi-vim-contributing|
-8. License				|jedi-vim-license|
+7. Testing				|jedi-vim-testing|
+8. Contributing				|jedi-vim-contributing|
+9. License				|jedi-vim-license|
 
 
 ==============================================================================
@@ -372,13 +373,26 @@ Options: 0 or 1
 Default: 0 (Warning is shown)
 
 ==============================================================================
-7. Contributing				*jedi-vim-contributing*
+7. Testing				*jedi-vim-testing*
+
+jedi-vim is being tested with a combination of vspec
+https://github.com/kana/vim-vspec and py.test http://pytest.org/.
+
+The tests are in the test subdirectory, you can run them calling::
+
+    py.test
+
+The tests are automatically run with `travis
+<https://travis-ci.org/davidhalter/jedi-vim>`_.
+
+==============================================================================
+8. Contributing				*jedi-vim-contributing*
 
 If you have any comments or feature requests, please tell us! I really want to
 know what you think about jedi and jedi-vim.
 
 ==============================================================================
-8. License				*jedi-vim-license*
+9. License				*jedi-vim-license*
 
 Jedi-vim is licensed under the GNU LGPL v3 license or later.
 
