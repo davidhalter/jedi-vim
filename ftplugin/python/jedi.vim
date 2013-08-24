@@ -11,6 +11,7 @@ if g:jedi#auto_initialization
     setlocal omnifunc=jedi#completions
 
     " map ctrl+space for autocompletion
+
     if g:jedi#completions_command == "<C-Space>"
         " in terminals, <C-Space> sometimes equals <Nul>
         inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
@@ -19,16 +20,28 @@ if g:jedi#auto_initialization
                 \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
                 \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
     endif
-    execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
+    if g:jedi#completions_command != ""
+        execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
+    endif
 
     " goto / get_definition / usages
-    execute "noremap <buffer>".g:jedi#goto_assignments_command." :call jedi#goto_assignments()<CR>"
-    execute "noremap <buffer>".g:jedi#goto_definitions_command." :call jedi#goto_definitions()<CR>"
-    execute "noremap <buffer>".g:jedi#usages_command." :call jedi#usages()<CR>"
+    if g:jedi#goto_assignments_command != ''
+        execute "noremap <buffer>".g:jedi#goto_assignments_command." :call jedi#goto_assignments()<CR>"
+    endif
+    if g:jedi#goto_definitions_command != ''
+        execute "noremap <buffer>".g:jedi#goto_definitions_command." :call jedi#goto_definitions()<CR>"
+    endif
+    if g:jedi#usages_command != ''
+        execute "noremap <buffer>".g:jedi#usages_command." :call jedi#usages()<CR>"
+    endif
     " rename
-    execute "noremap <buffer>".g:jedi#rename_command." :call jedi#rename()<CR>"
+    if g:jedi#rename_command != ''
+        execute "noremap <buffer>".g:jedi#rename_command." :call jedi#rename()<CR>"
+    endif
     " documentation/pydoc
-    execute "nnoremap <silent> <buffer>".g:jedi#documentation_command." :call jedi#show_documentation()<CR>"
+    if g:jedi#documentation_command != ''
+        execute "nnoremap <silent> <buffer>".g:jedi#documentation_command." :call jedi#show_documentation()<CR>"
+    endif
 
     if g:jedi#show_call_signatures == 1 && has('conceal')
         call jedi#configure_call_signatures()

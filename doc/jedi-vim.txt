@@ -192,6 +192,9 @@ a mapping yourself by calling a function: >
     nnoremap <silent> <buffer> <localleader>r :call jedi#rename()<cr>
     " etc.
 
+Note: You can set commands to '', which means that they are empty and not
+assigned. It's an easy way to "disable" functionality of jedi-vim.
+
 ------------------------------------------------------------------------------
 5.1. `g:jedi#completions_command`	*g:jedi#completions_command*
 Function: n/a; see above

@@ -120,7 +120,7 @@ and usually saves one keypress.
     let g:jedi#popup_select_first = 0
 
 Here are a few more defaults for actions, read the docs (``:help jedi-vim``) to
-get more information. You can change them
+get more information. If you set them to ``""``, they are not assigned.
 
 .. code-block:: vim
 
@@ -131,7 +131,6 @@ get more information. You can change them
     let g:jedi#completions_command = "<C-Space>"
     let g:jedi#rename_command = "<leader>r"
     let g:jedi#show_call_signatures = "1"
-
 
 
 Testing
