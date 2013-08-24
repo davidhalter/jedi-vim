@@ -36,6 +36,7 @@ Contents				*jedi-vim-contents*
     6.6. show_call_signatures		|g:jedi#show_call_signatures|
     6.7. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
     6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
+    6.9. completions_enable		|g:jedi#completions_enable|
 7. Testing				|jedi-vim-testing|
 8. Contributing				|jedi-vim-contributing|
 9. License				|jedi-vim-license|
@@ -382,6 +383,16 @@ effect and aborts loading itself. Set this to 1 to suppress that warning.
 
 Options: 0 or 1
 Default: 0 (Warning is shown)
+
+------------------------------------------------------------------------------
+6.9. `g:jedi#completions_enable`	*g:jedi#completions_enable*
+
+If you don't want Jedi completion, but all the other features, you can disable
+it in favor of another completion engine (that probably also uses Jedi, like
+YCM).
+
+Options: 0 or 1
+Default: 1
 
 ==============================================================================
 7. Testing				*jedi-vim-testing*

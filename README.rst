@@ -133,6 +133,13 @@ get more information. If you set them to ``""``, they are not assigned.
     let g:jedi#show_call_signatures = "1"
 
 
+Finally, if you don't want completion, but all the other features, use:
+
+.. code-block:: vim
+
+    let g:jedi#completions_enabled = 0
+
+
 Testing
 =======
 
