@@ -37,11 +37,22 @@ it up `on github <http://github.com/davidhalter/jedi-vim>`_.
 You can read the Jedi library documentation `here <http://jedi.jedidjah.ch>`_.
 
 
-Support
-=======
+Features
+========
 
-The Jedi library supports most of Python's core features. From decorators to
+The Jedi library understands most of Python's core features. From decorators to
 generators, there is broad support.
+
+Apart from that, jedi-vim supports the following commands
+
+- Completion ``<C-Space>``
+- Goto assignments ``<leader>g`` (typical goto function)
+- Goto definitions ``<leader>d`` (follow identifier as far as possible, includes
+    imports and statements)
+- Show Documentation/Pydoc ``K`` (shows a popup with assignments)
+- Renaming ``<leader>r``
+- Usages ``<leader>n`` (shows all the usages of a name)
+- Open module, e.g. ``:Pyimport os`` (opens the ``os`` module)
 
 
 Installation
