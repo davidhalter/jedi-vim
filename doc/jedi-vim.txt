@@ -26,6 +26,7 @@ Contents				*jedi-vim-contents*
     5.4. Show documentation		|g:jedi#documentation_command|
     5.5. Rename variables		|g:jedi#rename_command|
     5.6. Show name usages		|g:jedi#usages_command|
+    5.7. Open module by name 		|:Pyimport|
 6. Configuration			|jedi-vim-configuration|
     6.1. auto_initialization		|g:jedi#auto_initialization|
     6.2. auto_vim_configuration		|g:jedi#auto_vim_configuration|
@@ -256,12 +257,19 @@ with the new one. The number of performed renames is displayed in the command
 line.
 
 ------------------------------------------------------------------------------
-5.6. `g:jedi#usages_command`	*g:jedi#usages_command*
+5.6. `g:jedi#usages_command`		*g:jedi#usages_command*
 Function: `jedi#usages()`
 Default: <leader>n			Show usages of a name.
 
 The quickfix window is populated with a list of all names which point to the
 definition of the name under the cursor.
+
+------------------------------------------------------------------------------
+5.7. Open module by name		*:Pyimport*
+Function: `jedi#py_import(args)`
+Default: :Pyimport			e.g. `:Pyimport os` shows os.py in VIM.
+
+Simulate an import and open that module in VIM.
 
 ==============================================================================
 6. Configuration			*jedi-vim-configuration*
