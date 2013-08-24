@@ -28,8 +28,13 @@ There is also support for goto and renaming.
 
 Get the latest from `github <http://github.com/davidhalter/jedi-vim>`_.
 
-You can get the Jedi library documentation
-`here <http://jedi.jedidjah.ch>`_.
+Documentation
+=============
+
+Documentation is available in your vim: ``:help jedi-vim``. You can also look
+it up `on github <http://github.com/davidhalter/jedi-vim>`_.
+
+You can read the Jedi library documentation `here <http://jedi.jedidjah.ch>`_.
 
 
 Support
