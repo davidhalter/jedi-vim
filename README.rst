@@ -139,6 +139,19 @@ Finally, if you don't want completion, but all the other features, use:
 
     let g:jedi#completions_enabled = 0
 
+FAQ
+===
+
+I don't want the docstring window to popup during completion
+------------------------------------------------------------
+
+This depends on the ``completeopt`` option. Jedi initializes it in its
+``ftplugin``. Add the following line to your ``.vimrc`` to disable it:
+
+.. code-block:: vim
+
+    autocmd FileType Python setlocal completeopt-=preview
+
 
 Testing
 =======
