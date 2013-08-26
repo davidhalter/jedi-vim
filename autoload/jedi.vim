@@ -196,7 +196,7 @@ sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'plugin'))
 try:
     import jedi_vim
 except ImportError:
-    vim.eval('echom "Please install Jedi if you want to use jedi_vim."')
+    vim.command('echoerr "Please install Jedi if you want to use jedi_vim."')
 sys.path.pop(1)
 
 PYTHONEOF
