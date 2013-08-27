@@ -17,8 +17,12 @@ describe 'pyimport'
     end
 
     it 'completion'
-        " don't know how to test this.
+        " don't know how to test this directly
         "execute "Pyimport subproc\<Tab>"
         "Expect g:current_buffer_is_module('subprocess') == 1
+
+        Expect jedi#py_import_completions('subproc', 0, 0) == 'subprocess'
+        Expect jedi#py_import_completions('subprocess', 0, 0) == 'subprocess'
+        Expect jedi#py_import_completions('zip', 0, 0) == "zipfile\nzipimport"
     end
 end
