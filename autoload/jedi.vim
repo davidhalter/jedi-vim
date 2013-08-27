@@ -168,12 +168,6 @@ function! jedi#_vim_exceptions(str, is_eval)
     return l:result
 endfunction
 
-if has('python')
-    command! -nargs=1 Python python <args>
-else
-    command! -nargs=1 Python python3 <args>
-end
-
 " ------------------------------------------------------------------------
 " deprecations
 " ------------------------------------------------------------------------
@@ -225,6 +219,21 @@ for [key, val] in items(s:settings)
     endif
 endfor
 
+
+" ------------------------------------------------------------------------
+" Python initialization
+" ------------------------------------------------------------------------
+
+if has('python')
+    command! -nargs=1 Python python <args>
+elseif has('python3')
+    command! -nargs=1 Python python3 <args>
+else
+    if !exists("g:jedi#squelch_py_warning")
+        echomsg "Error: Required vim compiled with +python"
+    endif
+    finish
+end
 
 Python << PYTHONEOF
 """ here we initialize the jedi stuff """
