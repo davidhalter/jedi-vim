@@ -14,8 +14,8 @@ if g:jedi#show_call_signatures == 1 && has('conceal')
   hi def link jediIgnore Ignore
   hi def link jediFatSymbol Ignore
   hi def link jediSpace Normal
-  hi jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=#555555
-  hi jediFunction term=NONE cterm=NONE ctermfg=6 guifg=Black gui=NONE ctermbg=0 guibg=Grey
+  hi def link jediFat Pmenu
+  hi def link jediFunction Pmenu
 
   " override defaults (add jediFunction to contains)
   syn match pythonComment "#.*$" contains=pythonTodo,@Spell,jediFunction
