@@ -230,7 +230,7 @@ elseif has('python3')
     command! -nargs=1 Python python3 <args>
 else
     if !exists("g:jedi#squelch_py_warning")
-        echomsg "Error: Required vim compiled with +python"
+        echomsg "Error: jedi-vim requires vim compiled with +python"
     endif
     finish
 end
