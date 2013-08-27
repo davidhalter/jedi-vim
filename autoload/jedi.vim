@@ -242,7 +242,7 @@ import vim
 # update the system path, to include the jedi path
 import sys
 import os
-sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
+sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h")'), 'jedi'))
 
 # to display errors correctly
 import traceback
