@@ -150,7 +150,7 @@ This depends on the ``completeopt`` option. Jedi initializes it in its
 
 .. code-block:: vim
 
-    autocmd FileType Python setlocal completeopt-=preview
+    autocmd FileType python setlocal completeopt-=preview
 
 
 Testing
