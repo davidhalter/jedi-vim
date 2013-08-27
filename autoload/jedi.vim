@@ -5,26 +5,21 @@ function! jedi#goto_assignments()
     Python jedi_vim.goto()
 endfunction
 
-
 function! jedi#goto_definitions()
     Python jedi_vim.goto(is_definition=True)
 endfunction
-
 
 function! jedi#usages()
     Python jedi_vim.goto(is_related_name=True)
 endfunction
 
-
 function! jedi#rename(...)
     Python jedi_vim.rename()
 endfunction
 
-
 function! jedi#completions(findstart, base)
     Python jedi_vim.completions()
 endfunction
-
 
 function! jedi#show_call_signatures_func()
     Python jedi_vim.show_call_signatures()
