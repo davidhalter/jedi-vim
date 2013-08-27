@@ -14,7 +14,6 @@ describe 'goto_simple'
         normal! ggdd
         normal! G$
         Expect line('.') == 3
-        Expect g:loaded_jedi == 1
     end
 
     after
