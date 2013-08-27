@@ -174,6 +174,58 @@ else
     command! -nargs=1 Python python3 <args>
 end
 
+" ------------------------------------------------------------------------
+" deprecations
+" ------------------------------------------------------------------------
+
+let s:deprecations = {
+    \ 'get_definition_command':     'goto_definitions_command',
+    \ 'goto_command':               'goto_assignments_command',
+    \ 'pydoc':                      'documentation_command',
+    \ 'related_names_command':      'usages_command',
+    \ 'autocompletion_command':     'completions_command',
+    \ 'show_function_definition':   'show_call_signatures',
+\ }
+
+for [key, val] in items(s:deprecations)
+    if exists('g:jedi#'.key)
+        echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
+        exe 'let g:jedi#'.val.' = g:jedi#'.key
+    end
+endfor
+
+
+" ------------------------------------------------------------------------
+" defaults for jedi-vim
+" ------------------------------------------------------------------------
+
+let s:settings = {
+    \ 'use_tabs_not_buffers': 1,
+    \ 'auto_initialization': 1,
+    \ 'auto_vim_configuration': 1,
+    \ 'goto_assignments_command': "'<leader>g'",
+    \ 'completions_command': "'<C-Space>'",
+    \ 'goto_definitions_command': "'<leader>d'",
+    \ 'call_signatures_command': "'<leader>n'",
+    \ 'usages_command': "'<leader>n'",
+    \ 'rename_command': "'<leader>r'",
+    \ 'popup_on_dot': 1,
+    \ 'documentation_command': "'K'",
+    \ 'show_call_signatures': 1,
+    \ 'call_signature_escape': "'≡'",
+    \ 'auto_close_doc': 1,
+    \ 'popup_select_first': 1,
+    \ 'quickfix_window_height': 10,
+    \ 'completions_enabled': 1
+\ }
+
+for [key, val] in items(s:settings)
+    if !exists('g:jedi#'.key)
+        exe 'let g:jedi#'.key.' = '.val
+    endif
+endfor
+
+
 Python << PYTHONEOF
 """ here we initialize the jedi stuff """
 import vim
