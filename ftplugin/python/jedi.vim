@@ -14,17 +14,10 @@ if g:jedi#auto_initialization
         " map ctrl+space for autocompletion
         if g:jedi#completions_command == "<C-Space>"
             " in terminals, <C-Space> sometimes equals <Nul>
-            "
-            "if g:jedi#popup_select_first
-            "inoremap <expr> <Nul> pumvisible() ?
-            "        \ "<C-n>" :
-            "        \ "<C-x><C-o><c-r>=pumvisible() ?" .
-            "        \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
-            "        \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
             inoremap <expr> <Nul> jedi#auto_complete_string()
         endif
         if g:jedi#completions_command != ""
-            execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
+            execute "inoremap <expr> <buffer> ".g:jedi#completions_command." jedi#auto_complete_string()"
         endif
     endif
 
