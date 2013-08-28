@@ -32,8 +32,20 @@ describe 'completions'
     end
 
     it 'cycling through entries'
+        " testing select_first doesn't seem to work in ex mode
         execute "normal oraise impX\<C-n>\<C-n>\<C-n>"
         Expect getline('.') == 'raise ImportWarning'
+        let g:jedi#popup_select_first = 0
+        execute "normal oraise impX\<C-n>\<C-n>\<C-n>"
+        Expect getline('.') == 'raise ImportWarning'
+        let g:jedi#popup_select_first = 1
+
+        " -longest completes the first one
+        set completeopt -=longest
+        execute "normal oraise baseX"
+        Expect getline('.') == 'raise BaseException'
+        set completeopt +=longest
+
     end
 end
 

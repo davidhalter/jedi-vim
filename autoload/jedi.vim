@@ -187,6 +187,7 @@ function! jedi#complete_string(is_popup_on_dot)
     end
 endfunction
 
+
 function! jedi#complete_opened()
     if pumvisible() && g:jedi#popup_select_first && stridx(&completeopt, 'longest') > -1
         " only go down if it is visible, user-enabled and the longest option is set
