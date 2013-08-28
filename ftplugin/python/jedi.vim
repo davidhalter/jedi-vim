@@ -43,6 +43,13 @@ if g:jedi#auto_initialization
     if g:jedi#show_call_signatures == 1 && has('conceal')
         call jedi#configure_call_signatures()
     endif
+
+    inoremap <silent> <buffer> . .<C-R>=jedi#popup_on_dot_string()<CR>
+
+    if g:jedi#auto_close_doc
+        " close preview if its still open after insert
+        autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
+    end
 end
 
 if g:jedi#auto_vim_configuration
@@ -50,22 +57,4 @@ if g:jedi#auto_vim_configuration
     if len(mapcheck('<C-c>', 'i')) == 0
         inoremap <C-c> <ESC>
     end
-end
-
-if g:jedi#popup_on_dot
-    if stridx(&completeopt, 'longest') > -1
-        if g:jedi#popup_select_first
-            inoremap <silent> <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>\<lt>Down>" : ""<CR>
-        else
-            inoremap <silent> <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>" : ""<CR>
-        end
-
-    else
-        inoremap <silent> <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>\<lt>C-P>" : ""<CR>
-    end
-end
-
-if g:jedi#auto_close_doc
-    " close preview if its still open after insert
-    autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
 end

@@ -127,7 +127,7 @@ function! s:syn_stack()
 endfunc
 
 
-function! jedi#do_popup_on_dot()
+function! jedi#do_popup_on_dot_in_highlight()
     let highlight_groups = s:syn_stack()
     for a in highlight_groups
         if a == 'pythonDoctest'
@@ -144,6 +144,23 @@ function! jedi#do_popup_on_dot()
     endfor
     return 1
 endfunc
+
+
+function! jedi#popup_on_dot_string()
+    if g:jedi#popup_on_dot && jedi#do_popup_on_dot_in_highlight()
+        if stridx(&completeopt, 'longest') > -1
+            if g:jedi#popup_select_first
+                return "\<C-X>\<C-O>\<Down>"
+            else
+                return "\<C-X>\<C-O>"
+            end
+        else
+            return "\<C-X>\<C-O>\<C-P>"
+        end
+    else
+        return ''
+    end
+endfunction
 
 
 function! jedi#configure_call_signatures()
@@ -172,7 +189,9 @@ endfunction
 
 function! jedi#auto_complete_string()
     if pumvisible()
-        return "\<C-n>"
+        if g:jedi#popup_select_first
+            return "\<C-n>"
+        end
     else
         return "\<C-x>\<C-o>\<C-r>=jedi#auto_complete_opened()\<CR>"
     end
