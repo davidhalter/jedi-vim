@@ -21,10 +21,6 @@ function! jedi#completions(findstart, base)
     Python jedi_vim.completions()
 endfunction
 
-function! jedi#show_call_signatures_func()
-    Python jedi_vim.show_call_signatures()
-endfunction
-
 function! jedi#enable_speed_debugging()
     Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 endfunction
@@ -152,7 +148,7 @@ endfunction
 
 function! jedi#configure_call_signatures()
     autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
-    autocmd CursorMovedI <buffer> call jedi#show_call_signatures_func()
+    autocmd CursorMovedI <buffer> Python jedi_vim.show_call_signatures()
 endfunction
 
 " Helper function instead of `python vim.eval()`, and `.command()` because
