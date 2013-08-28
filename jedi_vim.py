@@ -11,7 +11,7 @@ from shlex import split as shsplit
 import vim
 import jedi
 import jedi.keywords
-from jedi._compatibility import unicode
+from jedi._compatibility import unicode, is_py3k
 
 
 def catch_and_print_exceptions(func):
@@ -40,7 +40,7 @@ def _catch_exception(string, is_eval):
     Necessary, because the exact error message is not given by `vim.error`.
     """
     e = 'jedi#_vim_exceptions(%s, %s)'
-    result = vim.eval(e % (repr(PythonToVimStr(string)), is_eval))
+    result = vim.eval(e % (repr(PythonToVimStr(string, 'UTF-8')), is_eval))
     if 'exception' in result:
         raise VimError(result['exception'], result['throwpoint'], string)
     return result['result']
@@ -65,6 +65,11 @@ if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
 class PythonToVimStr(unicode):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
+    def __new__(cls, obj, encoding='UTF-8'):
+        if is_py3k or isinstance(obj, unicode):
+            return unicode.__new__(cls, obj)
+        else:
+            return unicode.__new__(cls, obj, encoding)
 
     def __repr__(self):
         # this is totally stupid and makes no sense but vim/python unicode
