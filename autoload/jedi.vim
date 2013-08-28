@@ -147,19 +147,6 @@ endfunc
 
 
 function! jedi#popup_on_dot_string()
-    if g:jedi#popup_on_dot && jedi#do_popup_on_dot_in_highlight()
-        if stridx(&completeopt, 'longest') > -1
-            if g:jedi#popup_select_first
-                return "\<C-X>\<C-O>\<Down>"
-            else
-                return "\<C-X>\<C-O>"
-            end
-        else
-            return "\<C-X>\<C-O>\<C-P>"
-        end
-    else
-        return ''
-    end
 endfunction
 
 
@@ -187,18 +174,22 @@ function! jedi#_vim_exceptions(str, is_eval)
 endfunction
 
 
-function! jedi#auto_complete_string()
-    if pumvisible()
-        if g:jedi#popup_select_first
-            return "\<C-n>"
-        end
+function! jedi#complete_string(is_popup_on_dot)
+
+    if a:is_popup_on_dot && !(g:jedi#popup_on_dot && jedi#do_popup_on_dot_in_highlight())
+        return ''
+
+    end
+    if pumvisible() && !a:is_popup_on_dot
+        return "\<C-n>"
     else
-        return "\<C-x>\<C-o>\<C-r>=jedi#auto_complete_opened()\<CR>"
+        return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened()\<CR>"
     end
 endfunction
 
-function! jedi#auto_complete_opened()
-    if pumvisible()
+function! jedi#complete_opened()
+    if pumvisible() && g:jedi#popup_select_first && stridx(&completeopt, 'longest') > -1
+        " only go down if it is visible, user-enabled and the longest option is set
         return "\<Down>"
     end
     return ""

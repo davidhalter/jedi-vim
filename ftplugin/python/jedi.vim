@@ -14,10 +14,10 @@ if g:jedi#auto_initialization
         " map ctrl+space for autocompletion
         if g:jedi#completions_command == "<C-Space>"
             " in terminals, <C-Space> sometimes equals <Nul>
-            inoremap <expr> <Nul> jedi#auto_complete_string()
+            inoremap <expr> <Nul> jedi#complete_string(0)
         endif
         if g:jedi#completions_command != ""
-            execute "inoremap <expr> <buffer> ".g:jedi#completions_command." jedi#auto_complete_string()"
+            execute "inoremap <expr> <buffer> ".g:jedi#completions_command." jedi#complete_string(0)"
         endif
     endif
 
@@ -44,7 +44,7 @@ if g:jedi#auto_initialization
         call jedi#configure_call_signatures()
     endif
 
-    inoremap <silent> <buffer> . .<C-R>=jedi#popup_on_dot_string()<CR>
+    inoremap <silent> <buffer> . .<C-R>=jedi#complete_string(1)<CR>
 
     if g:jedi#auto_close_doc
         " close preview if its still open after insert
