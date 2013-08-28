@@ -51,6 +51,7 @@ endfun
 " ------------------------------------------------------------------------
 function! jedi#show_documentation()
     Python jedi_vim.show_documentation()
+
     if bufnr("__doc__") > 0
         " If the __doc__ buffer is open in the current window, jump to it
         silent execute "sbuffer ".bufnr("__doc__")
@@ -242,13 +243,13 @@ import vim
 # update the system path, to include the jedi path
 import sys
 import os
-sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h")'), 'jedi'))
+sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
 
 # to display errors correctly
 import traceback
 
 # update the sys path to include the jedi_vim script
-sys.path.insert(1, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'plugin'))
+sys.path.insert(1, vim.eval('expand("<sfile>:p:h:h")'))
 try:
     import jedi_vim
 except ImportError:
