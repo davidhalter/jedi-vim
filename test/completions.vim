@@ -26,14 +26,14 @@ describe 'completions'
         Expect getline('.') == 'IndentationError().filename'
     end
 
-    it 'typing'
+    it 'dot_open'
         normal oraisX ImpXErrX()
         Expect getline('.') == 'raise ImportError()'
     end
 
     it 'cycling through entries'
-        execute "normal oimpX\<C-n>\<C-n>\<C-n>"
-        Expect getline('.') == 'ImportWarning'
+        execute "normal oraise impX\<C-n>\<C-n>\<C-n>"
+        Expect getline('.') == 'raise ImportWarning'
     end
 end
 
