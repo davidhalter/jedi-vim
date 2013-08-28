@@ -14,11 +14,14 @@ if g:jedi#auto_initialization
         " map ctrl+space for autocompletion
         if g:jedi#completions_command == "<C-Space>"
             " in terminals, <C-Space> sometimes equals <Nul>
-            inoremap <expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
-                    \ "\<lt>C-n>" :
-                    \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
-                    \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
-                    \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+            "
+            "if g:jedi#popup_select_first
+            "inoremap <expr> <Nul> pumvisible() ?
+            "        \ "<C-n>" :
+            "        \ "<C-x><C-o><c-r>=pumvisible() ?" .
+            "        \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
+            "        \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+            inoremap <expr> <Nul> jedi#auto_complete_string()
         endif
         if g:jedi#completions_command != ""
             execute "inoremap <buffer>".g:jedi#completions_command." <C-X><C-O>"
@@ -59,7 +62,7 @@ end
 if g:jedi#popup_on_dot
     if stridx(&completeopt, 'longest') > -1
         if g:jedi#popup_select_first
-            inoremap <silent> <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>\<lt>C-N>" : ""<CR>
+            inoremap <silent> <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>\<lt>Down>" : ""<CR>
         else
             inoremap <silent> <buffer> . .<C-R>=jedi#do_popup_on_dot() ? "\<lt>C-X>\<lt>C-O>" : ""<CR>
         end

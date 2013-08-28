@@ -169,6 +169,24 @@ function! jedi#_vim_exceptions(str, is_eval)
     return l:result
 endfunction
 
+
+function! jedi#auto_complete_string()
+    if pumvisible()
+        return "\<C-n>"
+    else
+        return "\<C-x>\<C-o>\<C-r>=jedi#auto_complete_opened()\<CR>"
+    end
+endfunction
+
+function! jedi#auto_complete_opened()
+    if pumvisible()
+        return "\<Down>"
+    end
+    return ""
+endfunction
+
+
+
 " ------------------------------------------------------------------------
 " deprecations
 " ------------------------------------------------------------------------
