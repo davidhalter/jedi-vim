@@ -72,9 +72,6 @@ The first thing you need after that is an up-to-date version of Jedi. You can
 either get it via ``pip install jedi`` or with ``git submodule update --init``
 in your jedi-vim repository.
 
-The autocompletion can be used with <ctrl+space>, if you want it to work with
-<tab> you can use `supertab <https://github.com/ervandew/supertab>`_.
-
 On Arch Linux, you can also install jedi-vim from AUR: `vim-jedi
 <https://aur.archlinux.org/packages/vim-jedi/>`__.
 
@@ -151,6 +148,13 @@ This depends on the ``completeopt`` option. Jedi initializes it in its
 .. code-block:: vim
 
     autocmd FileType python setlocal completeopt-=preview
+
+
+I want <Tab> to do autocompletion
+---------------------------------
+
+Don't even think about changing the Jedi command to ``<Tab>``, 
+use `supertab <https://github.com/ervandew/supertab>`_!
 
 
 Testing
