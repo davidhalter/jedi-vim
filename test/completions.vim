@@ -30,6 +30,11 @@ describe 'completions'
         normal oraisX ImpXErrX()
         Expect getline('.') == 'raise ImportError()'
     end
+
+    it 'cycling through entries'
+        execute "normal oimpX\<C-n>\<C-n>\<C-n>"
+        Expect getline('.') == 'ImportWarning'
+    end
 end
 
 " vim: et:ts=4:sw=4
