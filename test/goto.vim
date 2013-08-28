@@ -23,7 +23,7 @@ describe 'goto_simple'
     it 'goto_definitions'
         silent normal \d
         Expect line('.') == 1
-        "Expect col('.') == 5
+        "Expect col('.') == 5  " not working yet.
     end
 
     it 'goto_assignments'

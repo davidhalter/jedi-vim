@@ -1,8 +1,13 @@
 source plugin/jedi.vim
 
-describe 'documentation_docstrings'
+describe 'documentation docstrings'
     before
         set filetype=python
+    end
+
+    after
+        bd!
+        bd!
     end
 
     it 'simple'
@@ -13,6 +18,12 @@ describe 'documentation_docstrings'
         let content = join(getline(1,'$'), "\n")
         Expect stridx(content, "Import can't find module") > 0
         normal K
+        Expect bufname('%') == ''
+    end
+
+    it 'no documentation'
+        put = 'x = 2'
+        normal G0K
         Expect bufname('%') == ''
     end
 end

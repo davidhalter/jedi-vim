@@ -213,6 +213,7 @@ def show_documentation():
         print(traceback.format_exc())
 
     if not definitions:
+        echo_highlight('No documentation found for that.')
         vim.command('return')
     else:
         docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '='*40, d.doc) if d.doc
