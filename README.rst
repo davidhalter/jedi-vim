@@ -102,6 +102,14 @@ put that in your ``.vimrc``:
     let g:jedi#use_tabs_not_buffers = 0
 
 
+If you are a person who likes to use splits not tabs, you might want to
+put that in your ``.vimrc``:
+
+.. code-block:: vim
+
+    let g:jedi#use_splits_not_buffers = 1
+
+
 Jedi automatically starts the completion, if you type a dot, e.g. ``str.``, if
 you don't want this:
 
