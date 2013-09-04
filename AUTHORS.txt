@@ -30,6 +30,7 @@ Emily Strickland (@emilyst) <mail@emily.st>
 Tin Tvrtković (@Tinche) <tinchester@gmail.com>
 Zekeriya Koc (@zekzekus) <zekzekus@gmail.com>
 ethinx (@ethinx) <eth2net@gmail.com>
+Wouter Overmeire (@lodagro) <lodagro@gmail.com>
 
 
 @something are github user names.
