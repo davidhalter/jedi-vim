@@ -170,7 +170,7 @@ you complete it. After that, the results should be cached and very fast.
 
 If it's still slow, in case you've installed the python-mode VIM plugin, disable
 it. It seems to conflict with jedi-vim. See issue `#163
-https://github.com/davidhalter/jedi-vim/issues/163>`__.
+<https://github.com/davidhalter/jedi-vim/issues/163>`__.
 
 
 Testing
