@@ -34,27 +34,6 @@ class VimError(Exception):
         return self.message + '; created by: ' +  repr(self.executing)
 
 
-class PythonToVimStr(unicode):
-    """ Vim has a different string implementation of single quotes """
-    __slots__ = []
-    def __new__(cls, obj, encoding='UTF-8'):
-        if is_py3k or isinstance(obj, unicode):
-            return unicode.__new__(cls, obj)
-        else:
-            return unicode.__new__(cls, obj, encoding)
-
-    def __repr__(self):
-        # this is totally stupid and makes no sense but vim/python unicode
-        # support is pretty bad. don't ask how I came up with this... It just
-        # works...
-        # It seems to be related to that bug: http://bugs.python.org/issue5876
-        if unicode is str:
-            s = self
-        else:
-            s = self.encode('UTF-8')
-        return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
-
-
 def _catch_exception(string, is_eval):
     """
     Interface between vim and python calls back to it.
@@ -81,6 +60,27 @@ def echo_highlight(msg):
 
 if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
     echo_highlight('Please update your Jedi version, it is to old.')
+
+
+class PythonToVimStr(unicode):
+    """ Vim has a different string implementation of single quotes """
+    __slots__ = []
+    def __new__(cls, obj, encoding='UTF-8'):
+        if is_py3k or isinstance(obj, unicode):
+            return unicode.__new__(cls, obj)
+        else:
+            return unicode.__new__(cls, obj, encoding)
+
+    def __repr__(self):
+        # this is totally stupid and makes no sense but vim/python unicode
+        # support is pretty bad. don't ask how I came up with this... It just
+        # works...
+        # It seems to be related to that bug: http://bugs.python.org/issue5876
+        if unicode is str:
+            s = self
+        else:
+            s = self.encode('UTF-8')
+        return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
 
 
 @catch_and_print_exceptions
