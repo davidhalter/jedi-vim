@@ -31,6 +31,7 @@ Tin Tvrtković (@Tinche) <tinchester@gmail.com>
 Zekeriya Koc (@zekzekus) <zekzekus@gmail.com>
 ethinx (@ethinx) <eth2net@gmail.com>
 Wouter Overmeire (@lodagro) <lodagro@gmail.com>
+Stephen J. Fuhry (@fuhrysteve) <fuhrysteve@gmail.com>
 
 
 @something are github user names.

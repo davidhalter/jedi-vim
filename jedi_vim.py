@@ -58,10 +58,6 @@ def echo_highlight(msg):
     vim_command('echohl WarningMsg | echom "%s" | echohl None' % msg)
 
 
-if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
-    echo_highlight('Please update your Jedi version, it is to old.')
-
-
 class PythonToVimStr(unicode):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
@@ -459,3 +455,7 @@ def escape_file_path(path):
 
 def print_to_stdout(level, str_out):
     print(str_out)
+
+if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
+    echo_highlight('Please update your Jedi version, it is to old.')
+
