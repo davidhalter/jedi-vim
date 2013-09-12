@@ -233,6 +233,7 @@ let s:settings = {
     \ 'documentation_command': "'K'",
     \ 'show_call_signatures': 1,
     \ 'call_signature_escape': "'≡'",
+    \ 'show_doc': 1,
     \ 'auto_close_doc': 1,
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,

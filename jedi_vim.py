@@ -127,10 +127,11 @@ def completions():
                          abbr=PythonToVimStr(c.name),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
-                         info=PythonToVimStr(c.doc),  # docstr
                          icase=1,  # case insensitive
                          dup=1  # allow duplicates (maybe later remove this)
                 )
+                if vim.eval('g:jedi#show_doc') != '0':
+                    d['info'] = PythonToVimStr(c.doc)
                 out.append(d)
 
             strout = str(out)
