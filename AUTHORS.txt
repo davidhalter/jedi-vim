@@ -1,20 +1,38 @@
 Main Authors
 ============
 
-David Halter (@davidhalter)
+David Halter (@davidhalter) <davidhalter88@gmail.com>
 
 
 Contributors (in order of contributions)
 ========================================
 
+Patrice Peterson (@runiq)
 tek (@tek)
-mattn (@mattn)
-Danilo Bargen (@dbrgn)
-Artur Dryomov (@ming13)
+heavenshell (@heavenshell) <heavenshell.jp@gmail.com>
+Danilo Bargen (@dbrgn) <gezuru@gmail.com>
+mattn (@mattn) <mattn.jp@gmail.com>
+Enrico Batista da Luz (@ricobl) <rico.bl@gmail.com>
+coot (@coot) <mszamot@gmail.com>
+Artur Dryomov (@ming13) <artur.dryomov@gmail.com>
+andviro (@andviro)
+Jean-Louis Fuchs (@ganwell) <ganwell@fangorn.ch>
+Mathieu Comandon (@strycore) <strider@strycore.com>
+Nick Hurley (@todesschaf) <hurley@todesschaf.org>
+gpoulin (@gpoulin)
 Akinori Hattori (@hattya)
 Luper Rouch (@flupke)
-Emily Strickland (@lilix)
-Mathieu Comandon (@strycore)
-Jean-Louis Fuchs (@ganwell)
-Nick Hurley (@todesschaf)
-Tinche (@Tinche)
+Matthew Moses (@mlmoses) <moses.matthewl@gmail.com>
+Tyler Wymer (@twymer)
+Artem Nezvigin (@artnez)
+rogererens (@rogererens)
+Emily Strickland (@emilyst) <mail@emily.st>
+Tin Tvrtković (@Tinche) <tinchester@gmail.com>
+Zekeriya Koc (@zekzekus) <zekzekus@gmail.com>
+ethinx (@ethinx) <eth2net@gmail.com>
+Wouter Overmeire (@lodagro) <lodagro@gmail.com>
+Stephen J. Fuhry (@fuhrysteve) <fuhrysteve@gmail.com>
+Sheng Yun (@ShengYun) <uewing@gmail.com>
+
+
+@something are github user names.
