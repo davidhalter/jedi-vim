@@ -112,7 +112,7 @@ If you are a person who likes to use VIM-splits, you might want to put this in y
 
     let g:jedi#use_splits_not_buffers = "left"
 
-This options could be "left", "right", "top" or "bottom", it will decide the direction where the split open.
+This options could be "left", "right", "top" or "bottom". It will decide the direction where the split open.
 
 Jedi automatically starts the completion, if you type a dot, e.g. ``str.``, if
 you don't want this:
