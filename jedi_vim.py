@@ -399,7 +399,7 @@ def new_buffer(path, options=''):
     # options are what you can to edit the edit options
     if vim_eval('g:jedi#use_tabs_not_buffers') == '1':
         _tabnew(path, options)
-    elif vim_eval('g:jedi#use_splits_not_buffers'):
+    elif not vim_eval('g:jedi#use_splits_not_buffers') == '1':
         user_split_option = vim_eval('g:jedi#use_splits_not_buffers')
         split_options = [
             'top',

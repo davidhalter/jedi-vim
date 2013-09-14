@@ -221,7 +221,7 @@ endfor
 
 let s:settings = {
     \ 'use_tabs_not_buffers': 1,
-    \ 'use_splits_not_buffers': "",
+    \ 'use_splits_not_buffers': 1,
     \ 'auto_initialization': 1,
     \ 'auto_vim_configuration': 1,
     \ 'goto_assignments_command': "'<leader>g'",
