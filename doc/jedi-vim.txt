@@ -37,6 +37,7 @@ Contents				*jedi-vim-contents*
     6.7. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
     6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
     6.9. completions_enable		|g:jedi#completions_enable|
+    6.10. use_splits_not_buffers	|g:jedi#use_splits_not_buffers|
 7. Testing				|jedi-vim-testing|
 8. Contributing				|jedi-vim-contributing|
 9. License				|jedi-vim-license|
@@ -393,6 +394,14 @@ YCM).
 
 Options: 0 or 1
 Default: 1
+
+6.10. `g:jedi#use_splits_not_buffers`	*g:jedi#use_splits_not_buffers*
+
+By default, jedi-vim opens a new tab if you use the "go to". When you set this
+option to 1, they open in a new split instead.
+
+Options: 0 or 1
+Default: 1 (Command output is put in a new split)
 
 ==============================================================================
 7. Testing				*jedi-vim-testing*

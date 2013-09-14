@@ -400,6 +400,11 @@ def new_buffer(path, options=''):
     if vim_eval('g:jedi#use_tabs_not_buffers') == '1':
         _tabnew(path, options)
     else:
+        # No need for much fancy stuff when splitting, simply split and replace
+        # the current buffer :)
+        if  vim_eval('g:jedi#use_splits_not_buffers') == '1':
+            vim_command('split')
+
         if vim_eval("!&hidden && &modified") == '1':
             if vim_eval("bufname('%')") is None:
                 echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
