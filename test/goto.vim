@@ -159,6 +159,7 @@ describe 'goto_with_splits'
         Expect g:current_buffer_is_module('subprocess') == 1
         Expect line('.') == 1
         Expect col('.') == 1
+        Expect winnr('$') == 2
         wincmd l
         Expect bufname('%') == ''
     end
