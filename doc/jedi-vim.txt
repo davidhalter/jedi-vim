@@ -396,7 +396,7 @@ Options: 0 or 1
 Default: 1
 
 ------------------------------------------------------------------------------
-6.9. `g:jedi#completions_enable`	*g:jedi#completions_enable*
+6.10. `g:jedi#use_splits_not_buffers`	*g:jedi#use_splits_not_buffers*
 
 If you want to open new split for "go to", you could set this option to the
 direction which you want to open a split with.
