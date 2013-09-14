@@ -408,7 +408,7 @@ def new_buffer(path, options=''):
             'bottom': 'botright split'
         }
         if user_split_option not in split_options:
-            print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options))
+            print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options.keys()))
         else:
             vim_command(split_options[user_split_option] + " %s" % path)
     else:
