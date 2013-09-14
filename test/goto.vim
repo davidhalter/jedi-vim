@@ -67,6 +67,7 @@ describe 'goto_with_tabs'
         Expect line('.') == 1
         Expect col('.') == 1
         Expect tabpagenr('$') == 2
+        Expect winnr('$') == 1
         tabprevious
         Expect bufname('%') == ''
     end
@@ -78,12 +79,14 @@ describe 'goto_with_tabs'
         Expect g:current_buffer_is_module('token') == 0
         execute "normal \<CR>"
         Expect tabpagenr('$') == 2
+        Expect winnr('$') == 1
         Expect g:current_buffer_is_module('token') == 1
 
         bd
         silent normal G$\d
         execute "normal j\<CR>"
         Expect tabpagenr('$') == 2
+        Expect winnr('$') == 1
         Expect g:current_buffer_is_module('tokenize') == 1
     end
 end
@@ -112,6 +115,7 @@ describe 'goto_with_buffers'
         set hidden
         call jedi#goto_assignments()
         Expect g:current_buffer_is_module('os') == 1
+        Expect winnr('$') == 1
         Expect tabpagenr('$') == 1
         Expect line('.') == 1
         Expect col('.') == 1
@@ -125,14 +129,48 @@ describe 'goto_with_buffers'
         Expect g:current_buffer_is_module('token') == 0
         execute "normal \<CR>"
         Expect tabpagenr('$') == 1
+        Expect winnr('$') == 1
         Expect g:current_buffer_is_module('token') == 1
 
         bd
         silent normal G$\d
         execute "normal j\<CR>"
         Expect tabpagenr('$') == 1
+        Expect winnr('$') == 1
         Expect g:current_buffer_is_module('tokenize') == 1
     end
 end
+
+
+
+describe 'goto_with_splits'
+    before
+        set filetype=python
+        let g:jedi#use_splits_not_buffers = 'left'
+    end
+
+    after
+        bd!
+        bd!
+    end
+
+    it 'follow_import'
+        put = ['import subprocess', 'subprocess']
+        silent normal G\g
+        Expect getline('.') == 'import subprocess'
+        Expect line('.') == 2
+        Expect col('.') == 8
+
+        silent normal G\d
+        Expect g:current_buffer_is_module('subprocess') == 1
+        Expect line('.') == 1
+        Expect col('.') == 1
+        Expect winnr('$') == 2
+        wincmd l
+        Expect bufname('%') == ''
+    end
+
+end
+
 
 " vim: et:ts=4:sw=4
