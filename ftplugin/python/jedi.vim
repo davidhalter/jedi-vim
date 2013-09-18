@@ -1,5 +1,3 @@
-let b:did_ftplugin = 1
-
 if !has('python') && !has('python3')
     finish
 endif
