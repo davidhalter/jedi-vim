@@ -33,6 +33,7 @@ ethinx (@ethinx) <eth2net@gmail.com>
 Wouter Overmeire (@lodagro) <lodagro@gmail.com>
 Stephen J. Fuhry (@fuhrysteve) <fuhrysteve@gmail.com>
 Sheng Yun (@ShengYun) <uewing@gmail.com>
+Yann Thomas-Gérard (@inside) <inside@gmail.com>
 
 
 @something are github user names.
