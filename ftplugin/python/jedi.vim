@@ -7,8 +7,6 @@ endif
 
 if g:jedi#auto_initialization
     if g:jedi#completions_enabled
-        setlocal omnifunc=jedi#completions
-
         " map ctrl+space for autocompletion
         if g:jedi#completions_command == "<C-Space>"
             " in terminals, <C-Space> sometimes equals <Nul>
