@@ -415,6 +415,6 @@ We love Pull Requests! Read the instructions in `CONTRIBUTING.md`.
 ==============================================================================
 9. License				*jedi-vim-license*
 
-Jedi-vim is licensed under the GNU LGPL v3 license or later.
+Jedi-vim is licensed with the MIT license.
 
  vim: textwidth=78 tabstop=8 filetype=help:norightleft:
