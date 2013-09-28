@@ -106,6 +106,13 @@ put that in your ``.vimrc``:
 
     let g:jedi#use_tabs_not_buffers = 0
 
+If you are a person who likes to use VIM-splits, you might want to put this in your ``.vimrc``:
+
+.. code-block:: vim
+
+    let g:jedi#use_splits_not_buffers = "left"
+
+This options could be "left", "right", "top" or "bottom". It will decide the direction where the split open.
 
 Jedi automatically starts the completion, if you type a dot, e.g. ``str.``, if
 you don't want this:
