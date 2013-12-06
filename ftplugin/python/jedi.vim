@@ -29,7 +29,9 @@ if g:jedi#auto_initialization
         call jedi#configure_call_signatures()
     endif
 
-    inoremap <silent> <buffer> . .<C-R>=jedi#complete_string(1)<CR>
+    if g:jedi#completions_enabled == 1
+        inoremap <silent> <buffer> . .<C-R>=jedi#complete_string(1)<CR>
+    endif
 
     if g:jedi#auto_close_doc
         " close preview if its still open after insert
