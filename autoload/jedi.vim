@@ -197,7 +197,6 @@ endfunction
 " ------------------------------------------------------------------------
 " deprecations
 " ------------------------------------------------------------------------
-
 let s:deprecations = {
     \ 'get_definition_command':     'goto_definitions_command',
     \ 'goto_command':               'goto_assignments_command',
@@ -207,18 +206,9 @@ let s:deprecations = {
     \ 'show_function_definition':   'show_call_signatures',
 \ }
 
-for [key, val] in items(s:deprecations)
-    if exists('g:jedi#'.key)
-        echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
-        exe 'let g:jedi#'.val.' = g:jedi#'.key
-    end
-endfor
-
-
 " ------------------------------------------------------------------------
 " defaults for jedi-vim
 " ------------------------------------------------------------------------
-
 let s:settings = {
     \ 'use_tabs_not_buffers': 1,
     \ 'use_splits_not_buffers': 1,
@@ -240,12 +230,21 @@ let s:settings = {
     \ 'completions_enabled': 1
 \ }
 
-for [key, val] in items(s:settings)
-    if !exists('g:jedi#'.key)
-        exe 'let g:jedi#'.key.' = '.val
-    endif
-endfor
+function! s:init()
+  for [key, val] in items(s:deprecations)
+      if exists('g:jedi#'.key)
+          echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
+          exe 'let g:jedi#'.val.' = g:jedi#'.key
+      end
+  endfor
+  for [key, val] in items(s:settings)
+      if !exists('g:jedi#'.key)
+          exe 'let g:jedi#'.key.' = '.val
+      endif
+  endfor
+endfunction
 
+call s:init()
 
 " ------------------------------------------------------------------------
 " Python initialization
