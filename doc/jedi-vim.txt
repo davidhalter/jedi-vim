@@ -19,7 +19,7 @@ Contents				*jedi-vim-contents*
     2.3. Using Vundle			|jedi-vim-installation-vundle|
 3. Supported Python features		|jedi-vim-support|
 4. Usage				|jedi-vim-usage|
-5. Mappings				|jedi-vim-mappings|
+5. Mappings				|jedi-vim-keybindings|
     5.1. Start completion		|g:jedi#completions_command|
     5.2. Go to assignment		|g:jedi#goto_assignments_command|
     5.3. Get original definition	|g:jedi#get_definitions_command|
@@ -291,7 +291,7 @@ Upon initialization, jedi-vim performs the following steps:
 
 1. Set the current buffers 'omnifunc' to its own completion function
    `jedi#complete`
-2. Create mappings to commands specified in |jedi-vim-mappings|
+2. Create mappings to commands specified in |jedi-vim-keybindings|
 3. Call `jedi#configure_call_signatures()` if
    `g:jedi#show_call_signatures` is set
 
