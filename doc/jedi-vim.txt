@@ -22,7 +22,7 @@ Contents				*jedi-vim-contents*
 5. Mappings				|jedi-vim-keybindings|
     5.1. Start completion		|g:jedi#completions_command|
     5.2. Go to assignment		|g:jedi#goto_assignments_command|
-    5.3. Get original definition	|g:jedi#get_definitions_command|
+    5.3. Get original definition	|g:jedi#goto_definitions_command|
     5.4. Show documentation		|g:jedi#documentation_command|
     5.5. Rename variables		|g:jedi#rename_command|
     5.6. Show name usages		|g:jedi#usages_command|
@@ -238,9 +238,9 @@ following module structure: >
     def bar():
         pass
 
-The `jedi#goto_definitions()` function will take you to the "from file2 import foo"
-statement in file1.py, while the `jedi#goto_definitions()` function will take
-you all the way to the "def bar():" line in file3.py.
+The `jedi#goto_assignments()` function will take you to the "from file2 import 
+foo" statement in file1.py, while the `jedi#goto_definitions()` function will
+take you all the way to the "def bar():" line in file3.py.
 
 ------------------------------------------------------------------------------
 5.4. `g:jedi#documentation_command`	*g:jedi#documentation_command*
