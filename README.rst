@@ -80,6 +80,10 @@ Note that the `python-mode <https://github.com/klen/python-mode>`_ VIM plugin se
 to conflict with jedi-vim, therefore you should disable it before enabling
 jedi-vim.
 
+To enjoy the full features of Jedi-Vim, you should have VIM >= 7.3. For older 
+version of VIM, the parameter recommendation list maybe not appeared when you type
+open bracket after the function name.
+
 
 Settings
 ========
