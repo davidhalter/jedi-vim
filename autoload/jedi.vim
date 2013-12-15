@@ -193,20 +193,23 @@ function! jedi#complete_opened()
 endfunction
 
 
-function! jedi#force_pycmd(pycmd)
-    let g:jedi#force_pycmd = a:pycmd
-    exec("command! -nargs=1 Python ".a:pycmd." <args>")
+function! jedi#force_py_version(py_version)
+    let g:jedi#force_py_version = a:py_version
+    if g:jedi#force_py_version == 2
+        command! -nargs=1 Python python <args>
+        execute 'pyfile '.s:script_path.'/initialize.py'
+    elseif g:jedi#force_py_version == 3
+        command! -nargs=1 Python python3 <args>
+        execute 'py3file '.s:script_path.'/initialize.py'
+    endif
 endfunction
 
 
-function! jedi#force_pycmd_switch()
-    if g:jedi#force_pycmd == 'python'
-      call jedi#force_pycmd('python3')
-    elseif g:jedi#force_pycmd == 'python3'
-      call jedi#force_pycmd('python')
-    else
-      " to be able switch from custom pycmd's
-      call jedi#force_pycmd('python')
+function! jedi#force_py_version_switch()
+    if g:jedi#force_py_version == 2
+        call jedi#force_py_version(3)
+    elseif g:jedi#force_py_version == 3
+        call jedi#force_py_version(2)
     endif
 endfunction
 
@@ -246,7 +249,7 @@ let s:settings = {
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
     \ 'completions_enabled': 1,
-    \ 'force_pycmd': "'python'"
+    \ 'force_py_version': 2
 \ }
 
 
@@ -273,10 +276,16 @@ call s:init()
 " Python initialization
 " ------------------------------------------------------------------------
 
-if has('python')
+let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
+
+if has('python') && has('python3')
+    call jedi#force_py_version(g:jedi#force_py_version)
+elseif has('python')
     command! -nargs=1 Python python <args>
+    execute 'pyfile '.s:script_path.'/initialize.py'
 elseif has('python3')
     command! -nargs=1 Python python3 <args>
+    execute 'py3file '.s:script_path.'/initialize.py'
 else
     if !exists("g:jedi#squelch_py_warning")
         echomsg "Error: jedi-vim requires vim compiled with +python"
@@ -284,18 +293,6 @@ else
     finish
 end
 
-if has('python') && has('python3')
-    call jedi#force_pycmd(g:jedi#force_pycmd)
-endif
-
-" jedi_vim.py has to be imported for 'python' and 'python3' each
-if has('python')
-    execute 'pyfile '.fnameescape(expand('<sfile>:p:h:h')).'/initialize.py'
-endif
-
-if has('python3')
-    execute 'py3file '.fnameescape(expand('<sfile>:p:h:h')).'/initialize.py'
-endif
 
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)

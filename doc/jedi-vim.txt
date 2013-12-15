@@ -38,7 +38,7 @@ Contents				*jedi-vim-contents*
     6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
     6.9. completions_enable		|g:jedi#completions_enable|
     6.10. use_splits_not_buffers	|g:jedi#use_splits_not_buffers|
-    6.11. force_pycmd                   |g:jedi#force_pycmd|
+    6.11. force_py_version              |g:jedi#force_py_version|
 7. Testing				|jedi-vim-testing|
 8. Contributing				|jedi-vim-contributing|
 9. License				|jedi-vim-license|
@@ -405,23 +405,23 @@ Options: top, left, right or bottom
 Default: "" (not enabled by default)
 
 ------------------------------------------------------------------------------
-6.11. `g:jedi#force_pycmd`                *g:jedi#force_pycmd*
+6.11. `g:jedi#force_py_version`                *g:jedi#force_py_version*
 
 If you have installed both python 2 and python 3, you can force which one jedi
 should use by setting this variable. It forces the internal Vim command, which
 will be used for every jedi call to the respective python interpreter.
-The variable can be set in the .vimrc like this:
+The variable can be set in the .vimrc like this to force python 3:
 
-let g:jedi#force_pycmd = 'python3'
+let g:jedi#force_py_version = 3
 
 This variable can be switched during runtime using the following function:
-Function: `jedi#force_pycmd_switch()`
+Function: `jedi#force_py_version_switch()`
 
 or set directly using this function, which has the same name as the variable:
-Function: `jedi#force_pycmd(pycmd)`
+Function: `jedi#force_py_version(py_version)`
 
-Options: 'python' or 'python3'
-Default: 'python'
+Options: 2 or 3
+Default: 2
 
 ==============================================================================
 7. Testing				*jedi-vim-testing*

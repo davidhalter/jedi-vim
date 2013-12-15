@@ -9,14 +9,15 @@ import vim
 import sys
 import os
 
-# vim.command('echom expand("<sfile>:p:h:h")')
-sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
+# vim.command('echom expand("<sfile>:p:h:h")') # broken, <sfile> inside function
+# sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
+sys.path.insert(0, os.path.join(vim.eval('s:script_path'), 'jedi'))
 
 # to display errors correctly
 import traceback
 
 # update the sys path to include the jedi_vim script
-sys.path.insert(1, vim.eval('expand("<sfile>:p:h:h")'))
+sys.path.insert(0, vim.eval('s:script_path'))
 try:
     import jedi_vim
 except ImportError:
