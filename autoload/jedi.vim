@@ -1,4 +1,4 @@
-﻿" ------------------------------------------------------------------------
+" ------------------------------------------------------------------------
 " functions that call python code
 " ------------------------------------------------------------------------
 function! jedi#goto_assignments()
@@ -193,6 +193,26 @@ function! jedi#complete_opened()
 endfunction
 
 
+function! jedi#force_py_version(py_version)
+    let g:jedi#force_py_version = a:py_version
+    if g:jedi#force_py_version == 2
+        command! -nargs=1 Python python <args>
+        execute 'pyfile '.s:script_path.'/initialize.py'
+    elseif g:jedi#force_py_version == 3
+        command! -nargs=1 Python python3 <args>
+        execute 'py3file '.s:script_path.'/initialize.py'
+    endif
+endfunction
+
+
+function! jedi#force_py_version_switch()
+    if g:jedi#force_py_version == 2
+        call jedi#force_py_version(3)
+    elseif g:jedi#force_py_version == 3
+        call jedi#force_py_version(2)
+    endif
+endfunction
+
 
 " ------------------------------------------------------------------------
 " deprecations
@@ -207,18 +227,9 @@ let s:deprecations = {
     \ 'show_function_definition':   'show_call_signatures',
 \ }
 
-for [key, val] in items(s:deprecations)
-    if exists('g:jedi#'.key)
-        echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
-        exe 'let g:jedi#'.val.' = g:jedi#'.key
-    end
-endfor
-
-
 " ------------------------------------------------------------------------
 " defaults for jedi-vim
 " ------------------------------------------------------------------------
-
 let s:settings = {
     \ 'use_tabs_not_buffers': 1,
     \ 'use_splits_not_buffers': 1,
@@ -237,24 +248,44 @@ let s:settings = {
     \ 'auto_close_doc': 1,
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
-    \ 'completions_enabled': 1
+    \ 'completions_enabled': 1,
+    \ 'force_py_version': 2
 \ }
 
-for [key, val] in items(s:settings)
-    if !exists('g:jedi#'.key)
-        exe 'let g:jedi#'.key.' = '.val
-    endif
-endfor
 
+function! s:init()
+  for [key, val] in items(s:deprecations)
+      if exists('g:jedi#'.key)
+          echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
+          exe 'let g:jedi#'.val.' = g:jedi#'.key
+      end
+  endfor
+
+
+  for [key, val] in items(s:settings)
+      if !exists('g:jedi#'.key)
+          exe 'let g:jedi#'.key.' = '.val
+      endif
+  endfor
+endfunction
+
+
+call s:init()
 
 " ------------------------------------------------------------------------
 " Python initialization
 " ------------------------------------------------------------------------
 
-if has('python')
+let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
+
+if has('python') && has('python3')
+    call jedi#force_py_version(g:jedi#force_py_version)
+elseif has('python')
     command! -nargs=1 Python python <args>
+    execute 'pyfile '.s:script_path.'/initialize.py'
 elseif has('python3')
     command! -nargs=1 Python python3 <args>
+    execute 'py3file '.s:script_path.'/initialize.py'
 else
     if !exists("g:jedi#squelch_py_warning")
         echomsg "Error: jedi-vim requires vim compiled with +python"
@@ -262,27 +293,7 @@ else
     finish
 end
 
-Python << PYTHONEOF
-""" here we initialize the jedi stuff """
-import vim
 
-# update the system path, to include the jedi path
-import sys
-import os
-sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
-
-# to display errors correctly
-import traceback
-
-# update the sys path to include the jedi_vim script
-sys.path.insert(1, vim.eval('expand("<sfile>:p:h:h")'))
-try:
-    import jedi_vim
-except ImportError:
-    vim.command('echoerr "Please install Jedi if you want to use jedi_vim."')
-sys.path.pop(1)
-
-PYTHONEOF
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 
