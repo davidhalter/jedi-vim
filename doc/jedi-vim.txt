@@ -225,7 +225,7 @@ the cursor. Just like the `jedi#goto_assignments()` function, it does not work
 if the definition isn't in a Python source file.
 
 The difference between `jedi#goto_assignments()` and `jedi#goto_definitions()`
-is that the former doesn't perform recursive lookups. Take, for example, the
+is that the latter performs recursive lookups. Take, for example, the
 following module structure: >
 
     # file1.py:
@@ -238,9 +238,16 @@ following module structure: >
     def bar():
         pass
 
-The `jedi#goto_assignments()` function will take you to the "from file2 import 
-foo" statement in file1.py, while the `jedi#goto_definitions()` function will
-take you all the way to the "def bar():" line in file3.py.
+The `jedi#goto_assignments()` function will take you to the >
+
+    from file2 import foo
+
+statement in file1.py, while the `jedi#goto_definitions()` function will take
+you all the way to the >
+
+    def bar():
+
+line in file3.py.
 
 ------------------------------------------------------------------------------
 5.4. `g:jedi#documentation_command`	*g:jedi#documentation_command*
