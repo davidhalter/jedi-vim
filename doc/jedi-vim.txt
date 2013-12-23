@@ -82,6 +82,10 @@ using pip: >
 However, you can also install it as a git submodule if you don't want to use
 jedi for anything but this plugin. How to do this is detailed below.
 
+It is the best if you have VIM >= 7.3. For the older version, you probably 
+cannot see the parameter recommendation list of function after typing open 
+bracket.
+
 ------------------------------------------------------------------------------
 2.1. Installing manually		*jedi-vim-installation-manually*
 
