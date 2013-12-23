@@ -36,6 +36,9 @@ Sheng Yun (@ShengYun) <uewing@gmail.com>
 Yann Thomas-Gérard (@inside) <inside@gmail.com>
 Colin Su (@littleq0903) <littleq0903@gmail.com>
 Arthur Jaron (@eyetracker)
+Justin M. Keyes (@justinmk)
+nagev (@np1)
+Chris Lasher (@gotgenes) <chris.lasher@gmail.com>
 
 
 @something are github user names.

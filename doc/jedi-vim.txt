@@ -19,10 +19,10 @@ Contents				*jedi-vim-contents*
     2.3. Using Vundle			|jedi-vim-installation-vundle|
 3. Supported Python features		|jedi-vim-support|
 4. Usage				|jedi-vim-usage|
-5. Mappings				|jedi-vim-mappings|
+5. Mappings				|jedi-vim-keybindings|
     5.1. Start completion		|g:jedi#completions_command|
     5.2. Go to assignment		|g:jedi#goto_assignments_command|
-    5.3. Get original definition	|g:jedi#get_definitions_command|
+    5.3. Get original definition	|g:jedi#goto_definitions_command|
     5.4. Show documentation		|g:jedi#documentation_command|
     5.5. Rename variables		|g:jedi#rename_command|
     5.6. Show name usages		|g:jedi#usages_command|
@@ -225,7 +225,7 @@ the cursor. Just like the `jedi#goto_assignments()` function, it does not work
 if the definition isn't in a Python source file.
 
 The difference between `jedi#goto_assignments()` and `jedi#goto_definitions()`
-is that the former doesn't perform recursive lookups. Take, for example, the
+is that the latter performs recursive lookups. Take, for example, the
 following module structure: >
 
     # file1.py:
@@ -238,9 +238,16 @@ following module structure: >
     def bar():
         pass
 
-The `jedi#goto_definitions()` function will take you to the "from file2 import foo"
+The `jedi#goto_assignments()` function will take you to the >
+
+    from file2 import foo
+
 statement in file1.py, while the `jedi#goto_definitions()` function will take
-you all the way to the "def bar():" line in file3.py.
+you all the way to the >
+
+    def bar():
+
+line in file3.py.
 
 ------------------------------------------------------------------------------
 5.4. `g:jedi#documentation_command`	*g:jedi#documentation_command*
@@ -291,7 +298,7 @@ Upon initialization, jedi-vim performs the following steps:
 
 1. Set the current buffers 'omnifunc' to its own completion function
    `jedi#complete`
-2. Create mappings to commands specified in |jedi-vim-mappings|
+2. Create mappings to commands specified in |jedi-vim-keybindings|
 3. Call `jedi#configure_call_signatures()` if
    `g:jedi#show_call_signatures` is set
 

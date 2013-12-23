@@ -217,7 +217,6 @@ endfunction
 " ------------------------------------------------------------------------
 " deprecations
 " ------------------------------------------------------------------------
-
 let s:deprecations = {
     \ 'get_definition_command':     'goto_definitions_command',
     \ 'goto_command':               'goto_assignments_command',
@@ -260,7 +259,6 @@ function! s:init()
           exe 'let g:jedi#'.val.' = g:jedi#'.key
       end
   endfor
-
 
   for [key, val] in items(s:settings)
       if !exists('g:jedi#'.key)
