@@ -31,7 +31,7 @@ class VimError(Exception):
         self.executing = executing
 
     def __str__(self):
-        return self.message + '; created by: ' +  repr(self.executing)
+        return self.message + '; created by: ' + repr(self.executing)
 
 
 def _catch_exception(string, is_eval):
@@ -61,6 +61,7 @@ def echo_highlight(msg):
 class PythonToVimStr(unicode):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
+
     def __new__(cls, obj, encoding='UTF-8'):
         if is_py3k or isinstance(obj, unicode):
             return unicode.__new__(cls, obj)
@@ -81,8 +82,8 @@ class PythonToVimStr(unicode):
 
 @catch_and_print_exceptions
 def get_script(source=None, column=None):
-    jedi.settings.additional_dynamic_modules = [b.name for b in vim.buffers
-                            if b.name is not None and b.name.endswith('.py')]
+    jedi.settings.additional_dynamic_modules = \
+        [b.name for b in vim.buffers if b.name is not None and b.name.endswith('.py')]
     if source is None:
         source = '\n'.join(vim.current.buffer)
     row = vim.current.window.cursor[0]
@@ -130,7 +131,7 @@ def completions():
                          info=PythonToVimStr(c.doc),  # docstr
                          icase=1,  # case insensitive
                          dup=1  # allow duplicates (maybe later remove this)
-                )
+                         )
                 out.append(d)
 
             strout = str(out)
@@ -157,7 +158,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
         else:
             definitions = script.goto_assignments()
     except jedi.NotFoundError:
-        echo_highlight( "Cannot follow nothing. Put your cursor on a valid name.")
+        echo_highlight("Cannot follow nothing. Put your cursor on a valid name.")
     else:
         if no_output:
             return definitions
@@ -172,8 +173,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
             d = list(definitions)[0]
             if d.in_builtin_module():
                 if d.is_keyword:
-                    echo_highlight(
-                            "Cannot get the definition of Python keywords.")
+                    echo_highlight("Cannot get the definition of Python keywords.")
                 else:
                     echo_highlight("Builtin modules cannot be displayed (%s)."
                                    % d.module_path)
@@ -189,8 +189,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
             lst = []
             for d in definitions:
                 if d.in_builtin_module():
-                    lst.append(dict(text=
-                                PythonToVimStr('Builtin ' + d.description)))
+                    lst.append(dict(text=PythonToVimStr('Builtin ' + d.description)))
                 else:
                     lst.append(dict(filename=PythonToVimStr(d.module_path),
                                     lnum=d.line, col=d.column + 1,
@@ -217,8 +216,8 @@ def show_documentation():
         echo_highlight('No documentation found for that.')
         vim.command('return')
     else:
-        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '='*40, d.doc) if d.doc
-                    else '|No Docstring for %s|' % d for d in definitions]
+        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.doc)
+                if d.doc else '|No Docstring for %s|' % d for d in definitions]
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
@@ -232,10 +231,10 @@ def clear_call_signatures():
     for i, line in enumerate(vim.current.buffer):
         match = re.search(r'%s' % regex, line)
         if match is not None:
-            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' % \
-                                                        int(match.group(1))
-            vim_command(r'try | %s,%ss/%s/\2/g | catch | endtry' \
-                                                % (i + 1, i + 1, vim_regex))
+            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' \
+                % int(match.group(1))
+            vim_command(r'try | %s,%ss/%s/\2/g | catch | endtry'
+                        % (i + 1, i + 1, vim_regex))
             vim_eval('histdel("search", -1)')
             vim_command('let @/ = histget("search", -1)')
     vim.current.window.cursor = cursor
@@ -340,7 +339,7 @@ def rename():
             # sort the whole thing reverse (positions at the end of the line
             # must be first, because they move the stuff before the position).
             temp_rename = sorted(temp_rename, reverse=True,
-                                key=lambda x: (x.module_path, x.start_pos))
+                                 key=lambda x: (x.module_path, x.start_pos))
             for r in temp_rename:
                 if r.in_builtin_module():
                     continue
@@ -389,7 +388,7 @@ def py_import_completions():
         comps = []
     else:
         text = 'import %s' % argl
-        script=jedi.Script(text, 1, len(text), '')
+        script = jedi.Script(text, 1, len(text), '')
         comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
     vim.command("return '%s'" % '\n'.join(comps))
 
@@ -421,9 +420,9 @@ def new_buffer(path, options=''):
         vim_command('edit %s %s' % (options, escape_file_path(path)))
     # sometimes syntax is being disabled and the filetype not set.
     if vim_eval('!exists("g:syntax_on")') == '1':
-      vim_command('syntax enable')
+        vim_command('syntax enable')
     if vim_eval("&filetype != 'python'") == '1':
-      vim_command('set filetype=python')
+        vim_command('set filetype=python')
     return True
 
 
@@ -470,4 +469,3 @@ def print_to_stdout(level, str_out):
 
 if not hasattr(jedi, '__version__') or jedi.__version__ < (0, 7, 0):
     echo_highlight('Please update your Jedi version, it is to old.')
-

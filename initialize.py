@@ -23,4 +23,3 @@ try:
 except ImportError:
     vim.command('echoerr "Please install Jedi if you want to use jedi_vim."')
 sys.path.pop(1)
-
