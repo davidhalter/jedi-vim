@@ -10,7 +10,6 @@ from shlex import split as shsplit
 
 import vim
 import jedi
-import jedi.keywords
 from jedi._compatibility import unicode, is_py3k
 
 
