@@ -6,11 +6,15 @@ with VIM.
 import traceback  # for exception output
 import re
 import os
+import sys
 from shlex import split as shsplit
 
 import vim
 import jedi
-from jedi._compatibility import unicode, is_py3
+
+is_py3 = sys.version_info[0] >= 3
+if is_py3:
+    unicode = str
 
 
 def catch_and_print_exceptions(func):
