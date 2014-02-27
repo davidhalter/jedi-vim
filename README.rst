@@ -73,6 +73,13 @@ The first thing you need after that is an up-to-date version of Jedi. You can
 either get it via ``pip install jedi`` or with ``git submodule update --init``
 in your jedi-vim repository.
 
+Example Installation Command using Pathogen:
+
+.. code-block:: sh
+
+    cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
+
+
 On Arch Linux, you can also install jedi-vim from AUR: `vim-jedi
 <https://aur.archlinux.org/packages/vim-jedi/>`__.
 

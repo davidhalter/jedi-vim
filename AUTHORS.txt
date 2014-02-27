@@ -41,6 +41,7 @@ nagev (@np1)
 Chris Lasher (@gotgenes) <chris.lasher@gmail.com>
 Doan Thanh Nam (@tndoan)
 Markus Koller (@toupeira)
+Justin Cheevers @justincheevers
 
 
 @something are github user names.
