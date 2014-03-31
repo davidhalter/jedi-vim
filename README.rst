@@ -67,11 +67,19 @@ Installation
 You might want to use `pathogen <https://github.com/tpope/vim-pathogen>`_ or
 `vundle <https://github.com/gmarik/vundle>`_ to install jedi in VIM. Also you
 need a VIM version that was compiled with ``+python``, which is typical for most
-distributions on Linux.
+distributions on Linux.  The Python version compiled into VIM must be 2.6 or later
+(you can check this from within VIM using ``:python import sys; print sys.version`` )
 
 The first thing you need after that is an up-to-date version of Jedi. You can
 either get it via ``pip install jedi`` or with ``git submodule update --init``
 in your jedi-vim repository.
+
+Example Installation Command using Pathogen:
+
+.. code-block:: sh
+
+    cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
+
 
 On Arch Linux, you can also install jedi-vim from AUR: `vim-jedi
 <https://aur.archlinux.org/packages/vim-jedi/>`__.
