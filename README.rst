@@ -36,6 +36,10 @@ it up `on github <http://github.com/davidhalter/jedi-vim>`_.
 
 You can read the Jedi library documentation `here <http://jedi.jedidjah.ch>`_.
 
+If you want to report issues, just use the github issue tracker. In case of
+questions about the software, please use `stackoverflow
+<https://stackoverflow.com>`_ and tag your question with ``jedi-vim``.
+
 
 Contributing
 ============
