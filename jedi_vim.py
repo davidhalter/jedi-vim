@@ -131,7 +131,7 @@ def completions():
                          abbr=PythonToVimStr(c.name),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
-                         info=PythonToVimStr(c.doc.full()),  # docstr
+                         info=PythonToVimStr(c.doc),  # docstr
                          icase=1,  # case insensitive
                          dup=1  # allow duplicates (maybe later remove this)
                          )
