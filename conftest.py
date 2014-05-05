@@ -16,7 +16,7 @@ class IntegrationTestFile(object):
     def run(self):
         output = subprocess.check_output([VSPEC_RUNNER, '.', VSPEC_FOLDER, self.path])
         for line in output.splitlines():
-            if line.startswith('not ok') or line.startswith('Error'):
+            if line.startswith(b'not ok') or line.startswith(b'Error'):
                 print(output)
                 assert False
 
@@ -42,7 +42,7 @@ def pytest_configure(config):
                 with open(dest, 'w') as f:
                     f.write(data)
         z.close()
-        os.chmod(VSPEC_RUNNER, 0777)
+        os.chmod(VSPEC_RUNNER, 0o777)
 
 
 def pytest_generate_tests(metafunc):
