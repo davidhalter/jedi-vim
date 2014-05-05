@@ -23,7 +23,7 @@ describe 'documentation docstrings'
 
     it 'no documentation'
         put = 'x = 2'
-        normal G0K
+        normal o<ESC>GK
         Expect bufname('%') == ''
     end
 end
