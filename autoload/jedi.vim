@@ -50,7 +50,7 @@ function! jedi#show_documentation()
 
     let bn = bufnr("__doc__")
     if bn > 0
-        let wi=index(tabpagebuflist(tabpagenr()), bn))
+        let wi=index(tabpagebuflist(tabpagenr()), bn)
         if wi >= 0
             " If the __doc__ buffer is open in the current tab, jump to it
             silent execute (wi+1).'wincmd w'
