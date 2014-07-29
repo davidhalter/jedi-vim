@@ -1,4 +1,4 @@
-*jedi-vim.txt* - For Vim version 7.3 - Last change: 2013/3/1
+*jedi-vim.txt* - For Vim version 7.3 - Last change: 2014/07/29
        __   _______  _______   __       ____    ____  __  .___  ___.~
       |  | |   ____||       \ |  |      \   \  /   / |  | |   \/   |~
       |  | |  |__   |  .--.  ||  |  _____\   \/   /  |  | |  \  /  |~
@@ -82,9 +82,22 @@ using pip: >
 However, you can also install it as a git submodule if you don't want to use
 jedi for anything but this plugin. How to do this is detailed below.
 
-It is the best if you have VIM >= 7.3. For the older version, you probably 
-cannot see the parameter recommendation list of function after typing open 
-bracket.
+It is best if you have VIM >= 7.3, compiled with the `+conceal` option. With
+older versions, you will probably not see the parameter recommendation list
+for functions after typing the open bracket. Some platforms (including OS X
+releases) do not ship a VIM with `+conceal`. You can check if your VIM has the
+feature with >
+
+    :ver
+
+and look for "`+conceal`" (as opposed to "`-conceal`") or >
+
+    :echo has('conceal')
+
+which will report 0 (not included) or 1 (included). If your VIM lacks this
+feature and you would like function parameter completion, you will need to
+build your own VIM, or use a package for your operating system that has this
+feature (such as MacVim on OS X, which also contains a console binary).
 
 ------------------------------------------------------------------------------
 2.1. Installing manually		*jedi-vim-installation-manually*
