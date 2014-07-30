@@ -32,7 +32,7 @@ Documentation
 =============
 
 Documentation is available in your vim: ``:help jedi-vim``. You can also look
-it up `on github <http://github.com/davidhalter/jedi-vim>`_.
+it up `on github <http://github.com/davidhalter/jedi-vim/blob/master/doc/jedi-vim.txt>`_.
 
 You can read the Jedi library documentation `here <http://jedi.jedidjah.ch>`_.
 
@@ -92,9 +92,12 @@ Note that the `python-mode <https://github.com/klen/python-mode>`_ VIM plugin se
 to conflict with jedi-vim, therefore you should disable it before enabling
 jedi-vim.
 
-To enjoy the full features of Jedi-Vim, you should have VIM >= 7.3. For older 
-version of VIM, the parameter recommendation list maybe not appeared when you type
-open bracket after the function name.
+To enjoy the full features of jedi-vim, you should have VIM >= 7.3, compiled with
+``+conceal`` (which is not the case on some platforms, including OS X). If your VIM
+does not meet these requirements, the parameter recommendation list may not appear
+when you type an open bracket after a function name. Please read
+`the documentation <http://github.com/davidhalter/jedi-vim/blob/master/doc/jedi-vim.txt>`_
+for details.
 
 
 Settings
