@@ -46,7 +46,7 @@ Contents				*jedi-vim-contents*
 ==============================================================================
 1. Introduction				*jedi-vim-introduction*
 
-Jedi-vim is a is a Vim binding to the awesome Python autocompletion library
+Jedi-vim is a Vim binding to the awesome Python autocompletion library
 `jedi`. Among jedi's (and, therefore, jedi-vim's) features are:
 
 - Completion for a wide array of Python features (see |jedi-vim-support|)
