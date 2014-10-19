@@ -8,6 +8,10 @@ import re
 import os
 import sys
 from shlex import split as shsplit
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest  # Python 2
 
 import vim
 import jedi
@@ -228,6 +232,10 @@ def show_documentation():
 
 @catch_and_print_exceptions
 def clear_call_signatures():
+    # Check if using command line call signatures
+    if vim_eval("g:jedi#show_call_signatures") == '2':
+        vim_command('echo ""')
+        return
     cursor = vim.current.window.cursor
     e = vim_eval('g:jedi#call_signature_escape')
     regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
@@ -254,6 +262,9 @@ def show_call_signatures(signatures=()):
 
     if not signatures:
         return
+
+    if vim_eval("g:jedi#show_call_signatures") == '2':
+        return cmdline_call_signatures(signatures)
 
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
@@ -308,6 +319,53 @@ def show_call_signatures(signatures=()):
         repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
         vim_eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
+
+
+@catch_and_print_exceptions
+def cmdline_call_signatures(signatures):
+    def get_params(s):
+        return [p.description.replace('\n', '') for p in s.params]
+
+    if len(signatures) > 1:
+        params = zip_longest(*map(get_params, signatures), fillvalue='_')
+        params = ['(' + ', '.join(p) + ')' for p in params]
+    else:
+        params = get_params(signatures[0])
+    text = ', '.join(params)
+
+    # Allow 12 characters for ruler/showcmd - setting noruler/noshowcmd
+    # here causes incorrect undo history
+    max_msg_len = int(vim_eval('&columns')) - 12
+    max_num_spaces = (max_msg_len - len(signatures[0].call_name)
+                      - len(text) - 2)  # 2 accounts for parentheses
+    if max_num_spaces < 0:
+        return  # No room for the message
+    _, column = signatures[0].bracket_start
+    num_spaces = min(int(vim_eval('g:jedi#first_col')) +
+                     column - len(signatures[0].call_name),
+                     max_num_spaces)
+    spaces = ' ' * num_spaces
+
+    try:
+        index = [s.index for s in signatures if isinstance(s.index, int)][0]
+        left = text.index(params[index])
+        right = left + len(params[index])
+        vim_command('                      echon "%s" | '
+                    'echohl Function     | echon "%s" | '
+                    'echohl None         | echon "("  | '
+                    'echohl jediFunction | echon "%s" | '
+                    'echohl jediFat      | echon "%s" | '
+                    'echohl jediFunction | echon "%s" | '
+                    'echohl None         | echon ")"'
+                    % (spaces, signatures[0].call_name, text[:left],
+                       text[left:right], text[right:]))
+    except (TypeError, IndexError):
+        vim_command('                      echon "%s" | '
+                    'echohl Function     | echon "%s" | '
+                    'echohl None         | echon "("  | '
+                    'echohl jediFunction | echon "%s" | '
+                    'echohl None         | echon ")"'
+                    % (spaces, signatures[0].call_name, text))
 
 
 @catch_and_print_exceptions

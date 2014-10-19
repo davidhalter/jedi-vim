@@ -379,9 +379,10 @@ Default: 1 (Automatically close preview window upon leaving insert mode)
 
 Jedi-vim can display a small window detailing the arguments of the currently
 completed function and highlighting the currently selected argument. This can
-be disabled by setting this option to 0.
+be disabled by setting this option to 0. Setting this option to 2 shows call
+signatures in the command line instead of a popup window.
 
-Options: 0 or 1
+Options: 0, 1, or 2
 Default: 1 (Show call signatures window)
 
 Note: This setting is ignored if |g:jedi#auto_initialization| is set to 0. In

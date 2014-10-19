@@ -1,4 +1,4 @@
-if g:jedi#show_call_signatures == 1 && has('conceal')
+if g:jedi#show_call_signatures > 0 && has('conceal')
     " conceal is normal for vim >= 7.3
  
     let s:e = g:jedi#call_signature_escape
