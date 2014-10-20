@@ -168,9 +168,9 @@ endfunction
 " Determine where the current window is on the screen for displaying call
 " signatures in the correct column.
 function! s:save_first_col()
-    let gutterwidth = &fdc + &number * max([&numberwidth, len(line('$')) + 1])
-    if bufname('%') ==# '[Command Line]' | return gutterwidth + 1 | endif
-    if winnr('$') == 1 | return gutterwidth | endif
+    if bufname('%') ==# '[Command Line]' || winnr('$') == 1
+        return 0
+    endif
 
     let l:eventignore = &eventignore
     set eventignore=all
@@ -182,7 +182,7 @@ function! s:save_first_col()
         wincmd h
         let win_on_left = winnr() == startwin
         if win_on_left
-            return gutterwidth
+            return 0
         else
             " Walk left and count up window widths until hitting the edge
             execute startwin."wincmd w"
@@ -194,7 +194,7 @@ function! s:save_first_col()
                 let winnr = winnr()
                 wincmd h
             endwhile
-            return width + gutterwidth
+            return width
         endif
     finally
         let &eventignore = l:eventignore

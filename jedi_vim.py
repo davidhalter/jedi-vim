@@ -341,7 +341,8 @@ def cmdline_call_signatures(signatures):
     if max_num_spaces < 0:
         return  # No room for the message
     _, column = signatures[0].bracket_start
-    num_spaces = min(int(vim_eval('g:jedi#first_col')) +
+    num_spaces = min(int(vim_eval('g:jedi#first_col +'
+                     'wincol() - col(".")')) +
                      column - len(signatures[0].call_name),
                      max_num_spaces)
     spaces = ' ' * num_spaces
