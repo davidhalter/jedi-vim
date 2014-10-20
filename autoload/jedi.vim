@@ -159,8 +159,8 @@ function! jedi#configure_call_signatures()
         " Need to track changes to avoid multiple undo points for a single edit
         let b:normaltick = b:changedtick
         autocmd TextChanged,InsertLeave,BufWinEnter <buffer> let b:normaltick = b:changedtick
+        autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
-    autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
     autocmd CursorMovedI <buffer> Python jedi_vim.show_call_signatures()
 endfunction
