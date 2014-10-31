@@ -85,8 +85,8 @@ Example Installation Command using Pathogen:
     cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
 
 
-On Arch Linux, you can also install jedi-vim from AUR: `vim-jedi
-<https://aur.archlinux.org/packages/vim-jedi/>`__.
+On Arch Linux, you can also install jedi-vim from official repositories: `vim-jedi
+<https://www.archlinux.org/packages/community/any/vim-jedi/>`__.
 
 Note that the `python-mode <https://github.com/klen/python-mode>`_ VIM plugin seems
 to conflict with jedi-vim, therefore you should disable it before enabling
