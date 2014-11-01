@@ -204,7 +204,11 @@ function! s:save_first_col()
         " new line, substitude a word), join that change with the rest of this
         " edit.
         if b:normaltick != b:changedtick
-            undojoin
+            try
+                undojoin
+            catch /^Vim\%((\a\+)\)\=:E790/
+                " This can happen if an undo happens during a :normal command.
+            endtry
         endif
     endtry
 endfunction
