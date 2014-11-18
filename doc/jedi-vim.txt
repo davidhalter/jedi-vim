@@ -125,11 +125,11 @@ Pathogen simplifies installation considerably.
    will automatically get the jedi library with the jedi-vim plugin. Add the
    following to the Bundles section in your .vimrc file: >
 
-    Bundle 'git://github.com/davidhalter/jedi-vim'
+    Plugin 'davidhalter/jedi-vim'
 
 2. Issue the following command in Vim: >
 
-    :BundleInstall
+    :PluginInstall
 
 Help tags are generated automatically, so you should be good to go.
 
