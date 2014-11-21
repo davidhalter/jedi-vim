@@ -147,6 +147,16 @@ and usually saves one keypress.
 
     let g:jedi#popup_select_first = 0
 
+Jedi displays function call signatures in insert mode in real-time, highlighting
+the current argument. The call signatures can be displayed as a pop-up in the
+buffer (set to 1, the default), which has the advantage of being easier to refer
+to, or in Vim's command line aligned with the function call (set to 2), which
+can improve the integrity of Vim's undo history.
+
+.. code-block:: vim
+
+    let g:jedi#show_call_signatures = "1"
+
 Here are a few more defaults for actions, read the docs (``:help jedi-vim``) to
 get more information. If you set them to ``""``, they are not assigned.
 
@@ -158,7 +168,6 @@ get more information. If you set them to ``""``, they are not assigned.
     let g:jedi#usages_command = "<leader>n"
     let g:jedi#completions_command = "<C-Space>"
     let g:jedi#rename_command = "<leader>r"
-    let g:jedi#show_call_signatures = "1"
 
 
 Finally, if you don't want completion, but all the other features, use:
