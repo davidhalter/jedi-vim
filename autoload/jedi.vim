@@ -157,8 +157,10 @@ endfunction
 function! jedi#configure_call_signatures()
     if g:jedi#show_call_signatures == 2  " Command line call signatures
         " Need to track changes to avoid multiple undo points for a single edit
-        let b:normaltick = b:changedtick
-        autocmd TextChanged,InsertLeave,BufWinEnter <buffer> let b:normaltick = b:changedtick
+        if v:version >= 704 || has("patch-7.3.867")
+            let b:normaltick = b:changedtick
+            autocmd TextChanged,InsertLeave,BufWinEnter <buffer> let b:normaltick = b:changedtick
+        endif
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
     autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
@@ -203,7 +205,7 @@ function! s:save_first_col()
         " If the event that triggered InsertEnter made a change (e.g. open a
         " new line, substitude a word), join that change with the rest of this
         " edit.
-        if b:normaltick != b:changedtick
+        if exists('b:normaltick') && b:normaltick != b:changedtick
             try
                 undojoin
             catch /^Vim\%((\a\+)\)\=:E790/
