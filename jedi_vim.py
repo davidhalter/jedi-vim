@@ -16,6 +16,12 @@ is_py3 = sys.version_info[0] >= 3
 if is_py3:
     unicode = str
 
+signatures_cache = {
+    'pos': None,
+    'index': -1,
+    'signatures': None
+}
+
 
 def catch_and_print_exceptions(func):
     def wrapper(*args, **kwargs):
@@ -244,13 +250,42 @@ def clear_call_signatures():
 
 
 @catch_and_print_exceptions
+def invalidate_signatures_cache():
+    # signatures_cache should be invalidated when leave insert mode, or
+    # when cursor is moved to out of parentheses
+    signatures_cache.update(pos=None,
+                            index=-1,
+                            signatures=None)
+
+
+@catch_and_print_exceptions
 def show_call_signatures(signatures=()):
     if vim_eval("has('conceal') && g:jedi#show_call_signatures") == '0':
         return
 
-    if signatures == ():
-        signatures = get_script().call_signatures()
     clear_call_signatures()
+
+    # skip if cursor is not inside parentheses
+    skip = 'synIDattr(synID(line("."), col("."), 0), "name") =~? "\v%(Comment|String)$"'
+    stopline = max(0, vim.current.window.cursor[0] - 50)
+    pos = vim_eval("searchpairpos('\V(', '', '\V)', 'bnW', '%s', %s)" % (skip, stopline))
+    if pos == ['0', '0']:
+        invalidate_signatures_cache()
+        return
+
+    if signatures == ():
+        # check index of current argument which cursor is on
+        cursor = vim.eval('getpos(".")')
+        args = vim.current.buffer[int(pos[0]) - 1:int(cursor[1])]
+        args[-1] = args[-1][:int(cursor[2])]
+        index = sum(l.count(',') for l in args)
+        # avoid parsing buffer for each CursorMovedI while cursor is inside
+        # same parentheses and on same index of argument
+        if signatures_cache['pos'] != pos or signatures_cache['index'] != index:
+            signatures_cache.update(pos=pos,
+                                    index=index,
+                                    signatures=get_script().call_signatures())
+        signatures = signatures_cache['signatures']
 
     if not signatures:
         return
