@@ -1,15 +1,16 @@
 if g:jedi#show_call_signatures == 1 && has('conceal')
     " conceal is normal for vim >= 7.3
  
-    let e = g:jedi#call_signature_escape
-    let l1 = e.'jedi=[^'.e.']*'.e.'[^'.e.']*'.e.'jedi'.e
-    let l2 = e.'jedi=\?[^'.e.']*'.e
-    exe 'syn match jediIgnore "'.l2.'" contained conceal'
+    let s:e = g:jedi#call_signature_escape
+    let s:l1 = s:e.'jedi=[^'.s:e.']*'.s:e.'[^'.s:e.']*'.s:e.'jedi'.s:e
+    let s:l2 = s:e.'jedi=\?[^'.s:e.']*'.s:e
+    exe 'syn match jediIgnore "'.s:l2.'" contained conceal'
     setlocal conceallevel=2
     syn match jediFatSymbol "*" contained conceal
     syn match jediFat "\*[^*]\+\*" contained contains=jediFatSymbol
     syn match jediSpace "\v[ ]+( )@=" contained
-    exe 'syn match jediFunction "'.l1.'" keepend extend contains=jediIgnore,jediFat,jediSpace'
+    exe 'syn match jediFunction "'.s:l1.'" keepend extend contains=jediIgnore,jediFat,jediSpace'
+    unlet! s:e s:l1 s:l2
  
     hi def link jediIgnore Ignore
     hi def link jediFatSymbol Ignore
