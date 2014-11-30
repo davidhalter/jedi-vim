@@ -1,9 +1,9 @@
-function! g:current_buffer_is_module(module_name)
-    return g:ends_with(bufname('%'), a:module_name.'.py')
+function! CurrentBufferIsModule(module_name)
+    return EndsWith(bufname('%'), a:module_name.'.py')
 endfunction
 
 
-function g:ends_with(string, end)
+function EndsWith(string, end)
     let l:should = len(a:string) - strlen(a:end)
     return l:should == stridx(a:string, a:end, should)
 endfunction
