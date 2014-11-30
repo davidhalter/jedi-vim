@@ -63,7 +63,7 @@ describe 'goto_with_tabs'
         Expect col('.') == 8
 
         silent normal G\d
-        Expect g:current_buffer_is_module('subprocess') == 1
+        Expect CurrentBufferIsModule('subprocess') == 1
         Expect line('.') == 1
         Expect col('.') == 1
         Expect tabpagenr('$') == 2
@@ -75,19 +75,19 @@ describe 'goto_with_tabs'
     it 'multi_definitions'
         put = ['import tokenize']
         silent normal G$\d
-        Expect g:current_buffer_is_module('tokenize') == 0
-        Expect g:current_buffer_is_module('token') == 0
+        Expect CurrentBufferIsModule('tokenize') == 0
+        Expect CurrentBufferIsModule('token') == 0
         execute "normal \<CR>"
         Expect tabpagenr('$') == 2
         Expect winnr('$') == 1
-        Expect g:current_buffer_is_module('token') == 1
+        Expect CurrentBufferIsModule('token') == 1
 
         bd
         silent normal G$\d
         execute "normal j\<CR>"
         Expect tabpagenr('$') == 2
         Expect winnr('$') == 1
-        Expect g:current_buffer_is_module('tokenize') == 1
+        Expect CurrentBufferIsModule('tokenize') == 1
     end
 end
 
@@ -109,12 +109,12 @@ describe 'goto_with_buffers'
         normal G$
         call jedi#goto_assignments()
         python jedi_vim.goto()
-        Expect g:current_buffer_is_module('os') == 0
+        Expect CurrentBufferIsModule('os') == 0
         " Without hidden, it's not possible to open a new buffer, when the old
         " one is not saved.
         set hidden
         call jedi#goto_assignments()
-        Expect g:current_buffer_is_module('os') == 1
+        Expect CurrentBufferIsModule('os') == 1
         Expect winnr('$') == 1
         Expect tabpagenr('$') == 1
         Expect line('.') == 1
@@ -125,19 +125,19 @@ describe 'goto_with_buffers'
         set hidden
         put = ['import tokenize']
         silent normal G$\d
-        Expect g:current_buffer_is_module('tokenize') == 0
-        Expect g:current_buffer_is_module('token') == 0
+        Expect CurrentBufferIsModule('tokenize') == 0
+        Expect CurrentBufferIsModule('token') == 0
         execute "normal \<CR>"
         Expect tabpagenr('$') == 1
         Expect winnr('$') == 1
-        Expect g:current_buffer_is_module('token') == 1
+        Expect CurrentBufferIsModule('token') == 1
 
         bd
         silent normal G$\d
         execute "normal j\<CR>"
         Expect tabpagenr('$') == 1
         Expect winnr('$') == 1
-        Expect g:current_buffer_is_module('tokenize') == 1
+        Expect CurrentBufferIsModule('tokenize') == 1
     end
 end
 
@@ -162,7 +162,7 @@ describe 'goto_with_splits'
         Expect col('.') == 8
 
         silent normal G\d
-        Expect g:current_buffer_is_module('subprocess') == 1
+        Expect CurrentBufferIsModule('subprocess') == 1
         Expect line('.') == 1
         Expect col('.') == 1
         Expect winnr('$') == 2
