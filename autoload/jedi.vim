@@ -50,9 +50,15 @@ endfun
 function! jedi#show_documentation()
     Python jedi_vim.show_documentation()
 
-    if bufnr("__doc__") > 0
-        " If the __doc__ buffer is open in the current window, jump to it
-        silent execute "sbuffer ".bufnr("__doc__")
+    let bn = bufnr("__doc__")
+    if bn > 0
+        let wi=index(tabpagebuflist(tabpagenr()), bn)
+        if wi >= 0
+            " If the __doc__ buffer is open in the current tab, jump to it
+            silent execute (wi+1).'wincmd w'
+        else
+            silent execute "sbuffer ".bn
+        endif
     else
         split '__doc__'
     endif
