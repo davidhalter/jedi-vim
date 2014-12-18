@@ -368,7 +368,7 @@ When doing completion, jedi-vim shows the docstring of the currently selected
 item in a preview window. By default, this window is being closed after
 insertion of a completion item.
 
-Set this to 1 to leave the preview window open even after leaving insert mode.
+Set this to 0 to leave the preview window open even after leaving insert mode.
 This could be useful if you want to browse longer docstrings.
 
 Options: 0 or 1
