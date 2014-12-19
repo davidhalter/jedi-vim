@@ -36,4 +36,31 @@ describe 'signatures'
 
         let g:jedi#show_call_signatures = 1
     end
+
+    it 'command line simple'
+        let g:jedi#show_call_signatures = 2
+        call jedi#configure_call_signatures()
+
+        normal oabs( 
+        redir => msg
+        Python jedi_vim.show_call_signatures()
+        redir END
+        Expect msg == "\nabs(number)"
+
+        redir => msg
+        doautocmd InsertLeave 
+        redir END
+        Expect msg == "\n\n"
+    end
+
+    it 'command line no signature'
+        let g:jedi#show_call_signatures = 2
+        call jedi#configure_call_signatures()
+
+        normal ostr 
+        redir => msg
+        Python jedi_vim.show_call_signatures()
+        redir END
+        Expect msg == "\n"
+    end
 end

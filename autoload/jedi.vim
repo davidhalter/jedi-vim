@@ -155,8 +155,64 @@ endfunction
 
 
 function! jedi#configure_call_signatures()
+    if g:jedi#show_call_signatures == 2  " Command line call signatures
+        " Need to track changes to avoid multiple undo points for a single edit
+        if v:version >= 704 || has("patch-7.3.867")
+            let b:normaltick = b:changedtick
+            autocmd TextChanged,InsertLeave,BufWinEnter <buffer> let b:normaltick = b:changedtick
+        endif
+        autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
+    endif
     autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
     autocmd CursorMovedI <buffer> Python jedi_vim.show_call_signatures()
+endfunction
+
+" Determine where the current window is on the screen for displaying call
+" signatures in the correct column.
+function! s:save_first_col()
+    if bufname('%') ==# '[Command Line]' || winnr('$') == 1
+        return 0
+    endif
+
+    let l:eventignore = &eventignore
+    set eventignore=all
+    let startwin = winnr()
+    let startaltwin = winnr('#')
+    let winwidth = winwidth(0)
+
+    try
+        wincmd h
+        let win_on_left = winnr() == startwin
+        if win_on_left
+            return 0
+        else
+            " Walk left and count up window widths until hitting the edge
+            execute startwin."wincmd w"
+            let width = 0
+            let winnr = winnr()
+            wincmd h
+            while winnr != winnr()
+                let width += winwidth(0) + 1  " Extra column for window divider
+                let winnr = winnr()
+                wincmd h
+            endwhile
+            return width
+        endif
+    finally
+        let &eventignore = l:eventignore
+        execute startaltwin."wincmd w"
+        execute startwin."wincmd w"
+        " If the event that triggered InsertEnter made a change (e.g. open a
+        " new line, substitude a word), join that change with the rest of this
+        " edit.
+        if exists('b:normaltick') && b:normaltick != b:changedtick
+            try
+                undojoin
+            catch /^Vim\%((\a\+)\)\=:E790/
+                " This can happen if an undo happens during a :normal command.
+            endtry
+        endif
+    endtry
 endfunction
 
 " Helper function instead of `python vim.eval()`, and `.command()` because
