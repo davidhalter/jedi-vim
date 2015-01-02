@@ -314,7 +314,7 @@ plugin.
 Upon initialization, jedi-vim performs the following steps:
 
 1. Set the current buffers 'omnifunc' to its own completion function
-   `jedi#complete`
+   `jedi#completions`
 2. Create mappings to commands specified in |jedi-vim-keybindings|
 3. Call `jedi#configure_call_signatures()` if
    `g:jedi#show_call_signatures` is set
