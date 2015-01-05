@@ -104,7 +104,8 @@ def get_script(source=None, column=None):
 @catch_and_print_exceptions
 def completions():
     row, column = vim.current.window.cursor
-    clear_call_signatures()
+    if vim_eval("g:jedi#show_call_signatures") == '1':
+        clear_call_signatures()
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
