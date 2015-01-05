@@ -385,6 +385,9 @@ signatures in the command line instead of a popup window.
 Options: 0, 1, or 2
 Default: 1 (Show call signatures window)
 
+Note: 'showmode' must be disabled for command line call signatures to be
+visible.
+
 Note: This setting is ignored if |g:jedi#auto_initialization| is set to 0. In
 that case, if you want to see call signatures, you have to set it up
 manually by calling a function in your configuration file: >
