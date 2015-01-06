@@ -104,6 +104,8 @@ def get_script(source=None, column=None):
 @catch_and_print_exceptions
 def completions():
     row, column = vim.current.window.cursor
+    # Clear call signatures in the buffer so they aren't seen by the completer.
+    # Call signatures in the command line can stay.
     if vim_eval("g:jedi#show_call_signatures") == '1':
         clear_call_signatures()
     if vim.eval('a:findstart') == '1':
