@@ -265,6 +265,7 @@ def show_call_signatures(signatures=()):
 
     if not signatures:
         return
+    signatures = list(set(signatures))
 
     if vim_eval("g:jedi#show_call_signatures") == '2':
         return cmdline_call_signatures(signatures)
