@@ -429,7 +429,7 @@ Default: 1
 If you want to open new split for "go to", you could set this option to the
 direction which you want to open a split with.
 
-Options: top, left, right or bottom
+Options: top, left, right, bottom or winwidth
 Default: "" (not enabled by default)
 
 ------------------------------------------------------------------------------
