@@ -472,9 +472,8 @@ def new_buffer(path, options=''):
             'bottom': 'botright split',
             'winwidth': 'vs'
         }
-        if user_split_option == 'winwidth' and vim.current.window.width <= 2 * int(vim_eval("&tw ? &tw : 80")):
-            for key, value in split_options.items():
-                split_options['winwidth'] = 'sp'
+        if user_split_option == 'winwidth' and vim.current.window.width <= 2 * int(vim_eval("&textwidth ? &textwidth : 80")):
+            split_options['winwidth'] = 'sp'
         if user_split_option not in split_options:
             print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options.keys()))
         else:
