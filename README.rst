@@ -131,7 +131,7 @@ If you are a person who likes to use VIM-splits, you might want to put this in y
 
     let g:jedi#use_splits_not_buffers = "left"
 
-This options could be "left", "right", "top" or "bottom". It will decide the direction where the split open.
+This options could be "left", "right", "top", "bottom" or "winwidth". It will decide the direction where the split open.
 
 Jedi automatically starts the completion, if you type a dot, e.g. ``str.``, if
 you don't want this:
@@ -193,7 +193,7 @@ This depends on the ``completeopt`` option. Jedi initializes it in its
 I want <Tab> to do autocompletion
 ---------------------------------
 
-Don't even think about changing the Jedi command to ``<Tab>``, 
+Don't even think about changing the Jedi command to ``<Tab>``,
 use `supertab <https://github.com/ervandew/supertab>`_!
 
 

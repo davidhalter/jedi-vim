@@ -429,8 +429,13 @@ Default: 1
 If you want to open new split for "go to", you could set this option to the
 direction which you want to open a split with.
 
-Options: top, left, right or bottom
+Options: top, left, right, bottom or winwidth
 Default: "" (not enabled by default)
+
+Note: with the 'winwidth' option the window is split vertically or horizontally
+depending on the width of the window relative to 'textwidth'. This essentially
+means that if the window is big enough it will be split vertically but if it is
+small a horizontal split happens.
 
 ------------------------------------------------------------------------------
 6.11. `g:jedi#force_py_version`                *g:jedi#force_py_version*
