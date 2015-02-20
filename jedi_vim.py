@@ -387,7 +387,6 @@ def rename():
         vim_command('normal! diw')
         vim_command(':startinsert')
     else:
-        window_path = vim.current.buffer.name
         # reset autocommand
         vim_command('autocmd! jedi_rename InsertLeave')
 
@@ -417,9 +416,6 @@ def rename():
                 vim.current.window.cursor = r.start_pos
                 vim_command('normal! cw%s' % replace)
 
-            result = new_buffer(window_path)
-            if not result:
-                return
             vim.current.window.cursor = cursor
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
 

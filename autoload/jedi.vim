@@ -16,7 +16,14 @@ function! jedi#usages()
 endfunction
 
 function! jedi#rename(...)
-    Python jedi_vim.rename()
+    if has('win32') || has('win64')
+        let old_shellslash = &l:shellslash
+        setlocal noshellslash
+        Python jedi_vim.rename()
+        let &l:shellslash = old_shellslash
+    else
+        Python jedi_vim.rename()
+    endif
 endfunction
 
 function! jedi#completions(findstart, base)
@@ -142,7 +149,7 @@ function! jedi#do_popup_on_dot_in_highlight()
     for a in highlight_groups
         for b in ['pythonString', 'pythonComment', 'pythonNumber']
             if a == b
-                return 0 
+                return 0
             endif
         endfor
     endfor
