@@ -6,7 +6,7 @@ jedi-vim - awesome Python autocompletion with VIM
    :target: https://travis-ci.org/davidhalter/jedi-vim
    :alt: Travis-CI build status
 
-jedi-vim is a is a VIM binding to the autocompletion library
+jedi-vim is a VIM binding to the autocompletion library
 `Jedi <http://github.com/davidhalter/jedi>`_.
 
 Here are some pictures:
@@ -85,8 +85,8 @@ Example Installation Command using Pathogen:
     cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
 
 
-On Arch Linux, you can also install jedi-vim from AUR: `vim-jedi
-<https://aur.archlinux.org/packages/vim-jedi/>`__.
+On Arch Linux, you can also install jedi-vim from official repositories: `vim-jedi
+<https://www.archlinux.org/packages/community/any/vim-jedi/>`__.
 
 Note that the `python-mode <https://github.com/klen/python-mode>`_ VIM plugin seems
 to conflict with jedi-vim, therefore you should disable it before enabling
@@ -131,7 +131,7 @@ If you are a person who likes to use VIM-splits, you might want to put this in y
 
     let g:jedi#use_splits_not_buffers = "left"
 
-This options could be "left", "right", "top" or "bottom". It will decide the direction where the split open.
+This options could be "left", "right", "top", "bottom" or "winwidth". It will decide the direction where the split open.
 
 Jedi automatically starts the completion, if you type a dot, e.g. ``str.``, if
 you don't want this:
@@ -147,6 +147,16 @@ and usually saves one keypress.
 
     let g:jedi#popup_select_first = 0
 
+Jedi displays function call signatures in insert mode in real-time, highlighting
+the current argument. The call signatures can be displayed as a pop-up in the
+buffer (set to 1, the default), which has the advantage of being easier to refer
+to, or in Vim's command line aligned with the function call (set to 2), which
+can improve the integrity of Vim's undo history.
+
+.. code-block:: vim
+
+    let g:jedi#show_call_signatures = "1"
+
 Here are a few more defaults for actions, read the docs (``:help jedi-vim``) to
 get more information. If you set them to ``""``, they are not assigned.
 
@@ -158,7 +168,6 @@ get more information. If you set them to ``""``, they are not assigned.
     let g:jedi#usages_command = "<leader>n"
     let g:jedi#completions_command = "<C-Space>"
     let g:jedi#rename_command = "<leader>r"
-    let g:jedi#show_call_signatures = "1"
 
 
 Finally, if you don't want completion, but all the other features, use:
@@ -184,7 +193,7 @@ This depends on the ``completeopt`` option. Jedi initializes it in its
 I want <Tab> to do autocompletion
 ---------------------------------
 
-Don't even think about changing the Jedi command to ``<Tab>``, 
+Don't even think about changing the Jedi command to ``<Tab>``,
 use `supertab <https://github.com/ervandew/supertab>`_!
 
 

@@ -8,6 +8,10 @@ import re
 import os
 import sys
 from shlex import split as shsplit
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest  # Python 2
 
 import vim
 import jedi
@@ -100,7 +104,10 @@ def get_script(source=None, column=None):
 @catch_and_print_exceptions
 def completions():
     row, column = vim.current.window.cursor
-    clear_call_signatures()
+    # Clear call signatures in the buffer so they aren't seen by the completer.
+    # Call signatures in the command line can stay.
+    if vim_eval("g:jedi#show_call_signatures") == '1':
+        clear_call_signatures()
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
@@ -131,7 +138,7 @@ def completions():
                          abbr=PythonToVimStr(c.name),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
-                         info=PythonToVimStr(c.doc),  # docstr
+                         info=PythonToVimStr(c.docstring()),  # docstr
                          icase=1,  # case insensitive
                          dup=1  # allow duplicates (maybe later remove this)
                          )
@@ -219,8 +226,8 @@ def show_documentation():
         echo_highlight('No documentation found for that.')
         vim.command('return')
     else:
-        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.doc)
-                if d.doc else '|No Docstring for %s|' % d for d in definitions]
+        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.docstring())
+                if d.docstring() else '|No Docstring for %s|' % d for d in definitions]
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
@@ -228,6 +235,10 @@ def show_documentation():
 
 @catch_and_print_exceptions
 def clear_call_signatures():
+    # Check if using command line call signatures
+    if vim_eval("g:jedi#show_call_signatures") == '2':
+        vim_command('echo ""')
+        return
     cursor = vim.current.window.cursor
     e = vim_eval('g:jedi#call_signature_escape')
     regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
@@ -255,6 +266,9 @@ def show_call_signatures(signatures=()):
     if not signatures:
         return
 
+    if vim_eval("g:jedi#show_call_signatures") == '2':
+        return cmdline_call_signatures(signatures)
+
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
         # signatures are listed above each other
@@ -268,7 +282,7 @@ def show_call_signatures(signatures=()):
         # TODO check if completion menu is above or below
         line = vim_eval("getline(%s)" % line_to_replace)
 
-        params = [p.get_code().replace('\n', '') for p in signature.params]
+        params = [p.description.replace('\n', '') for p in signature.params]
         try:
             params[signature.index] = '*%s*' % params[signature.index]
         except (IndexError, TypeError):
@@ -308,6 +322,54 @@ def show_call_signatures(signatures=()):
         repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
         vim_eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
+
+
+@catch_and_print_exceptions
+def cmdline_call_signatures(signatures):
+    def get_params(s):
+        return [p.description.replace('\n', '') for p in s.params]
+
+    if len(signatures) > 1:
+        params = zip_longest(*map(get_params, signatures), fillvalue='_')
+        params = ['(' + ', '.join(p) + ')' for p in params]
+    else:
+        params = get_params(signatures[0])
+    text = ', '.join(params).replace('"', '\\"')
+
+    # Allow 12 characters for ruler/showcmd - setting noruler/noshowcmd
+    # here causes incorrect undo history
+    max_msg_len = int(vim_eval('&columns')) - 12
+    max_num_spaces = (max_msg_len - len(signatures[0].call_name)
+                      - len(text) - 2)  # 2 accounts for parentheses
+    if max_num_spaces < 0:
+        return  # No room for the message
+    _, column = signatures[0].bracket_start
+    num_spaces = min(int(vim_eval('g:jedi#first_col +'
+                     'wincol() - col(".")')) +
+                     column - len(signatures[0].call_name),
+                     max_num_spaces)
+    spaces = ' ' * num_spaces
+
+    try:
+        index = [s.index for s in signatures if isinstance(s.index, int)][0]
+        left = text.index(params[index])
+        right = left + len(params[index])
+        vim_command('                      echon "%s" | '
+                    'echohl Function     | echon "%s" | '
+                    'echohl None         | echon "("  | '
+                    'echohl jediFunction | echon "%s" | '
+                    'echohl jediFat      | echon "%s" | '
+                    'echohl jediFunction | echon "%s" | '
+                    'echohl None         | echon ")"'
+                    % (spaces, signatures[0].call_name, text[:left],
+                       text[left:right], text[right:]))
+    except (TypeError, IndexError):
+        vim_command('                      echon "%s" | '
+                    'echohl Function     | echon "%s" | '
+                    'echohl None         | echon "("  | '
+                    'echohl jediFunction | echon "%s" | '
+                    'echohl None         | echon ")"'
+                    % (spaces, signatures[0].call_name, text))
 
 
 @catch_and_print_exceptions
@@ -407,8 +469,11 @@ def new_buffer(path, options=''):
             'top': 'topleft split',
             'left': 'topleft vsplit',
             'right': 'botright vsplit',
-            'bottom': 'botright split'
+            'bottom': 'botright split',
+            'winwidth': 'vs'
         }
+        if user_split_option == 'winwidth' and vim.current.window.width <= 2 * int(vim_eval("&textwidth ? &textwidth : 80")):
+            split_options['winwidth'] = 'sp'
         if user_split_option not in split_options:
             print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options.keys()))
         else:

@@ -46,7 +46,7 @@ Contents				*jedi-vim-contents*
 ==============================================================================
 1. Introduction				*jedi-vim-introduction*
 
-Jedi-vim is a is a Vim binding to the awesome Python autocompletion library
+Jedi-vim is a Vim binding to the awesome Python autocompletion library
 `jedi`. Among jedi's (and, therefore, jedi-vim's) features are:
 
 - Completion for a wide array of Python features (see |jedi-vim-support|)
@@ -138,11 +138,11 @@ Pathogen simplifies installation considerably.
    will automatically get the jedi library with the jedi-vim plugin. Add the
    following to the Bundles section in your .vimrc file: >
 
-    Bundle 'git://github.com/davidhalter/jedi-vim'
+    Plugin 'davidhalter/jedi-vim'
 
 2. Issue the following command in Vim: >
 
-    :BundleInstall
+    :PluginInstall
 
 Help tags are generated automatically, so you should be good to go.
 
@@ -314,7 +314,7 @@ plugin.
 Upon initialization, jedi-vim performs the following steps:
 
 1. Set the current buffers 'omnifunc' to its own completion function
-   `jedi#complete`
+   `jedi#completions`
 2. Create mappings to commands specified in |jedi-vim-keybindings|
 3. Call `jedi#configure_call_signatures()` if
    `g:jedi#show_call_signatures` is set
@@ -368,7 +368,7 @@ When doing completion, jedi-vim shows the docstring of the currently selected
 item in a preview window. By default, this window is being closed after
 insertion of a completion item.
 
-Set this to 1 to leave the preview window open even after leaving insert mode.
+Set this to 0 to leave the preview window open even after leaving insert mode.
 This could be useful if you want to browse longer docstrings.
 
 Options: 0 or 1
@@ -379,10 +379,14 @@ Default: 1 (Automatically close preview window upon leaving insert mode)
 
 Jedi-vim can display a small window detailing the arguments of the currently
 completed function and highlighting the currently selected argument. This can
-be disabled by setting this option to 0.
+be disabled by setting this option to 0. Setting this option to 2 shows call
+signatures in the command line instead of a popup window.
 
-Options: 0 or 1
+Options: 0, 1, or 2
 Default: 1 (Show call signatures window)
+
+Note: 'showmode' must be disabled for command line call signatures to be
+visible.
 
 Note: This setting is ignored if |g:jedi#auto_initialization| is set to 0. In
 that case, if you want to see call signatures, you have to set it up
@@ -425,8 +429,13 @@ Default: 1
 If you want to open new split for "go to", you could set this option to the
 direction which you want to open a split with.
 
-Options: top, left, right or bottom
+Options: top, left, right, bottom or winwidth
 Default: "" (not enabled by default)
+
+Note: with the 'winwidth' option the window is split vertically or horizontally
+depending on the width of the window relative to 'textwidth'. This essentially
+means that if the window is big enough it will be split vertically but if it is
+small a horizontal split happens.
 
 ------------------------------------------------------------------------------
 6.11. `g:jedi#force_py_version`                *g:jedi#force_py_version*
