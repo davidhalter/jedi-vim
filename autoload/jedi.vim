@@ -87,7 +87,7 @@ function! jedi#show_documentation()
 
     " quit comands
     nnoremap <buffer> q ZQ
-    nnoremap <buffer> K ZQ
+    execute "nnoremap <buffer> ".g:jedi#documentation_command." ZQ"
 
     " highlight python code within rst
     unlet! b:current_syntax
