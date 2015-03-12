@@ -233,8 +233,11 @@ function! jedi#show_documentation()
     setlocal nomodified
     setlocal filetype=rst
 
-    if l:doc_lines > 30  " max lines for plugin
-        let l:doc_lines = 30
+    if !exists('g:jedi#max_doc_height')
+        let g:jedi#max_doc_height = 30
+    endif
+    if l:doc_lines > g:jedi#max_doc_height " max lines for plugin
+        let l:doc_lines = g:jedi#max_doc_height
     endif
     execute "resize ".l:doc_lines
 
