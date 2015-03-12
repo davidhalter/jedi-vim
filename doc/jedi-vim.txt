@@ -272,7 +272,8 @@ Function: `jedi#show_documentation()`
 Default: <K>				Show pydoc documentation
 
 This shows the pydoc documentation for the item currently under the cursor.
-The documentation is opened in a horizontally split buffer.
+The documentation is opened in a horizontally split buffer. The height of this
+buffer is controlled by `g:jedi#max_doc_height` (set by default to 30).
 
 ------------------------------------------------------------------------------
 5.5. `g:jedi#rename_command`		*g:jedi#rename_command*
