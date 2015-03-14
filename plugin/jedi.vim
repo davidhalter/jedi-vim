@@ -7,7 +7,7 @@
 
 " jedi-vim doesn't work in compatible mode (vim script syntax problems)
 if &compatible
-    set nocompatible
+    finish
 endif
 
 " jedi-vim really needs, otherwise jedi-vim cannot start.
