@@ -193,7 +193,6 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                     if not result:
                         return
                 vim.current.window.cursor = d.line, d.column
-                vim_command('normal! zt')  # cursor at top of screen
         else:
             # multiple solutions
             lst = []
