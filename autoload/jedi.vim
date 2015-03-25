@@ -307,7 +307,7 @@ let s:settings = {
     \ 'popup_on_dot': 1,
     \ 'documentation_command': "'K'",
     \ 'show_call_signatures': 1,
-    \ 'call_signature_escape': "'=='",
+    \ 'call_signature_escape': "'=`='",
     \ 'auto_close_doc': 1,
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
