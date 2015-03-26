@@ -283,7 +283,8 @@ def show_call_signatures(signatures=()):
 
         params = [p.description.replace('\n', '') for p in signature.params]
         try:
-            params[signature.index] = '*%s*' % params[signature.index]
+            # *_*PLACEHOLDER*_* makes something fat. See after/syntax file.
+            params[signature.index] = '*_*%s*_*' % params[signature.index]
         except (IndexError, TypeError):
             pass
 

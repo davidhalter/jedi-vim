@@ -6,8 +6,8 @@ if g:jedi#show_call_signatures > 0 && has('conceal')
     let s:ignore = s:e.'jedi.\{-}'.s:e
     exe 'syn match jediIgnore "'.s:ignore.'" contained conceal'
     setlocal conceallevel=2
-    syn match jediFatSymbol "*" contained conceal
-    syn match jediFat "\*[^*]\+\*" contained contains=jediFatSymbol
+    syn match jediFatSymbol "\*_\*" contained conceal
+    syn match jediFat "\*_\*.\{-}\*_\*" contained contains=jediFatSymbol
     syn match jediSpace "\v[ ]+( )@=" contained
     exe 'syn match jediFunction "'.s:full.'" keepend extend '
                 \ .' contains=jediIgnore,jediFat,jediSpace'
