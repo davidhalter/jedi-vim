@@ -15,7 +15,7 @@ describe 'signatures'
         " equals doautocmd CursorMovedI
         Python jedi_vim.show_call_signatures()
 
-        Expect getline(1) == '=`=jedi=0, =`=   (*number*) =`=jedi=`='
+        Expect getline(1) == '=`=jedi=0, =`=   (*_*number*_*) =`=jedi=`='
 
         doautocmd InsertLeave 
         Expect getline(1) == ''
