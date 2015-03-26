@@ -17,7 +17,7 @@ class IntegrationTestFile(object):
         output = subprocess.check_output([VSPEC_RUNNER, '.', VSPEC_FOLDER, self.path])
         for line in output.splitlines():
             if line.startswith(b'not ok') or line.startswith(b'Error'):
-                print(output)
+                print(output.decode('utf-8'))
                 assert False
 
     def __repr__(self):
