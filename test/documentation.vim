@@ -2,7 +2,6 @@ source plugin/jedi.vim
 
 describe 'documentation docstrings'
     before
-        bd!
         set filetype=python
     end
 

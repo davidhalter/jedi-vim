@@ -240,16 +240,20 @@ def clear_call_signatures():
         return
     cursor = vim.current.window.cursor
     e = vim_eval('g:jedi#call_signature_escape')
-    regex = r'%sjedi=([0-9]+), ([^%s]*)%s.*%sjedi%s'.replace('%s', e)
+    # We need two turns here to search and replace certain lines:
+    # 1. Search for a line with a call signature and save the appended
+    #    characters
+    # 2. Actually replace the line and redo the status quo.
+    py_regex = r'%sjedi=([0-9]+), (.*?)%s.*?%sjedi%s'.replace('%s', e)
     for i, line in enumerate(vim.current.buffer):
-        match = re.search(r'%s' % regex, line)
+        match = re.search(r'%s' % py_regex, line)
         if match is not None:
-            vim_regex = r'\v' + regex.replace('=', r'\=') + '.{%s}' \
-                % int(match.group(1))
-            vim_command(r'try | %s,%ss/%s/\2/g | catch | endtry'
-                        % (i + 1, i + 1, vim_regex))
-            vim_eval('histdel("search", -1)')
-            vim_command('let @/ = histget("search", -1)')
+            # Some signs were added to minimize syntax changes due to call
+            # signatures. We have to remove them again. The number of them is
+            # specified in `match.group(1)`.
+            after = line[match.end() + int(match.group(1)):]
+            line = line[:match.start()] + match.group(2) + after
+            vim.current.buffer[i] = line
     vim.current.window.cursor = cursor
 
 
