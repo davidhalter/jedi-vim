@@ -21,5 +21,5 @@ sys.path.insert(0, vim.eval('expand(s:script_path)'))
 try:
     import jedi_vim
 except ImportError:
-    vim.command('echoerr "Please install Jedi if you want to use jedi_vim."')
+    vim.command('echohl ErrorMsg | echomsg "Please install Jedi if you want to use jedi_vim." | echohl NONE')
 sys.path.pop(1)
