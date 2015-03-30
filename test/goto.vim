@@ -73,21 +73,24 @@ describe 'goto_with_tabs'
     end
 
     it 'multi_definitions'
-        put = ['import tokenize']
-        silent normal G$\d
-        Expect CurrentBufferIsModule('tokenize') == 0
-        Expect CurrentBufferIsModule('token') == 0
-        execute "normal \<CR>"
-        Expect tabpagenr('$') == 2
-        Expect winnr('$') == 1
-        Expect CurrentBufferIsModule('token') == 1
+        " This used to behave differently. Now we don't have any real multi
+        " definitions.
+        
+        " put = ['import tokenize']
+        " silent normal G$\d
+        " Expect CurrentBufferIsModule('tokenize') == 1
+        " Expect CurrentBufferIsModule('token') == 0
+        " execute "normal \<CR>"
+        " Expect tabpagenr('$') == 2
+        " Expect winnr('$') == 1
+        " Expect CurrentBufferIsModule('token') == 1
 
-        bd
-        silent normal G$\d
-        execute "normal j\<CR>"
-        Expect tabpagenr('$') == 2
-        Expect winnr('$') == 1
-        Expect CurrentBufferIsModule('tokenize') == 1
+        " bd
+        " silent normal G$\d
+        " execute "normal j\<CR>"
+        " Expect tabpagenr('$') == 2
+        " Expect winnr('$') == 1
+        " Expect CurrentBufferIsModule('tokenize') == 1
     end
 end
 
@@ -122,22 +125,22 @@ describe 'goto_with_buffers'
     end
 
     it 'multi_definitions'
-        set hidden
-        put = ['import tokenize']
-        silent normal G$\d
-        Expect CurrentBufferIsModule('tokenize') == 0
-        Expect CurrentBufferIsModule('token') == 0
-        execute "normal \<CR>"
-        Expect tabpagenr('$') == 1
-        Expect winnr('$') == 1
-        Expect CurrentBufferIsModule('token') == 1
+        " set hidden
+        " put = ['import tokenize']
+        " silent normal G$\d
+        " Expect CurrentBufferIsModule('tokenize') == 0
+        " Expect CurrentBufferIsModule('token') == 0
+        " execute "normal \<CR>"
+        " Expect tabpagenr('$') == 1
+        " Expect winnr('$') == 1
+        " Expect CurrentBufferIsModule('token') == 1
 
-        bd
-        silent normal G$\d
-        execute "normal j\<CR>"
-        Expect tabpagenr('$') == 1
-        Expect winnr('$') == 1
-        Expect CurrentBufferIsModule('tokenize') == 1
+        " bd
+        " silent normal G$\d
+        " execute "normal j\<CR>"
+        " Expect tabpagenr('$') == 1
+        " Expect winnr('$') == 1
+        " Expect CurrentBufferIsModule('tokenize') == 1
     end
 end
 
