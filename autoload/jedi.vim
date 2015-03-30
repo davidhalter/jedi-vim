@@ -48,7 +48,7 @@ endfun
 " show_documentation
 " ------------------------------------------------------------------------
 function! jedi#show_documentation()
-    Python jedi_vim.show_documentation()
+    Python if jedi_vim.show_documentation() is None: vim.command('return')
 
     let bn = bufnr("__doc__")
     if bn > 0
@@ -148,10 +148,6 @@ function! jedi#do_popup_on_dot_in_highlight()
     endfor
     return 1
 endfunc
-
-
-function! jedi#popup_on_dot_string()
-endfunction
 
 
 function! jedi#configure_call_signatures()

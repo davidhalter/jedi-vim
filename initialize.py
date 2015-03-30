@@ -18,8 +18,5 @@ import traceback
 
 # update the sys path to include the jedi_vim script
 sys.path.insert(0, vim.eval('expand(s:script_path)'))
-try:
-    import jedi_vim
-except ImportError:
-    vim.command('echoerr "Please install Jedi if you want to use jedi_vim."')
+import jedi_vim
 sys.path.pop(1)
