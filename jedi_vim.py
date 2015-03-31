@@ -280,7 +280,7 @@ def clear_call_signatures():
     # 2. Actually replace the line and redo the status quo.
     py_regex = r'%sjedi=([0-9]+), (.*?)%s.*?%sjedi%s'.replace('%s', e)
     for i, line in enumerate(vim.current.buffer):
-        match = re.search(r'%s' % py_regex, line)
+        match = re.search(py_regex, line)
         if match is not None:
             # Some signs were added to minimize syntax changes due to call
             # signatures. We have to remove them again. The number of them is
