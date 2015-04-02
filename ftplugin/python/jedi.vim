@@ -36,12 +36,12 @@ if g:jedi#auto_initialization
     if g:jedi#auto_close_doc
         " close preview if its still open after insert
         autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
-    end
-end
+    endif
+endif
 
 if g:jedi#auto_vim_configuration
     setlocal completeopt=menuone,longest,preview
     if len(mapcheck('<C-c>', 'i')) == 0
         inoremap <C-c> <ESC>
-    end
-end
+    endif
+endif

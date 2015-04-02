@@ -235,12 +235,12 @@ function! jedi#complete_string(is_popup_on_dot)
     if a:is_popup_on_dot && !(g:jedi#popup_on_dot && jedi#do_popup_on_dot_in_highlight())
         return ''
 
-    end
+    endif
     if pumvisible() && !a:is_popup_on_dot
         return "\<C-n>"
     else
         return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened()\<CR>"
-    end
+    endif
 endfunction
 
 
@@ -248,7 +248,7 @@ function! jedi#complete_opened()
     if pumvisible() && g:jedi#popup_select_first && stridx(&completeopt, 'longest') > -1
         " only go down if it is visible, user-enabled and the longest option is set
         return "\<Down>"
-    end
+    endif
     return ""
 endfunction
 
@@ -317,7 +317,7 @@ function! s:init()
       if exists('g:jedi#'.key)
           echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
           exe 'let g:jedi#'.val.' = g:jedi#'.key
-      end
+      endif
   endfor
 
   for [key, val] in items(s:settings)
@@ -349,7 +349,7 @@ else
         echomsg "Error: jedi-vim requires vim compiled with +python"
     endif
     finish
-end
+endif
 
 
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)

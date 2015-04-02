@@ -24,5 +24,5 @@ if g:jedi#show_call_signatures > 0 && has('conceal')
     else
         hi jediFunction term=NONE cterm=NONE ctermfg=6 guifg=Black gui=NONE ctermbg=0 guibg=Grey
         hi jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=#555555
-    end
+    endif
 endif
