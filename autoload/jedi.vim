@@ -96,10 +96,11 @@ endfunction
 " helper functions
 " ------------------------------------------------------------------------
 
-function! jedi#add_goto_window()
+function! jedi#add_goto_window(len)
     set lazyredraw
     cclose
-    execute 'belowright copen '.g:jedi#quickfix_window_height
+    let height = min([a:len, g:jedi#quickfix_window_height])
+    execute 'belowright copen '.height
     set nolazyredraw
     if g:jedi#use_tabs_not_buffers == 1
         noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
