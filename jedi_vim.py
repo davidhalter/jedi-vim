@@ -236,7 +236,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
                                     lnum=d.line, col=d.column + 1,
                                     text=PythonToVimStr(d.description)))
             vim_eval('setqflist(%s)' % repr(lst))
-            vim_eval('jedi#add_goto_window()')
+            vim_eval('jedi#add_goto_window(' + str(len(lst)) + ')')
     return definitions
 
 
