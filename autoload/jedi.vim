@@ -4,43 +4,43 @@ scriptencoding utf-8
 " functions that call python code
 " ------------------------------------------------------------------------
 function! jedi#goto_assignments()
-    Python jedi_vim.goto()
+    PythonJedi jedi_vim.goto()
 endfunction
 
 function! jedi#goto_definitions()
-    Python jedi_vim.goto(is_definition=True)
+    PythonJedi jedi_vim.goto(is_definition=True)
 endfunction
 
 function! jedi#usages()
-    Python jedi_vim.goto(is_related_name=True)
+    PythonJedi jedi_vim.goto(is_related_name=True)
 endfunction
 
 function! jedi#rename(...)
-    Python jedi_vim.rename()
+    PythonJedi jedi_vim.rename()
 endfunction
 
 function! jedi#completions(findstart, base)
-    Python jedi_vim.completions()
+    PythonJedi jedi_vim.completions()
 endfunction
 
 function! jedi#enable_speed_debugging()
-    Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
+    PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 endfunction
 
 function! jedi#enable_debugging()
-    Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
+    PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 endfunction
 
 function! jedi#disable_debugging()
-    Python jedi_vim.jedi.set_debug_function(None)
+    PythonJedi jedi_vim.jedi.set_debug_function(None)
 endfunction
 
 function! jedi#py_import(args)
-    Python jedi_vim.py_import()
+    PythonJedi jedi_vim.py_import()
 endfun
 
 function! jedi#py_import_completions(argl, cmdl, pos)
-    Python jedi_vim.py_import_completions()
+    PythonJedi jedi_vim.py_import_completions()
 endfun
 
 
@@ -48,7 +48,7 @@ endfun
 " show_documentation
 " ------------------------------------------------------------------------
 function! jedi#show_documentation()
-    Python if jedi_vim.show_documentation() is None: vim.command('return')
+    PythonJedi if jedi_vim.show_documentation() is None: vim.command('return')
 
     let bn = bufnr("__doc__")
     if bn > 0
@@ -116,7 +116,7 @@ function! jedi#goto_window_on_enter()
     if l:data.bufnr
         " close goto_window buffer
         normal ZQ
-        Python jedi_vim.new_buffer(vim.eval('bufname(l:data.bufnr)'))
+        PythonJedi jedi_vim.new_buffer(vim.eval('bufname(l:data.bufnr)'))
         call cursor(l:data.lnum, l:data.col)
     else
         echohl WarningMsg | echo "Builtin module cannot be opened." | echohl None
@@ -160,8 +160,8 @@ function! jedi#configure_call_signatures()
         endif
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
-    autocmd InsertLeave <buffer> Python jedi_vim.clear_call_signatures()
-    autocmd CursorMovedI <buffer> Python jedi_vim.show_call_signatures()
+    autocmd InsertLeave <buffer> PythonJedi jedi_vim.clear_call_signatures()
+    autocmd CursorMovedI <buffer> PythonJedi jedi_vim.show_call_signatures()
 endfunction
 
 " Determine where the current window is on the screen for displaying call
@@ -258,10 +258,10 @@ function! jedi#force_py_version(py_version)
     let g:jedi#force_py_version = a:py_version
     try
         if g:jedi#force_py_version == 2
-            command! -nargs=1 Python python <args>
+            command! -nargs=1 PythonJedi python <args>
             execute 'pyfile '.s:script_path.'/initialize.py'
         elseif g:jedi#force_py_version == 3
-            command! -nargs=1 Python python3 <args>
+            command! -nargs=1 PythonJedi python3 <args>
             execute 'py3file '.s:script_path.'/initialize.py'
         endif
     catch
@@ -371,10 +371,10 @@ else
     if g:jedi#force_py_version == 'auto'
         " If it's still "auto", it wasn't handled above.
         if has('python')
-            command! -nargs=1 Python python <args>
+            command! -nargs=1 PythonJedi python <args>
             execute 'pyfile '.s:script_path.'/initialize.py'
         elseif has('python3')
-            command! -nargs=1 Python python3 <args>
+            command! -nargs=1 PythonJedi python3 <args>
             execute 'py3file '.s:script_path.'/initialize.py'
         else
             if !exists("g:jedi#squelch_py_warning")
@@ -385,7 +385,7 @@ else
 endif
 
 
-"Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
-"Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
+"PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
+"PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 
 " vim: set et ts=4:
