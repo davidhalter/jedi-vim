@@ -254,21 +254,31 @@ function! jedi#complete_opened()
 endfunction
 
 
+function! jedi#setup_py_version(py_version)
+    if a:py_version == 2
+        let cmd_init = 'pyfile'
+        let cmd_exec = 'python'
+    elseif a:py_version == 3
+        let cmd_init = 'py3file'
+        let cmd_exec = 'python3'
+    else
+        throw "jedi#setup_py_version: invalid py_version: ".a:py_version
+    endif
+
+    try
+        execute cmd_init.' '.s:script_path.'/initialize.py'
+        execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
+        return 1
+    catch
+        execute 'command! -nargs=1 PythonJedi echoerr "Jedi failed to initialize: '.v:exception.'"'
+        throw "jedi#setup_py_version: ".v:exception
+    endtry
+endfunction
+
+
 function! jedi#force_py_version(py_version)
     let g:jedi#force_py_version = a:py_version
-    try
-        if g:jedi#force_py_version == 2
-            command! -nargs=1 PythonJedi python <args>
-            execute 'pyfile '.s:script_path.'/initialize.py'
-        elseif g:jedi#force_py_version == 3
-            command! -nargs=1 PythonJedi python3 <args>
-            execute 'py3file '.s:script_path.'/initialize.py'
-        endif
-    catch
-        if !exists("g:jedi#squelch_py_warning")
-            echom "jedi#force_py_version failed: " . v:exception
-        endif
-    endtry
+    return jedi#setup_py_version(a:py_version)
 endfunction
 
 
@@ -277,6 +287,8 @@ function! jedi#force_py_version_switch()
         call jedi#force_py_version(3)
     elseif g:jedi#force_py_version == 3
         call jedi#force_py_version(2)
+    else
+        throw "Don't know how to switch from ".g:jedi#force_py_version."!"
     endif
 endfunction
 
@@ -343,10 +355,16 @@ call s:init()
 
 let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
 
-if g:jedi#force_py_version != 'auto'
-    " Always use the user supplied version.
-    call jedi#force_py_version(g:jedi#force_py_version)
-else
+function! s:init_python()
+    if g:jedi#force_py_version != 'auto'
+        " Always use the user supplied version.
+        try
+            return jedi#force_py_version(g:jedi#force_py_version)
+        catch
+            throw "Could not setup g:jedi#force_py_version: ".v:exception
+        endtry
+    endif
+
     " Handle "auto" version.
     if has('nvim') || (has('python') && has('python3'))
         " Neovim usually has both python providers. Skipping the `has` check
@@ -356,33 +374,50 @@ else
         let s:def_py = system("python -c 'import sys; sys.stdout.write(str(sys.version_info[0]))'")
         if v:shell_error != 0 || !len(s:def_py)
             if !exists("g:jedi#squelch_py_warning")
-                echomsg "Error: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
-                echomsg "Falling back to version 2."
+                echohl WarningMsg
+                echom "Warning: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
+                echom "Falling back to version 2."
+                echohl None
             endif
             let s:def_py = 2
+        elseif &verbose
+            echom "jedi-vim: auto-detected Python: ".s:def_py
         endif
 
         " Make sure that the auto-detected version is available in Vim.
         if !has('nvim') || has('python'.(s:def_py == 2 ? '' : s:def_py))
-            call jedi#force_py_version(s:def_py)
+            return jedi#force_py_version(s:def_py)
         endif
     end
 
-    if g:jedi#force_py_version == 'auto'
-        " If it's still "auto", it wasn't handled above.
-        if has('python')
-            command! -nargs=1 PythonJedi python <args>
-            execute 'pyfile '.s:script_path.'/initialize.py'
-        elseif has('python3')
-            command! -nargs=1 PythonJedi python3 <args>
-            execute 'py3file '.s:script_path.'/initialize.py'
-        else
+    if has('python')
+        call jedi#setup_py_version(2)
+    elseif has('python3')
+        call jedi#setup_py_version(3)
+    else
+        throw "jedi-vim requires Vim with support for Python 2 or 3."
+    end
+    return 1
+endfunction
+
+
+function! jedi#init_python()
+    if !exists('s:_init_python')
+        try
+            let s:_init_python = s:init_python()
+        catch
             if !exists("g:jedi#squelch_py_warning")
-                echomsg "Error: jedi-vim requires vim compiled with +python"
+                echohl WarningMsg
+                echom "Error: jedi-vim failed to initialize Python: ".v:exception
+                echohl None
             endif
-        end
+            let s:_init_python = 0
+        endtry
     endif
-endif
+    return s:_init_python
+endfunction
+
+call jedi#init_python()
 
 
 "PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)

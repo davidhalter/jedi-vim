@@ -1,4 +1,4 @@
-if !has('python') && !has('python3')
+if !jedi#init_python()
     finish
 endif
 " ------------------------------------------------------------------------

@@ -1,6 +1,10 @@
+if !jedi#init_python()
+    finish
+endif
+
 if g:jedi#show_call_signatures > 0 && has('conceal')
     " +conceal is the default for vim >= 7.3
- 
+
     let s:e = g:jedi#call_signature_escape
     let s:full = s:e.'jedi=.\{-}'.s:e.'.\{-}'.s:e.'jedi'.s:e
     let s:ignore = s:e.'jedi.\{-}'.s:e
@@ -13,11 +17,11 @@ if g:jedi#show_call_signatures > 0 && has('conceal')
                 \ .' contains=jediIgnore,jediFat,jediSpace'
                 \ .' containedin=pythonComment,pythonString,pythonRawString'
     unlet! s:e s:full s:ignore
- 
+
     hi def link jediIgnore Ignore
     hi def link jediFatSymbol Ignore
     hi def link jediSpace Normal
- 
+
     if exists('g:colors_name')
         hi def link jediFunction CursorLine
         hi def link jediFat TabLine
