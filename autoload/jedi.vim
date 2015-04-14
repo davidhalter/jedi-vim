@@ -256,13 +256,19 @@ endfunction
 
 function! jedi#force_py_version(py_version)
     let g:jedi#force_py_version = a:py_version
-    if g:jedi#force_py_version == 2
-        command! -nargs=1 Python python <args>
-        execute 'pyfile '.s:script_path.'/initialize.py'
-    elseif g:jedi#force_py_version == 3
-        command! -nargs=1 Python python3 <args>
-        execute 'py3file '.s:script_path.'/initialize.py'
-    endif
+    try
+        if g:jedi#force_py_version == 2
+            command! -nargs=1 Python python <args>
+            execute 'pyfile '.s:script_path.'/initialize.py'
+        elseif g:jedi#force_py_version == 3
+            command! -nargs=1 Python python3 <args>
+            execute 'py3file '.s:script_path.'/initialize.py'
+        endif
+    catch
+        if !exists("g:jedi#squelch_py_warning")
+            echom "jedi#force_py_version failed: " . v:exception
+        endif
+    endtry
 endfunction
 
 
