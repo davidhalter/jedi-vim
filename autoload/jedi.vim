@@ -352,7 +352,9 @@ function! jedi#get_force_py_version()
     return g:jedi#force_py_version
 endfunction
 
-if has('python') && has('python3')
+" NOTE: nvim usually has both python providers. Skipping the `has` check
+" avoids starting both of them.
+if has('nvim') || (has('python') && has('python3'))
     " Use default python with Jedi.
     call jedi#force_py_version(jedi#get_force_py_version())
 elseif has('python')
