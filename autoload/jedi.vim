@@ -343,38 +343,46 @@ call s:init()
 
 let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
 
-if g:jedi#force_py_version == 'auto'
-    " Get default python version from interpreter in $PATH.
-    let s:def_py = system("python -c 'import sys; sys.stdout.write(str(sys.version_info[0]))'")
-    if v:shell_error == 0 && len(s:def_py)
-        let g:jedi#force_py_version = s:def_py
-    else
-        if !exists("g:jedi#squelch_py_warning")
-            echomsg "Error: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
-            echomsg "Falling back to version 2."
-        endif
-        let g:jedi#force_py_version = 2
-    endif
-
+if g:jedi#force_py_version != 'auto'
+    " Always use the user supplied version.
+    call jedi#force_py_version(g:jedi#force_py_version)
+else
+    " Handle "auto" version.
     if has('nvim') || (has('python') && has('python3'))
         " Neovim usually has both python providers. Skipping the `has` check
         " avoids starting both of them.
-        call jedi#force_py_version(g:jedi#force_py_version)
-    elseif has('python')
-        command! -nargs=1 Python python <args>
-        execute 'pyfile '.s:script_path.'/initialize.py'
-    elseif has('python3')
-        command! -nargs=1 Python python3 <args>
-        execute 'py3file '.s:script_path.'/initialize.py'
-    else
-        if !exists("g:jedi#squelch_py_warning")
-            echomsg "Error: jedi-vim requires vim compiled with +python"
+
+        " Get default python version from interpreter in $PATH.
+        let s:def_py = system("python -c 'import sys; sys.stdout.write(str(sys.version_info[0]))'")
+        if v:shell_error != 0 || !len(s:def_py)
+            if !exists("g:jedi#squelch_py_warning")
+                echomsg "Error: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
+                echomsg "Falling back to version 2."
+            endif
+            let s:def_py = 2
         endif
-        finish
+
+        " Make sure that the auto-detected version is available in Vim.
+        if !has('nvim') || has('python'.(s:def_py == 2 ? '' : s:def_py))
+            call jedi#force_py_version(s:def_py)
+        endif
     end
-else
-    call jedi#force_py_version(g:jedi#force_py_version)
-end
+
+    if g:jedi#force_py_version == 'auto'
+        " If it's still "auto", it wasn't handled above.
+        if has('python')
+            command! -nargs=1 Python python <args>
+            execute 'pyfile '.s:script_path.'/initialize.py'
+        elseif has('python3')
+            command! -nargs=1 Python python3 <args>
+            execute 'py3file '.s:script_path.'/initialize.py'
+        else
+            if !exists("g:jedi#squelch_py_warning")
+                echomsg "Error: jedi-vim requires vim compiled with +python"
+            endif
+        end
+    endif
+endif
 
 
 "Python jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
