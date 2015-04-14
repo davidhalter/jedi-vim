@@ -462,7 +462,7 @@ or set directly using this function, which has the same name as the variable:
 Function: `jedi#force_py_version(py_version)`
 
 Options: 2 or 3
-Default: 2
+Default: "auto" (will use sys.version_info from "python" in your $PATH)
 
 ==============================================================================
 7. Testing				*jedi-vim-testing*

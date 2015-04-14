@@ -309,7 +309,7 @@ let s:settings = {
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
     \ 'completions_enabled': 1,
-    \ 'force_py_version': 2
+    \ 'force_py_version': "'auto'"
 \ }
 
 
@@ -337,8 +337,24 @@ call s:init()
 
 let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
 
+" Get g:jedi#force_py_version, handling "auto" on first call.
+function! jedi#get_force_py_version()
+    if g:jedi#force_py_version == 'auto'
+        let s:def_py = system("python -c 'import sys; sys.stdout.write(str(sys.version_info[0]))'")
+        if v:shell_error == 0 && len(s:def_py)
+            let g:jedi#force_py_version = s:def_py
+        else
+            if !exists("g:jedi#squelch_py_warning")
+                echomsg "Error: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
+            endif
+        endif
+    endif
+    return g:jedi#force_py_version
+endfunction
+
 if has('python') && has('python3')
-    call jedi#force_py_version(g:jedi#force_py_version)
+    " Use default python with Jedi.
+    call jedi#force_py_version(jedi#get_force_py_version())
 elseif has('python')
     command! -nargs=1 Python python <args>
     execute 'pyfile '.s:script_path.'/initialize.py'
