@@ -1,9 +1,56 @@
 scriptencoding utf-8
 
 " ------------------------------------------------------------------------
+" Settings initialization
+" ------------------------------------------------------------------------
+let s:deprecations = {
+    \ 'get_definition_command':     'goto_definitions_command',
+    \ 'goto_command':               'goto_assignments_command',
+    \ 'pydoc':                      'documentation_command',
+    \ 'related_names_command':      'usages_command',
+    \ 'autocompletion_command':     'completions_command',
+    \ 'show_function_definition':   'show_call_signatures',
+\ }
+
+let s:default_settings = {
+    \ 'use_tabs_not_buffers': 1,
+    \ 'use_splits_not_buffers': 1,
+    \ 'auto_initialization': 1,
+    \ 'auto_vim_configuration': 1,
+    \ 'goto_assignments_command': "'<leader>g'",
+    \ 'completions_command': "'<C-Space>'",
+    \ 'goto_definitions_command': "'<leader>d'",
+    \ 'call_signatures_command': "'<leader>n'",
+    \ 'usages_command': "'<leader>n'",
+    \ 'rename_command': "'<leader>r'",
+    \ 'popup_on_dot': 1,
+    \ 'documentation_command': "'K'",
+    \ 'show_call_signatures': 1,
+    \ 'call_signature_escape': "'=`='",
+    \ 'auto_close_doc': 1,
+    \ 'popup_select_first': 1,
+    \ 'quickfix_window_height': 10,
+    \ 'completions_enabled': 1,
+    \ 'force_py_version': "'auto'"
+\ }
+
+for [key, val] in items(s:deprecations)
+    if exists('g:jedi#'.key)
+        echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
+        exe 'let g:jedi#'.val.' = g:jedi#'.key
+    endif
+endfor
+
+for [key, val] in items(s:default_settings)
+    if !exists('g:jedi#'.key)
+        exe 'let g:jedi#'.key.' = '.val
+    endif
+endfor
+
+
+" ------------------------------------------------------------------------
 " Python initialization
 " ------------------------------------------------------------------------
-
 let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
 
 function! s:init_python()
@@ -39,7 +86,7 @@ function! s:init_python()
         if !has('nvim') || has('python'.(s:def_py == 2 ? '' : s:def_py))
             return jedi#force_py_version(s:def_py)
         endif
-    end
+    endif
 
     if has('python')
         call jedi#setup_py_version(2)
@@ -47,7 +94,7 @@ function! s:init_python()
         call jedi#setup_py_version(3)
     else
         throw "jedi-vim requires Vim with support for Python 2 or 3."
-    end
+    endif
     return 1
 endfunction
 
@@ -67,6 +114,45 @@ function! jedi#init_python()
     endif
     return s:_init_python
 endfunction
+
+
+function! jedi#setup_py_version(py_version)
+    if a:py_version == 2
+        let cmd_init = 'pyfile'
+        let cmd_exec = 'python'
+    elseif a:py_version == 3
+        let cmd_init = 'py3file'
+        let cmd_exec = 'python3'
+    else
+        throw "jedi#setup_py_version: invalid py_version: ".a:py_version
+    endif
+
+    try
+        execute cmd_init.' '.s:script_path.'/initialize.py'
+        execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
+        return 1
+    catch
+        throw "jedi#setup_py_version: ".v:exception
+    endtry
+endfunction
+
+
+function! jedi#force_py_version(py_version)
+    let g:jedi#force_py_version = a:py_version
+    return jedi#setup_py_version(a:py_version)
+endfunction
+
+
+function! jedi#force_py_version_switch()
+    if g:jedi#force_py_version == 2
+        call jedi#force_py_version(3)
+    elseif g:jedi#force_py_version == 3
+        call jedi#force_py_version(2)
+    else
+        throw "Don't know how to switch from ".g:jedi#force_py_version."!"
+    endif
+endfunction
+
 
 if !jedi#init_python()
     " Do not define any functions when Python initialization failed.
@@ -326,101 +412,6 @@ function! jedi#complete_opened()
     endif
     return ""
 endfunction
-
-
-function! jedi#setup_py_version(py_version)
-    if a:py_version == 2
-        let cmd_init = 'pyfile'
-        let cmd_exec = 'python'
-    elseif a:py_version == 3
-        let cmd_init = 'py3file'
-        let cmd_exec = 'python3'
-    else
-        throw "jedi#setup_py_version: invalid py_version: ".a:py_version
-    endif
-
-    try
-        execute cmd_init.' '.s:script_path.'/initialize.py'
-        execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
-        return 1
-    catch
-        throw "jedi#setup_py_version: ".v:exception
-    endtry
-endfunction
-
-
-function! jedi#force_py_version(py_version)
-    let g:jedi#force_py_version = a:py_version
-    return jedi#setup_py_version(a:py_version)
-endfunction
-
-
-function! jedi#force_py_version_switch()
-    if g:jedi#force_py_version == 2
-        call jedi#force_py_version(3)
-    elseif g:jedi#force_py_version == 3
-        call jedi#force_py_version(2)
-    else
-        throw "Don't know how to switch from ".g:jedi#force_py_version."!"
-    endif
-endfunction
-
-
-" ------------------------------------------------------------------------
-" deprecations
-" ------------------------------------------------------------------------
-let s:deprecations = {
-    \ 'get_definition_command':     'goto_definitions_command',
-    \ 'goto_command':               'goto_assignments_command',
-    \ 'pydoc':                      'documentation_command',
-    \ 'related_names_command':      'usages_command',
-    \ 'autocompletion_command':     'completions_command',
-    \ 'show_function_definition':   'show_call_signatures',
-\ }
-
-" ------------------------------------------------------------------------
-" defaults for jedi-vim
-" ------------------------------------------------------------------------
-let s:settings = {
-    \ 'use_tabs_not_buffers': 1,
-    \ 'use_splits_not_buffers': 1,
-    \ 'auto_initialization': 1,
-    \ 'auto_vim_configuration': 1,
-    \ 'goto_assignments_command': "'<leader>g'",
-    \ 'completions_command': "'<C-Space>'",
-    \ 'goto_definitions_command': "'<leader>d'",
-    \ 'call_signatures_command': "'<leader>n'",
-    \ 'usages_command': "'<leader>n'",
-    \ 'rename_command': "'<leader>r'",
-    \ 'popup_on_dot': 1,
-    \ 'documentation_command': "'K'",
-    \ 'show_call_signatures': 1,
-    \ 'call_signature_escape': "'=`='",
-    \ 'auto_close_doc': 1,
-    \ 'popup_select_first': 1,
-    \ 'quickfix_window_height': 10,
-    \ 'completions_enabled': 1,
-    \ 'force_py_version': "'auto'"
-\ }
-
-
-function! s:init()
-  for [key, val] in items(s:deprecations)
-      if exists('g:jedi#'.key)
-          echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
-          exe 'let g:jedi#'.val.' = g:jedi#'.key
-      endif
-  endfor
-
-  for [key, val] in items(s:settings)
-      if !exists('g:jedi#'.key)
-          exe 'let g:jedi#'.key.' = '.val
-      endif
-  endfor
-endfunction
-
-
-call s:init()
 
 
 "PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
