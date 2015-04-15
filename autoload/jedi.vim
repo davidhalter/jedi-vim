@@ -106,7 +106,7 @@ function! jedi#init_python()
         catch
             if !exists("g:jedi#squelch_py_warning")
                 echohl WarningMsg
-                echom "Error: jedi-vim failed to initialize Python: ".v:exception
+                echom "Error: jedi-vim failed to initialize Python: ".v:exception." (in ".v:throwpoint.")"
                 echohl None
             endif
             let s:_init_python = 0
