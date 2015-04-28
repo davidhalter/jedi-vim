@@ -17,6 +17,7 @@ Contents				*jedi-vim-contents*
     2.1. Manually			|jedi-vim-installation-manually|
     2.2. Using Pathogen			|jedi-vim-installation-pathogen|
     2.3. Using Vundle			|jedi-vim-installation-vundle|
+    2.4. Installing from Repositories	|jedi-vim-installation-repos|
 3. Supported Python features		|jedi-vim-support|
 4. Usage				|jedi-vim-usage|
 5. Mappings				|jedi-vim-keybindings|
@@ -145,6 +146,13 @@ Pathogen simplifies installation considerably.
     :PluginInstall
 
 Help tags are generated automatically, so you should be good to go.
+
+------------------------------------------------------------------------------
+2.4. Installing from Repositories	*jedi-vim-installation-repos*
+
+Some Linux distributions have jedi-vim packages in their official 
+repositories. On Arch Linux, install vim-jedi. On Debian (8+) or Ubuntu 
+(14.04+) install vim-python-jedi.
 
 ==============================================================================
 3. Supported Python features		*jedi-vim-support*
