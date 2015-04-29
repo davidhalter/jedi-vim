@@ -5,7 +5,6 @@ scriptencoding utf-8
 " ------------------------------------------------------------------------
 let s:deprecations = {
     \ 'get_definition_command':     'goto_definitions_command',
-    \ 'goto_command':               'goto_assignments_command',
     \ 'pydoc':                      'documentation_command',
     \ 'related_names_command':      'usages_command',
     \ 'autocompletion_command':     'completions_command',
@@ -17,9 +16,10 @@ let s:default_settings = {
     \ 'use_splits_not_buffers': 1,
     \ 'auto_initialization': 1,
     \ 'auto_vim_configuration': 1,
+    \ 'goto_command': "'<leader>d'",
     \ 'goto_assignments_command': "'<leader>g'",
+    \ 'goto_definitions_command': "''",
     \ 'completions_command': "'<C-Space>'",
-    \ 'goto_definitions_command': "'<leader>d'",
     \ 'call_signatures_command': "'<leader>n'",
     \ 'usages_command': "'<leader>n'",
     \ 'rename_command': "'<leader>r'",
@@ -183,16 +183,20 @@ endif
 " ------------------------------------------------------------------------
 " functions that call python code
 " ------------------------------------------------------------------------
+function! jedi#goto()
+    PythonJedi jedi_vim.goto(mode="goto")
+endfunction
+
 function! jedi#goto_assignments()
-    PythonJedi jedi_vim.goto()
+    PythonJedi jedi_vim.goto(mode="assignment")
 endfunction
 
 function! jedi#goto_definitions()
-    PythonJedi jedi_vim.goto(is_definition=True)
+    PythonJedi jedi_vim.goto(mode="definition")
 endfunction
 
 function! jedi#usages()
-    PythonJedi jedi_vim.goto(is_related_name=True)
+    PythonJedi jedi_vim.goto(mode="related_name")
 endfunction
 
 function! jedi#rename(...)

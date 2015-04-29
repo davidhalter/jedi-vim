@@ -196,15 +196,23 @@ def completions():
 
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
-def goto(is_definition=False, is_related_name=False, no_output=False):
+def goto(mode = "goto", no_output=False):
+    """
+    mode: "related_name", "definition", "assignment", "auto".
+    """
     definitions = []
     script = get_script()
     try:
-        if is_related_name:
+        if mode == "goto":
+            definitions = [x for x in script.goto_definitions()
+                           if not x.in_builtin_module()]
+            if not definitions:
+                definitions = script.goto_assignments()
+        elif mode == "related_name":
             definitions = script.usages()
-        elif is_definition:
+        elif mode == "definition":
             definitions = script.goto_definitions()
-        else:
+        elif mode == "assignment":
             definitions = script.goto_assignments()
     except jedi.NotFoundError:
         echo_highlight("Cannot follow nothing. Put your cursor on a valid name.")
@@ -213,7 +221,7 @@ def goto(is_definition=False, is_related_name=False, no_output=False):
             return definitions
         if not definitions:
             echo_highlight("Couldn't find any definitions for this.")
-        elif len(definitions) == 1 and not is_related_name:
+        elif len(definitions) == 1 and mode != "related_name":
             # just add some mark to add the current position to the jumplist.
             # this is ugly, because it overrides the mark for '`', so if anyone
             # has a better idea, let me know.
