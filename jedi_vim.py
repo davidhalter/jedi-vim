@@ -15,7 +15,7 @@ except ImportError:
 
 
 def no_jedi_warning():
-    vim.command('echoerr "Please install Jedi if you want to use jedi_vim."')
+    vim.command('echohl WarningMsg | echom "Please install Jedi if you want to use jedi_vim." | echohl None')
 
 
 def echo_highlight(msg):
