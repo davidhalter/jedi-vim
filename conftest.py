@@ -3,6 +3,8 @@ import urllib
 import zipfile
 import subprocess
 
+import pytest
+
 CACHE_FOLDER = '.cache'
 VSPEC_FOLDER = os.path.join(CACHE_FOLDER, 'vim-vspec-master')
 VSPEC_RUNNER = os.path.join(VSPEC_FOLDER, 'bin/vspec')
@@ -17,8 +19,8 @@ class IntegrationTestFile(object):
         output = subprocess.check_output([VSPEC_RUNNER, '.', VSPEC_FOLDER, self.path])
         for line in output.splitlines():
             if line.startswith(b'not ok') or line.startswith(b'Error'):
-                print(output.decode('utf-8'))
-                assert False
+                pytest.fail("{} failed:\n{}".format(
+                    self.path, output.decode('utf-8')), pytrace=False)
 
     def __repr__(self):
         return "<%s: %s>"  % (type(self), self.path)
