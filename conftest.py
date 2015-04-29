@@ -3,8 +3,9 @@ import urllib
 import zipfile
 import subprocess
 
+VSPEC_URL = 'https://github.com/kana/vim-vspec/archive/1.4.1.zip'
 CACHE_FOLDER = '.cache'
-VSPEC_FOLDER = os.path.join(CACHE_FOLDER, 'vim-vspec-master')
+VSPEC_FOLDER = os.path.join(CACHE_FOLDER, 'vim-vspec-1.4.1')
 VSPEC_RUNNER = os.path.join(VSPEC_FOLDER, 'bin/vspec')
 TEST_DIR = 'test'
 
@@ -29,8 +30,7 @@ def pytest_configure(config):
         os.mkdir(CACHE_FOLDER)
 
     if not os.path.exists(VSPEC_FOLDER):
-        url = 'https://github.com/kana/vim-vspec/archive/master.zip'
-        name, hdrs = urllib.urlretrieve(url)
+        name, hdrs = urllib.urlretrieve(VSPEC_URL)
         z = zipfile.ZipFile(name)
         for n in z.namelist():
             dest = os.path.join(CACHE_FOLDER, n)
