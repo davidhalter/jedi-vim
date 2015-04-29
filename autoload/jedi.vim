@@ -16,7 +16,14 @@ function! jedi#usages()
 endfunction
 
 function! jedi#rename(...)
-    Python jedi_vim.rename()
+    if has('win32') || has('win64')
+        let old_shellslash = &l:shellslash
+        setlocal noshellslash
+        Python jedi_vim.rename()
+        let &l:shellslash = old_shellslash
+    else
+        Python jedi_vim.rename()
+    endif
 endfunction
 
 function! jedi#completions(findstart, base)
@@ -73,8 +80,11 @@ function! jedi#show_documentation()
     setlocal nomodified
     setlocal filetype=rst
 
-    if l:doc_lines > 30  " max lines for plugin
-        let l:doc_lines = 30
+    if !exists('g:jedi#max_doc_height')
+        let g:jedi#max_doc_height = 30
+    endif
+    if l:doc_lines > g:jedi#max_doc_height " max lines for plugin
+        let l:doc_lines = g:jedi#max_doc_height
     endif
     execute "resize ".l:doc_lines
 
@@ -143,7 +153,7 @@ function! jedi#do_popup_on_dot_in_highlight()
     for a in highlight_groups
         for b in ['pythonString', 'pythonComment', 'pythonNumber']
             if a == b
-                return 0 
+                return 0
             endif
         endfor
     endfor
