@@ -336,9 +336,11 @@ Default: 1 (Perform automatic initialization)
 ------------------------------------------------------------------------------
 6.2. `g:jedi#auto_vim_configuration`	*g:jedi#auto_vim_configuration*
 
-Jedi-vim sets 'completeopt' to `menuone,longest,preview` by default. It also
-remaps <Ctrl-C> to <Esc> in insert mode. If you want to keep your own
-configuration, disable this setting.
+Jedi-vim sets 'completeopt' to `menuone,longest,preview` by default, if
+'completeopt' is not changed from Vim's default.
+It also remaps <Ctrl-C> to <Esc> in insert mode.
+
+If you want to keep your own configuration, disable this setting.
 
 Options: 0 or 1
 Default: 1 (Set 'completeopt' and mapping as described above)
