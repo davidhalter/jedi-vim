@@ -113,7 +113,7 @@ you disable the auto-initialization in your ``.vimrc``:
     let g:jedi#auto_initialization = 0
 
 There are also some VIM options (like ``completeopt`` and key defaults) which
-are automatically initialized, but you can change all of them:
+are automatically initialized, but you can skip this:
 
 .. code-block:: vim
 

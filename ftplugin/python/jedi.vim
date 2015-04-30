@@ -38,10 +38,3 @@ if g:jedi#auto_initialization
         autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
     endif
 endif
-
-if g:jedi#auto_vim_configuration
-    setlocal completeopt=menuone,longest,preview
-    if len(mapcheck('<C-c>', 'i')) == 0
-        inoremap <C-c> <ESC>
-    endif
-endif

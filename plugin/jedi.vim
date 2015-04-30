@@ -12,6 +12,19 @@ if !exists("g:jedi#auto_vim_configuration") || g:jedi#auto_vim_configuration
 
     " jedi-vim really needs, otherwise jedi-vim cannot start.
     filetype plugin on
+
+    " Change completeopt, but only if it has Vim's default value.
+    let s:save_completeopt=&completeopt
+    set completeopt&
+    let s:default_completeopt=&completeopt
+    let &completeopt=s:save_completeopt
+    if s:default_completeopt == &completeopt
+        set completeopt=menuone,longest,preview
+    endif
+
+    if len(mapcheck('<C-c>', 'i')) == 0
+        inoremap <C-c> <ESC>
+    endif
 endif
 
 " Pyimport command
