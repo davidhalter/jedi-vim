@@ -15,7 +15,7 @@ except ImportError:
 
 
 def no_jedi_warning():
-    vim.command('echohl WarningMsg | echom "Please install Jedi if you want to use jedi_vim." | echohl None')
+    vim.command('echohl WarningMsg | echom "Please install Jedi if you want to use jedi-vim." | echohl None')
 
 
 def echo_highlight(msg):
@@ -35,7 +35,7 @@ else:
         from jedi import utils
         version = utils.version_info()
     if version < (0, 7):
-        echo_highlight('Please update your Jedi version, it is to old.')
+        echo_highlight('Please update your Jedi version, it is too old.')
 
 is_py3 = sys.version_info[0] >= 3
 if is_py3:
