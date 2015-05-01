@@ -14,55 +14,31 @@ except ImportError:
     from itertools import izip_longest as zip_longest  # Python 2
 
 
-def no_jedi_warning():
-    vim.command('echohl WarningMsg | echom "Please install Jedi if you want to use jedi-vim." | echohl None')
-
-
-def echo_highlight(msg):
-    vim_command('echohl WarningMsg | echom "%s" | echohl None' % msg)
-
-
-import vim
-try:
-    import jedi
-except ImportError:
-    no_jedi_warning()
-    jedi = None
-else:
-    version = jedi.__version__
-    if isinstance(version, str):
-        # the normal use case, now.
-        from jedi import utils
-        version = utils.version_info()
-    if version < (0, 7):
-        echo_highlight('Please update your Jedi version, it is too old.')
-
 is_py3 = sys.version_info[0] >= 3
 if is_py3:
     unicode = str
 
 
-def catch_and_print_exceptions(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except (Exception, vim.error):
-            print(traceback.format_exc())
-            return None
-    return wrapper
+class PythonToVimStr(unicode):
+    """ Vim has a different string implementation of single quotes """
+    __slots__ = []
 
+    def __new__(cls, obj, encoding='UTF-8'):
+        if is_py3 or isinstance(obj, unicode):
+            return unicode.__new__(cls, obj)
+        else:
+            return unicode.__new__(cls, obj, encoding)
 
-def _check_jedi_availability(show_error=False):
-    def func_receiver(func):
-        def wrapper(*args, **kwargs):
-            if jedi is None:
-                if show_error:
-                    no_jedi_warning()
-                return
-            else:
-                return func(*args, **kwargs)
-        return wrapper
-    return func_receiver
+    def __repr__(self):
+        # this is totally stupid and makes no sense but vim/python unicode
+        # support is pretty bad. don't ask how I came up with this... It just
+        # works...
+        # It seems to be related to that bug: http://bugs.python.org/issue5876
+        if unicode is str:
+            s = self
+        else:
+            s = self.encode('UTF-8')
+        return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
 
 
 class VimError(Exception):
@@ -87,34 +63,64 @@ def _catch_exception(string, is_eval):
     return result['result']
 
 
-def vim_eval(string):
-    return _catch_exception(string, 1)
-
-
 def vim_command(string):
     _catch_exception(string, 0)
 
 
-class PythonToVimStr(unicode):
-    """ Vim has a different string implementation of single quotes """
-    __slots__ = []
+def vim_eval(string):
+    return _catch_exception(string, 1)
 
-    def __new__(cls, obj, encoding='UTF-8'):
-        if is_py3 or isinstance(obj, unicode):
-            return unicode.__new__(cls, obj)
-        else:
-            return unicode.__new__(cls, obj, encoding)
 
-    def __repr__(self):
-        # this is totally stupid and makes no sense but vim/python unicode
-        # support is pretty bad. don't ask how I came up with this... It just
-        # works...
-        # It seems to be related to that bug: http://bugs.python.org/issue5876
-        if unicode is str:
-            s = self
-        else:
-            s = self.encode('UTF-8')
-        return '"%s"' % s.replace('\\', '\\\\').replace('"', r'\"')
+def no_jedi_warning():
+    vim.command('echohl WarningMsg | echom "Please install Jedi if you want to use jedi-vim." | echohl None')
+
+
+def echo_highlight(msg):
+    vim_command('echohl WarningMsg | echom "%s" | echohl None' % msg)
+
+
+import vim
+try:
+    import jedi
+except ImportError:
+    no_jedi_warning()
+    jedi = None
+else:
+    try:
+        version = jedi.__version__
+    except Exception as e:  # e.g. AttributeError
+        echo_highlight("Could not load jedi python module: {}".format(e))
+        jedi = None
+    else:
+        if isinstance(version, str):
+            # the normal use case, now.
+            from jedi import utils
+            version = utils.version_info()
+        if version < (0, 7):
+            echo_highlight('Please update your Jedi version, it is too old.')
+
+
+def catch_and_print_exceptions(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except (Exception, vim.error):
+            print(traceback.format_exc())
+            return None
+    return wrapper
+
+
+def _check_jedi_availability(show_error=False):
+    def func_receiver(func):
+        def wrapper(*args, **kwargs):
+            if jedi is None:
+                if show_error:
+                    no_jedi_warning()
+                return
+            else:
+                return func(*args, **kwargs)
+        return wrapper
+    return func_receiver
 
 
 @catch_and_print_exceptions
