@@ -407,14 +407,14 @@ endfunction
 
 function! jedi#complete_opened(is_popup_on_dot)
     if pumvisible()
-        if a:is_popup_on_dot
-            " Prevent completion of the first entry with dot completion.
-            return "\<C-p>"
-        endif
         " Only go down if it is visible, user-enabled and the longest
         " option is set.
         if g:jedi#popup_select_first && stridx(&completeopt, 'longest') > -1
             return "\<Down>"
+        endif
+        if a:is_popup_on_dot
+            " Prevent completion of the first entry with dot completion.
+            return "\<C-p>"
         endif
     endif
     return ""
