@@ -68,6 +68,7 @@ def _check_jedi_availability(show_error=False):
 class VimError(Exception):
     def __init__(self, message, throwpoint, executing):
         super(type(self), self).__init__(message)
+        self.message = message
         self.throwpoint = throwpoint
         self.executing = executing
 
