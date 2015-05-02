@@ -425,6 +425,7 @@ def rename():
         vim_command('autocmd InsertLeave <buffer> call jedi#rename(1)')
         vim_command('augroup END')
 
+        vim_eval("let s:jedi_replace_orig = expand('<cword>')")
         vim_command('normal! diw')
         vim_command(':startinsert')
     else:
@@ -444,6 +445,7 @@ def rename():
         if replace is None:
             echo_highlight('No rename possible, if no name is given.')
         else:
+            orig = vim_eval('s:jedi_replace_orig')
             temp_rename = goto(is_related_name=True, no_output=True)
             # sort the whole thing reverse (positions at the end of the line
             # must be first, because they move the stuff before the position).
@@ -466,7 +468,7 @@ def rename():
                 saved_view = vim_eval('winsaveview()')
 
                 vim.current.window.cursor = r.start_pos
-                vim_command('normal! cw%s' % replace)
+                vim_command('normal! c{:d}l{}'.format(len(orig), replace))
 
                 # Restore view.
                 vim_command('call winrestview(%s)' % PythonToVimStr(saved_view))
