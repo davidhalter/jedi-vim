@@ -449,6 +449,7 @@ def rename():
             # must be first, because they move the stuff before the position).
             temp_rename = sorted(temp_rename, reverse=True,
                                  key=lambda x: (x.module_path, x.start_pos))
+            buffers = set()
             for r in temp_rename:
                 if r.in_builtin_module():
                     continue
@@ -458,6 +459,8 @@ def rename():
                     if not result:
                         return
 
+                buffers.add(vim.current.buffer.name)
+
                 vim.current.window.cursor = r.start_pos
                 vim_command('normal! cw%s' % replace)
 
@@ -466,7 +469,11 @@ def rename():
             vim_command('{:d}wincmd w'.format(saved_win))
 
             vim.current.window.cursor = cursor
-            echo_highlight('Jedi did %s renames!' % len(temp_rename))
+            if len(buffers) > 1:
+                echo_highlight('Jedi did {:d} renames in {:d} buffers!'.format(
+                    len(temp_rename), len(buffers)))
+            else:
+                echo_highlight('Jedi did {:d} renames!'.format(len(temp_rename)))
 
 
 @_check_jedi_availability(show_error=True)
