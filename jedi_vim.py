@@ -461,14 +461,19 @@ def rename():
 
                 buffers.add(vim.current.buffer.name)
 
+                # Save view.
+                saved_view = vim_eval('winsaveview()')
+
                 vim.current.window.cursor = r.start_pos
                 vim_command('normal! cw%s' % replace)
+
+                # Restore view.
+                vim_command('call winrestview(%s)' % PythonToVimStr(saved_view))
 
             # Restore previous tab and window.
             vim_command('tabnext {:d}'.format(saved_tab))
             vim_command('{:d}wincmd w'.format(saved_win))
 
-            vim.current.window.cursor = cursor
             if len(buffers) > 1:
                 echo_highlight('Jedi did {:d} renames in {:d} buffers!'.format(
                     len(temp_rename), len(buffers)))
