@@ -428,9 +428,12 @@ def rename():
         vim_command('normal! diw')
         vim_command(':startinsert')
     else:
-        window_path = vim.current.buffer.name
         # reset autocommand
         vim_command('autocmd! jedi_rename InsertLeave')
+
+        # Save original window / tab.
+        saved_tab = int(vim_eval('tabpagenr()'))
+        saved_win = int(vim_eval('winnr()'))
 
         replace = vim_eval("expand('<cword>')")
         vim_command('normal! u')  # undo new word
@@ -458,9 +461,10 @@ def rename():
                 vim.current.window.cursor = r.start_pos
                 vim_command('normal! cw%s' % replace)
 
-            result = new_buffer(window_path)
-            if not result:
-                return
+            # Restore previous tab and window.
+            vim_command('tabnext {:d}'.format(saved_tab))
+            vim_command('{:d}wincmd w'.format(saved_win))
+
             vim.current.window.cursor = cursor
             echo_highlight('Jedi did %s renames!' % len(temp_rename))
 
