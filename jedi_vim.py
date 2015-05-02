@@ -577,6 +577,8 @@ def _tabnew(path, options=''):
                 if buf_path == path:
                     # tab exists, just switch to that tab
                     vim_command('tabfirst | tabnext %i' % (tab_nr + 1))
+                    # Goto the buffer's window.
+                    vim_command('exec bufwinnr(%i) . " wincmd w"' % (buf_nr + 1))
                     break
         else:
             continue
