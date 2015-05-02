@@ -19,6 +19,7 @@ if g:jedi#auto_initialization
     " rename
     if g:jedi#rename_command != ''
         execute "nnoremap <buffer> ".g:jedi#rename_command." :call jedi#rename()<CR>"
+        execute "vnoremap <buffer> ".g:jedi#rename_command." :call jedi#rename_visual()<CR>"
     endif
     " documentation/pydoc
     if g:jedi#documentation_command != ''
