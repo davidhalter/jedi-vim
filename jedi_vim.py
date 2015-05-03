@@ -475,7 +475,7 @@ def do_rename(replace, orig = None):
         if r.in_builtin_module():
             continue
 
-        if vim.current.buffer.name != r.module_path:
+        if os.path.abspath(vim.current.buffer.name) != r.module_path:
             result = new_buffer(r.module_path)
             if not result:
                 echo_highlight("Jedi-vim: failed to create buffer window for {}!".format(r.module_path))
