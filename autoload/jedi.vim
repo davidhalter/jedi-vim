@@ -28,6 +28,7 @@ let s:default_settings = {
     \ 'show_call_signatures': 1,
     \ 'call_signature_escape': "'=`='",
     \ 'auto_close_doc': 1,
+    \ 'max_doc_height': 30,
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
     \ 'completions_enabled': 1,
@@ -252,8 +253,8 @@ function! jedi#show_documentation()
     setlocal nomodified
     setlocal filetype=rst
 
-    if l:doc_lines > 30  " max lines for plugin
-        let l:doc_lines = 30
+    if l:doc_lines > g:jedi#max_doc_height " max lines for plugin
+        let l:doc_lines = g:jedi#max_doc_height
     endif
     execute "resize ".l:doc_lines
 
