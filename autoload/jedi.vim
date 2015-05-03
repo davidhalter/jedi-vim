@@ -154,6 +154,25 @@ function! jedi#force_py_version_switch()
 endfunction
 
 
+" Helper function instead of `python vim.eval()`, and `.command()` because
+" these also return error definitions.
+function! jedi#_vim_exceptions(str, is_eval)
+    let l:result = {}
+    try
+        if a:is_eval
+            let l:result.result = eval(a:str)
+        else
+            execute a:str
+            let l:result.result = ''
+        endif
+    catch
+        let l:result.exception = v:exception
+        let l:result.throwpoint = v:throwpoint
+    endtry
+    return l:result
+endfunction
+
+
 if !jedi#init_python()
     " Do not define any functions when Python initialization failed.
     finish
@@ -324,6 +343,7 @@ function! jedi#configure_call_signatures()
     autocmd CursorMovedI <buffer> PythonJedi jedi_vim.show_call_signatures()
 endfunction
 
+
 " Determine where the current window is on the screen for displaying call
 " signatures in the correct column.
 function! s:save_first_col()
@@ -370,24 +390,6 @@ function! s:save_first_col()
             endtry
         endif
     endtry
-endfunction
-
-" Helper function instead of `python vim.eval()`, and `.command()` because
-" these also return error definitions.
-function! jedi#_vim_exceptions(str, is_eval)
-    let l:result = {}
-    try
-        if a:is_eval
-            let l:result.result = eval(a:str)
-        else
-            execute a:str
-            let l:result.result = ''
-        endif
-    catch
-        let l:result.exception = v:exception
-        let l:result.throwpoint = v:throwpoint
-    endtry
-    return l:result
 endfunction
 
 
