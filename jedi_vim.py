@@ -380,7 +380,7 @@ def cmdline_call_signatures(signatures):
         params = ['(' + ', '.join(p) + ')' for p in params]
     else:
         params = get_params(signatures[0])
-    text = ', '.join(params).replace('"', '\\"')
+    text = ', '.join(params).replace('"', '\\"').replace(r'\n', r'\\n')
 
     # Allow 12 characters for ruler/showcmd - setting noruler/noshowcmd
     # here causes incorrect undo history
