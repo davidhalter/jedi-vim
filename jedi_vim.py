@@ -431,10 +431,10 @@ def rename():
         vim_command('autocmd InsertLeave <buffer> call jedi#rename(1)')
         vim_command('augroup END')
 
+        vim_command("let s:jedi_replace_orig = expand('<cword>')")
         vim_command('normal! diw')
         vim_command(':startinsert')
     else:
-        window_path = vim.current.buffer.name
         # reset autocommand
         vim_command('autocmd! jedi_rename InsertLeave')
 
@@ -444,31 +444,64 @@ def rename():
         vim_command('normal! u')  # undo the space at the end
         vim.current.window.cursor = cursor
 
-        if replace is None:
-            echo_highlight('No rename possible, if no name is given.')
-        else:
-            temp_rename = goto(is_related_name=True, no_output=True)
-            # sort the whole thing reverse (positions at the end of the line
-            # must be first, because they move the stuff before the position).
-            temp_rename = sorted(temp_rename, reverse=True,
-                                 key=lambda x: (x.module_path, x.start_pos))
-            for r in temp_rename:
-                if r.in_builtin_module():
-                    continue
+        return do_rename(replace)
 
-                if vim.current.buffer.name != r.module_path:
-                    result = new_buffer(r.module_path)
-                    if not result:
-                        return
 
-                vim.current.window.cursor = r.start_pos
-                vim_command('normal! cw%s' % replace)
+def rename_visual():
+    replace = vim.eval('input("Rename to: ")')
+    orig = vim.eval('getline(".")[(getpos("\'<")[2]-1):getpos("\'>")[2]]')
+    do_rename(replace, orig)
 
-            result = new_buffer(window_path)
+
+def do_rename(replace, orig = None):
+    if replace is None:
+        echo_highlight('No rename possible, if no name is given.')
+        return
+
+    if orig is None:
+        orig = vim_eval('s:jedi_replace_orig')
+
+    # Save original window / tab.
+    saved_tab = int(vim_eval('tabpagenr()'))
+    saved_win = int(vim_eval('winnr()'))
+
+    temp_rename = goto(is_related_name=True, no_output=True)
+    # sort the whole thing reverse (positions at the end of the line
+    # must be first, because they move the stuff before the position).
+    temp_rename = sorted(temp_rename, reverse=True,
+                         key=lambda x: (x.module_path, x.start_pos))
+    buffers = set()
+    for r in temp_rename:
+        if r.in_builtin_module():
+            continue
+
+        if vim.current.buffer.name != r.module_path:
+            result = new_buffer(r.module_path)
             if not result:
-                return
-            vim.current.window.cursor = cursor
-            echo_highlight('Jedi did %s renames!' % len(temp_rename))
+                echo_highlight("Jedi-vim: failed to create buffer window for {}!".format(r.module_path))
+                continue
+
+        buffers.add(vim.current.buffer.name)
+
+        # Save view.
+        saved_view = vim_eval('winsaveview()')
+
+        # Replace original word.
+        vim.current.window.cursor = r.start_pos
+        vim_command('normal! c{:d}l{}'.format(len(orig), replace))
+
+        # Restore view.
+        vim_command('call winrestview(%s)' % PythonToVimStr(saved_view))
+
+    # Restore previous tab and window.
+    vim_command('tabnext {:d}'.format(saved_tab))
+    vim_command('{:d}wincmd w'.format(saved_win))
+
+    if len(buffers) > 1:
+        echo_highlight('Jedi did {:d} renames in {:d} buffers!'.format(
+            len(temp_rename), len(buffers)))
+    else:
+        echo_highlight('Jedi did {:d} renames!'.format(len(temp_rename)))
 
 
 @_check_jedi_availability(show_error=True)
@@ -567,6 +600,8 @@ def _tabnew(path, options=''):
                 if buf_path == path:
                     # tab exists, just switch to that tab
                     vim_command('tabfirst | tabnext %i' % (tab_nr + 1))
+                    # Goto the buffer's window.
+                    vim_command('exec bufwinnr(%i) . " wincmd w"' % (buf_nr + 1))
                     break
         else:
             continue
