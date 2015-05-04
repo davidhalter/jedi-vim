@@ -569,7 +569,7 @@ def edit_buffer(path):
             echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
             return False
         else:
-            vim_command('w')
+            vim_command('update')
     vim_command('edit %s' % escape_file_path(path))
     fix_buffer_options()
     return True
