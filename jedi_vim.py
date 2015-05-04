@@ -606,9 +606,6 @@ def _tabnew(path, options=''):
     :param options: `:tabnew` options, read vim help.
     """
     path = os.path.abspath(path)
-    if vim_eval('has("gui")') == '1':
-        vim_command('tab drop %s %s' % (options, escape_file_path(path)))
-        return
 
     for tab_nr in range(int(vim_eval("tabpagenr('$')"))):
         for buf_nr in vim_eval("tabpagebuflist(%i + 1)" % tab_nr):
