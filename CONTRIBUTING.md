@@ -1,12 +1,9 @@
-Pull Requests are great (on the **dev** branch)!
+We <3 pull requests!
 
  1. Fork the Repo on github.
  2. Add yourself to AUTHORS.txt
  3. Add a test if possible.
- 4. Push to your fork and submit a **pull request to the dev branch**.
+ 4. Push to your fork and submit a pull request.
 
-My **master** branch is a 100% stable (should be). I only push to it after I am
-certain that things are working out. Many people are using Jedi directly from
-the github master branch. 
-
-Please use Pep8 to style your code.
+Please use PEP8 as a Python code style. For VIM, just stick try to style your
+code similar to the jedi-vim code that's there.
