@@ -543,8 +543,7 @@ def py_import():
         if completion.in_builtin_module():
             echo_highlight('%s is a builtin module.' % import_path)
         else:
-            cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-            edit_buffer(completion.module_path, cmd_args)
+            edit_buffer(completion.module_path)
 
 
 @catch_and_print_exceptions
@@ -563,7 +562,7 @@ def py_import_completions():
 
 
 @catch_and_print_exceptions
-def edit_buffer(path, options=''):
+def edit_buffer(path):
     """Edit the given path in the current window."""
     if vim_eval("!&hidden && &modified") == '1':
         if vim_eval("bufname('%')") is None:
@@ -571,17 +570,16 @@ def edit_buffer(path, options=''):
             return False
         else:
             vim_command('w')
-    vim_command('edit %s %s' % (options, escape_file_path(path)))
+    vim_command('edit %s' % escape_file_path(path))
     fix_buffer_options()
     return True
 
 
 @catch_and_print_exceptions
-def new_buffer(path, options=''):
+def new_buffer(path):
     """Edit the given path in a new window."""
-    # options are what you can to edit the edit options
     if vim_eval('g:jedi#use_tabs_not_buffers') == '1':
-        _tabnew(path, options)
+        _tabnew(path)
     elif not vim_eval('g:jedi#use_splits_not_buffers') == '1':
         user_split_option = vim_eval('g:jedi#use_splits_not_buffers')
         split_options = {
@@ -598,7 +596,7 @@ def new_buffer(path, options=''):
         else:
             vim_command(split_options[user_split_option] + " %s" % path)
     else:
-        edit_buffer(path, options)
+        edit_buffer(path)
 
     fix_buffer_options()
     return True
