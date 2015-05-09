@@ -77,7 +77,8 @@ def no_jedi_warning():
 
 
 def echo_highlight(msg):
-    vim_command('echohl WarningMsg | echom "%s" | echohl None' % msg)
+    vim_command('echohl WarningMsg | echom "{}" | echohl None'.format(
+        msg.replace('"', '\\"')))
 
 
 import vim
