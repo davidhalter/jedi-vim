@@ -484,14 +484,14 @@ def do_rename(replace, orig = None):
         buffers.add(vim.current.buffer.name)
 
         # Save view.
-        saved_view = vim_eval('winsaveview()')
+        saved_view = vim_eval('string(winsaveview())')
 
         # Replace original word.
         vim.current.window.cursor = r.start_pos
         vim_command('normal! c{:d}l{}'.format(len(orig), replace))
 
         # Restore view.
-        vim_command('call winrestview(%s)' % PythonToVimStr(saved_view))
+        vim_command('call winrestview(%s)' % saved_view)
 
     # Restore previous tab and window.
     vim_command('tabnext {:d}'.format(saved_tab))
