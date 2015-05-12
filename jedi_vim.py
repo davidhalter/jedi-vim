@@ -73,7 +73,9 @@ def vim_eval(string):
 
 
 def no_jedi_warning():
-    vim.command('echohl WarningMsg | echom "Please install Jedi if you want to use jedi-vim." | echohl None')
+    vim.command('echohl WarningMsg'
+                '| echom "Please install Jedi if you want to use jedi-vim."'
+                '| echohl None')
 
 
 def echo_highlight(msg):
@@ -467,13 +469,14 @@ def rename():
         if replace:
             return do_rename(replace)
 
+
 def rename_visual():
     replace = vim.eval('input("Rename to: ")')
     orig = vim.eval('getline(".")[(getpos("\'<")[2]-1):getpos("\'>")[2]]')
     do_rename(replace, orig)
 
 
-def do_rename(replace, orig = None):
+def do_rename(replace, orig=None):
     if not len(replace):
         echo_highlight('No rename possible without name.')
         return
