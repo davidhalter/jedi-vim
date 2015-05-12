@@ -476,8 +476,8 @@ def do_rename(replace, orig = None):
     saved_tab = int(vim_eval('tabpagenr()'))
     saved_win = int(vim_eval('winnr()'))
 
-    temp_rename = goto(is_related_name=True, no_output=True)
-    # sort the whole thing reverse (positions at the end of the line
+    temp_rename = goto(mode="related_name", no_output=True)
+    # Sort the whole thing reverse (positions at the end of the line
     # must be first, because they move the stuff before the position).
     temp_rename = sorted(temp_rename, reverse=True,
                          key=lambda x: (x.module_path, x.start_pos))
