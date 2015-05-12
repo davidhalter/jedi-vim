@@ -199,9 +199,10 @@ def completions():
 @catch_and_print_exceptions
 def goto(mode = "goto", no_output=False):
     """
-    mode: "related_name", "definition", "assignment", "auto".
+    :param str mode: "related_name", "definition", "assignment", "auto"
+    :return: list of definitions/assignments
+    :rtype: list
     """
-    definitions = []
     script = get_script()
     try:
         if mode == "goto":
@@ -217,6 +218,7 @@ def goto(mode = "goto", no_output=False):
             definitions = script.goto_assignments()
     except jedi.NotFoundError:
         echo_highlight("Cannot follow nothing. Put your cursor on a valid name.")
+        definitions = []
     else:
         if no_output:
             return definitions
@@ -239,7 +241,7 @@ def goto(mode = "goto", no_output=False):
                 if d.module_path != vim.current.buffer.name:
                     result = new_buffer(d.module_path)
                     if not result:
-                        return
+                        return []
                 vim.current.window.cursor = d.line, d.column
         else:
             # multiple solutions
