@@ -73,7 +73,9 @@ def vim_eval(string):
 
 
 def no_jedi_warning():
-    vim.command('echohl WarningMsg | echom "Please install Jedi if you want to use jedi-vim." | echohl None')
+    vim.command('echohl WarningMsg'
+                '| echom "Please install Jedi if you want to use jedi-vim."'
+                '| echohl None')
 
 
 def echo_highlight(msg):
@@ -197,7 +199,7 @@ def completions():
 
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
-def goto(mode = "goto", no_output=False):
+def goto(mode="goto", no_output=False):
     """
     :param str mode: "related_name", "definition", "assignment", "auto"
     :return: list of definitions/assignments
@@ -433,29 +435,39 @@ def cmdline_call_signatures(signatures):
 @catch_and_print_exceptions
 def rename():
     if not int(vim.eval('a:0')):
-        _rename_cursor = vim.current.window.cursor
-
-        vim_command('normal A ')  # otherwise startinsert doesn't work well
-        vim.current.window.cursor = _rename_cursor
-
         vim_command('augroup jedi_rename')
         vim_command('autocmd InsertLeave <buffer> call jedi#rename(1)')
         vim_command('augroup END')
 
         vim_command("let s:jedi_replace_orig = expand('<cword>')")
         vim_command('normal! diw')
-        vim_command(':startinsert')
+        vim_command("let s:jedi_changedtick = b:changedtick")
+        vim_command('startinsert')
+
     else:
-        # reset autocommand
+        # Remove autocommand.
         vim_command('autocmd! jedi_rename InsertLeave')
 
-        replace = vim_eval("expand('<cword>')")
-        vim_command('normal! u')  # undo new word
+        # Get replacement, if there is something on the cursor.
+        # This won't be the case when the user ends insert mode right away,
+        # and `<cword>` would pick up the nearest word instead.
+        if vim_eval('getline(".")[getpos(".")[2]-1]') != ' ':
+            replace = vim_eval("expand('<cword>')")
+        else:
+            replace = None
+
         cursor = vim.current.window.cursor
-        vim_command('normal! u')  # undo the space at the end
+
+        # Undo new word, but only if something was changed, which is not the
+        # case when ending insert mode right away.
+        if vim_eval('b:changedtick != s:jedi_changedtick') == '1':
+            vim_command('normal! u')  # Undo new word.
+        vim_command('normal! u')  # Undo diw.
+
         vim.current.window.cursor = cursor
 
-        return do_rename(replace)
+        if replace:
+            return do_rename(replace)
 
 
 def rename_visual():
@@ -464,9 +476,9 @@ def rename_visual():
     do_rename(replace, orig)
 
 
-def do_rename(replace, orig = None):
-    if replace is None:
-        echo_highlight('No rename possible, if no name is given.')
+def do_rename(replace, orig=None):
+    if not len(replace):
+        echo_highlight('No rename possible without name.')
         return
 
     if orig is None:
