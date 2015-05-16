@@ -310,6 +310,7 @@ def clear_call_signatures():
             vim.current.buffer[i] = line
     vim.current.window.cursor = cursor
 
+last_displayed_signatures = None
 
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
@@ -319,13 +320,20 @@ def show_call_signatures(signatures=()):
 
     if signatures == ():
         signatures = get_script().call_signatures()
-    clear_call_signatures()
 
     if not signatures:
+        clear_call_signatures()
         return
 
     if vim_eval("g:jedi#show_call_signatures") == '2':
+        global last_displayed_signatures
+        if str(signatures) == str(last_displayed_signatures):
+            return
+        last_displayed_signatures = signatures
+        clear_call_signatures()
         return cmdline_call_signatures(signatures)
+
+    clear_call_signatures()
 
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
