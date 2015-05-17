@@ -341,11 +341,6 @@ endfunc
 
 function! jedi#configure_call_signatures()
     if g:jedi#show_call_signatures == 2  " Command line call signatures
-        " Need to track changes to avoid multiple undo points for a single edit
-        if v:version >= 704 || has("patch-7.3.867")
-            let b:normaltick = b:changedtick
-            autocmd TextChanged,InsertLeave,BufWinEnter <buffer> let b:normaltick = b:changedtick
-        endif
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
     autocmd InsertLeave <buffer> PythonJedi jedi_vim.clear_call_signatures()
@@ -360,45 +355,40 @@ function! s:save_first_col()
         return 0
     endif
 
-    let l:eventignore = &eventignore
-    set eventignore=all
     let startwin = winnr()
-    let startaltwin = winnr('#')
     let winwidth = winwidth(0)
-
-    try
-        wincmd h
-        let win_on_left = winnr() == startwin
-        if win_on_left
+    if winwidth == &columns
+        return 0
+    elseif winnr('$') == 2
+        return startwin == 1 ? 0 : (winwidth(1) + 1)
+    elseif winnr('$') == 3
+        if startwin == 1
             return 0
-        else
-            " Walk left and count up window widths until hitting the edge
-            execute startwin."wincmd w"
-            let width = 0
-            let winnr = winnr()
-            wincmd h
-            while winnr != winnr()
-                let width += winwidth(0) + 1  " Extra column for window divider
-                let winnr = winnr()
-                wincmd h
-            endwhile
-            return width
         endif
-    finally
-        let &eventignore = l:eventignore
-        execute startaltwin."wincmd w"
-        execute startwin."wincmd w"
-        " If the event that triggered InsertEnter made a change (e.g. open a
-        " new line, substitude a word), join that change with the rest of this
-        " edit.
-        if exists('b:normaltick') && b:normaltick != b:changedtick
-            try
-                undojoin
-            catch /^Vim\%((\a\+)\)\=:E790/
-                " This can happen if an undo happens during a :normal command.
-            endtry
+        let ww1 = winwidth(1)
+        let ww2 = winwidth(2)
+        let ww3 = winwidth(3)
+        if ww1 + ww2 + ww3 + 2 == &columns
+            if startwin == 2
+                return ww1 + 1
+            else
+                return ww1 + ww2 + 2
+            endif
+        elseif startwin == 2
+            if ww2 + ww3 + 1 == &columns
+                return 0
+            else
+                return ww1 + 1
+            endif
+        else " startwin == 3
+            if ww2 + ww3 + 1 == &columns
+                return ww2 + 1
+            else
+                return ww1 + 1
+            endif
         endif
-    endtry
+    endif
+    return 0
 endfunction
 
 
