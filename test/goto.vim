@@ -48,6 +48,7 @@ end
 describe 'goto_with_tabs'
     before
         set filetype=python
+        let g:jedi#use_tabs_not_buffers = 1
     end
 
     after
@@ -75,7 +76,7 @@ describe 'goto_with_tabs'
     it 'multi_definitions'
         " This used to behave differently. Now we don't have any real multi
         " definitions.
-        
+
         " put = ['import tokenize']
         " silent normal G$\d
         " Expect CurrentBufferIsModule('tokenize') == 1

@@ -12,7 +12,7 @@ let s:deprecations = {
 \ }
 
 let s:default_settings = {
-    \ 'use_tabs_not_buffers': 1,
+    \ 'use_tabs_not_buffers': 0,
     \ 'use_splits_not_buffers': 1,
     \ 'auto_initialization': 1,
     \ 'auto_vim_configuration': 1,
