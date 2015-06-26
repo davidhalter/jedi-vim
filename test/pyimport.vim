@@ -2,6 +2,10 @@ source plugin/jedi.vim
 source test/utils.vim
 
 describe 'pyimport'
+    before
+        let g:jedi#use_tabs_not_buffers = 1
+    end
+
     after
         bd!
         bd!

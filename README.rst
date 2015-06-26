@@ -120,12 +120,11 @@ are automatically initialized, but you can skip this:
     let g:jedi#auto_vim_configuration = 0
 
 
-If you are a person who likes to use VIM-buffers not tabs, you might want to
-put that in your ``.vimrc``:
+You can make jedi-vim use tabs when going to a definition etc:
 
 .. code-block:: vim
 
-    let g:jedi#use_tabs_not_buffers = 0
+    let g:jedi#use_tabs_not_buffers = 1
 
 If you are a person who likes to use VIM-splits, you might want to put this in your ``.vimrc``:
 

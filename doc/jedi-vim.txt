@@ -423,12 +423,12 @@ manually by calling a function in your configuration file: >
 ------------------------------------------------------------------------------
 6.7. `g:jedi#use_tabs_not_buffers`	*g:jedi#use_tabs_not_buffers*
 
-By default, jedi-vim opens a new tab if you use the "go to", "show
-definition", or "related names" commands. When you set this option to 0, they
-open in the current buffer instead.
+You can make jedi-vim open a new tab if you use the "go to", "show
+definition", or "related names" commands. When you leave this at the default
+(0), they open in the current buffer instead.
 
 Options: 0 or 1
-Default: 1 (Command output is put in a new tab)
+Default: 0 (Command output is put in a new tab)
 
 ------------------------------------------------------------------------------
 6.8. `g:jedi#squelch_py_warning`	*g:jedi#squelch_py_warning*
