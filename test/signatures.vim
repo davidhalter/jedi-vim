@@ -50,7 +50,7 @@ describe 'signatures'
         redir => msg
         doautocmd InsertLeave 
         redir END
-        Expect msg == "\n\n"
+        Expect msg == "\n"
     end
 
     it 'command line no signature'

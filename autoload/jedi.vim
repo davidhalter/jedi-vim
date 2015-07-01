@@ -367,11 +367,14 @@ endfunc
 
 
 function! jedi#configure_call_signatures()
+    augroup jedi_call_signatures
+    au!
     if g:jedi#show_call_signatures == 2  " Command line call signatures
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
     autocmd InsertLeave <buffer> PythonJedi jedi_vim.clear_call_signatures()
     autocmd CursorMovedI <buffer> PythonJedi jedi_vim.show_call_signatures()
+    augroup END
 endfunction
 
 
