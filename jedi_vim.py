@@ -286,8 +286,13 @@ def show_documentation():
     return True
 
 
+last_displayed_signatures = None
+
 @catch_and_print_exceptions
 def clear_call_signatures():
+    global last_displayed_signatures
+    last_displayed_signatures = None
+
     # Check if using command line call signatures
     if vim_eval("g:jedi#show_call_signatures") == '2':
         vim_command('echo ""')
@@ -309,8 +314,6 @@ def clear_call_signatures():
             line = line[:match.start()] + match.group(2) + after
             vim.current.buffer[i] = line
     vim.current.window.cursor = cursor
-
-last_displayed_signatures = None
 
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
