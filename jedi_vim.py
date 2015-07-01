@@ -411,8 +411,9 @@ def cmdline_call_signatures(signatures):
 
     try:
         index = [s.index for s in signatures if isinstance(s.index, int)][0]
-        left = text.index(params[index])
-        right = left + len(params[index])
+        escaped_param = params[index].replace(r'\n', r'\\n')
+        left = text.index(escaped_param)
+        right = left + len(escaped_param)
         vim_command('                      echon "%s" | '
                     'echohl Function     | echon "%s" | '
                     'echohl None         | echon "("  | '
