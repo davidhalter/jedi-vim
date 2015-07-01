@@ -26,6 +26,7 @@ let s:default_settings = {
     \ 'popup_on_dot': 1,
     \ 'documentation_command': "'K'",
     \ 'show_call_signatures': 1,
+    \ 'show_call_signatures_delay': 500,
     \ 'call_signature_escape': "'=`='",
     \ 'auto_close_doc': 1,
     \ 'max_doc_height': 30,
@@ -373,7 +374,17 @@ function! jedi#configure_call_signatures()
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
     autocmd InsertLeave <buffer> PythonJedi jedi_vim.clear_call_signatures()
-    autocmd CursorMovedI <buffer> PythonJedi jedi_vim.show_call_signatures()
+    if g:jedi#show_call_signatures_delay > 0
+        autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
+                    \ | let &updatetime = g:jedi#show_call_signatures_delay
+        autocmd InsertLeave <buffer> if exists('b:_jedi_orig_updatetime')
+                    \ |   let &updatetime = b:_jedi_orig_updatetime
+                    \ |   unlet b:_jedi_orig_updatetime
+                    \ | endif
+        autocmd CursorHoldI <buffer> PythonJedi jedi_vim.show_call_signatures()
+    else
+        autocmd CursorMovedI <buffer> PythonJedi jedi_vim.show_call_signatures()
+    endif
     augroup END
 endfunction
 
