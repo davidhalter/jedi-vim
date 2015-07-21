@@ -46,6 +46,7 @@ Talha Ahmed (@talha81) <talha.ahmed@gmail.com>
 Matthew Tylee Atkinson (@matatk)
 Pedro Ferrari (@petobens)
 Dave Honneffer (@pearofducks)
+Daisuke Suzuki (@daisuzu) <daisuzu@gmail.com>
 
 
 @something are github user names.
