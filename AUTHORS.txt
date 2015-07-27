@@ -47,7 +47,6 @@ Matthew Tylee Atkinson (@matatk)
 Pedro Ferrari (@petobens)
 Daniel Hahler (@blueyed)
 Dave Honneffer (@pearofducks)
-Daisuke Suzuki (@daisuzu) <daisuzu@gmail.com>
 
 
 @something are github user names.
