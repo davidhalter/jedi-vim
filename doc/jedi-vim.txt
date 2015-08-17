@@ -485,12 +485,12 @@ Default: "auto" (will use sys.version_info from "python" in your $PATH)
 ------------------------------------------------------------------------------
 6.12. `g:jedi#smart_auto_mappings`	            *g:jedi#smart_auto_mappings*
 
-When you start typing from module.name<space> jedi automatically
-fills import statement and display autocomplete popup.
+When you start typing `from module.name<space>` jedi-vim automatically
+adds the "import" statement and displays the autocomplete popup.
 
 This option can be disabled in the .vimrc:
 
-let g:jedi#smart_auto_mappings = 1
+`let g:jedi#smart_auto_mappings = 0`
 
 Options: 0 or 1
 Default: 1 (enabled by default)
