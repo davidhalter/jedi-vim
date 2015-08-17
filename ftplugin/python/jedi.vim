@@ -37,6 +37,10 @@ if g:jedi#auto_initialization
         inoremap <silent> <buffer> . .<C-R>=jedi#complete_string(1)<CR>
     endif
 
+    if g:jedi#smart_auto_mappings == 1
+        inoremap <buffer> <expr> <Space> jedi#smart_auto_mappings(g:jedi#popup_on_dot)
+    end
+
     if g:jedi#auto_close_doc
         " close preview if its still open after insert
         autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
