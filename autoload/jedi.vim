@@ -425,7 +425,7 @@ endfunction
 
 function! jedi#smart_auto_mappings()
     " Auto put import statement after from module.name<space> and complete
-    if search('\<from\s\+[A-Za-z0-9._]\+\s*\%#\s*$', 'bcn', line('.'))
+    if search('\<from\s\+[A-Za-z0-9._]\{1,50}\%#\s*$', 'bcn', line('.'))
         " Enter character and start completion.
         return "\<space>import \<C-x>\<C-o>\<C-r>=jedi#complete_opened(1)\<CR>"
     endif
