@@ -423,11 +423,11 @@ function! jedi#complete_opened(is_popup_on_dot)
 endfunction
 
 
-function! jedi#smart_auto_mappings(is_popup_on_dot)
+function! jedi#smart_auto_mappings()
     " Auto put import statement after from module.name<space> and complete
     if search('\<from\s\+[A-Za-z0-9._]\+\s*\%#\s*$', 'bcn', line('.'))
         " Enter character and start completion.
-        return "\<space>import \<C-x>\<C-o>\<C-r>=jedi#complete_opened(".a:is_popup_on_dot.")\<CR>"
+        return "\<space>import \<C-x>\<C-o>\<C-r>=jedi#complete_opened(1)\<CR>"
     endif
     return "\<space>"
 endfunction
