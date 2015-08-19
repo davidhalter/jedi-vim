@@ -11,6 +11,17 @@ describe 'completions'
         bd!
     end
 
+    it 'smart import'
+        exec "normal ifrom os "
+        Expect getline('.') == 'from os import '
+    end
+
+    it 'no smart import after space'
+        exec "normal! ifrom os "
+        exec "normal  a "
+        Expect getline('.') == 'from os  '
+    end
+
     it 'import'
         " X is the completion command
         normal oimporX
