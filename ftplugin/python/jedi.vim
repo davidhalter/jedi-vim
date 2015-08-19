@@ -38,7 +38,7 @@ if g:jedi#auto_initialization
     endif
 
     if g:jedi#smart_auto_mappings == 1
-        inoremap <buffer> <space> <C-R>=jedi#smart_auto_mappings()<CR>
+        inoremap <silent> <buffer> <space> <C-R>=jedi#smart_auto_mappings()<CR>
     end
 
     if g:jedi#auto_close_doc
