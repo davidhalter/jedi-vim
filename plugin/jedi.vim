@@ -30,4 +30,6 @@ endif
 " Pyimport command
 command! -nargs=1 -complete=custom,jedi#py_import_completions Pyimport :call jedi#py_import(<q-args>)
 
+command! -nargs=0 JediDebugInfo call jedi#debug_info()
+
 " vim: set et ts=4:
