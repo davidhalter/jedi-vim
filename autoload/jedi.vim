@@ -88,6 +88,18 @@ function! s:init_python()
         if !has('nvim') || has('python'.(s:def_py == 2 ? '' : s:def_py))
             return jedi#force_py_version(s:def_py)
         endif
+
+        " Add a warning in case the auto-detected version is not available,
+        " usually because of a missing neovim module in a VIRTUAL_ENV.
+        if has('nvim')
+            echohl WarningMsg
+            echom "jedi-vim: the detected Python version (".s:def_py.")"
+                        \ "is not functional."
+                        \ "Is the 'neovim' module installed?"
+                        \ "While jedi-vim will work, it might not use the"
+                        \ "expected Python path."
+            echohl None
+        endif
     endif
 
     if has('python')
