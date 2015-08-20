@@ -130,13 +130,16 @@ function! jedi#init_python()
 endfunction
 
 
+let s:python_version = 'null'
 function! jedi#setup_py_version(py_version)
     if a:py_version == 2
         let cmd_init = 'pyfile'
         let cmd_exec = 'python'
+        let s:python_version = 2
     elseif a:py_version == 3
         let cmd_init = 'py3file'
         let cmd_exec = 'python3'
+        let s:python_version = 3
     else
         throw "jedi#setup_py_version: invalid py_version: ".a:py_version
     endif
@@ -148,6 +151,11 @@ function! jedi#setup_py_version(py_version)
     catch
         throw "jedi#setup_py_version: ".v:exception
     endtry
+endfunction
+
+
+function! jedi#debug_info()
+    echom "Using Python version:" s:python_version
 endfunction
 
 
