@@ -113,6 +113,12 @@ function! s:init_python()
 endfunction
 
 
+function! jedi#reinit_python()
+    unlet! s:_init_python
+    call jedi#init_python()
+endfunction
+
+
 function! jedi#init_python()
     if !exists('s:_init_python')
         try
