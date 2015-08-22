@@ -7,7 +7,6 @@ import traceback  # for exception output
 import re
 import os
 import sys
-import tempfile
 import string
 import random
 from shlex import split as shsplit
@@ -247,7 +246,7 @@ def goto(mode="goto", no_output=False):
                                    % d.desc_with_module)
             else:
                 if vim_eval('g:jedi#use_tag_stack') == '1':
-                    with tempfile.NamedTemporaryFile('w') as f:
+                    with open(vim_eval('tempname()'), 'w') as f:
                         tagname = d.name
                         while vim_eval('taglist("^%s$")' % tagname) != []:
                             tagname = d.name + ' ' + ''.join(
