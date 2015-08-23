@@ -245,9 +245,11 @@ def goto(mode="goto", no_output=False):
                     echo_highlight("Builtin modules cannot be displayed (%s)."
                                    % d.desc_with_module)
             else:
-                if vim_eval('g:jedi#use_tag_stack') == '1':
-                    if not can_switch_buffers():
+                if d.module_path != vim.current.buffer.name:
+                    result = new_buffer(d.module_path, using_tagstack=True)
+                    if not result:
                         return []
+                if d.module_path and vim_eval('g:jedi#use_tag_stack') == '1':
                     with open(vim_eval('tempname()'), 'w') as f:
                         tagname = d.name
                         while vim_eval('taglist("^%s$")' % tagname) != []:
@@ -260,12 +262,7 @@ def goto(mode="goto", no_output=False):
                         vim.command('set tags+=%s' % f.name)
                         vim.command('tjump %s' % tagname)
                         vim.command('set tags-=%s' % f.name)
-                else:
-                    if d.module_path != vim.current.buffer.name:
-                        result = new_buffer(d.module_path)
-                        if not result:
-                            return []
-                    vim.current.window.cursor = d.line, d.column
+                vim.current.window.cursor = d.line, d.column
         else:
             # multiple solutions
             lst = []
@@ -585,7 +582,7 @@ def py_import_completions():
 
 
 @catch_and_print_exceptions
-def new_buffer(path, options=''):
+def new_buffer(path, options='', using_tagstack=False):
     # options are what you can to edit the edit options
     if vim_eval('g:jedi#use_tabs_not_buffers') == '1':
         _tabnew(path, options)
@@ -604,26 +601,21 @@ def new_buffer(path, options=''):
             print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options.keys()))
         else:
             vim_command(split_options[user_split_option] + " %s" % path)
+    elif using_tagstack:
+        return True
     else:
-        if not can_switch_buffers():
-            return False
+        if vim_eval("!&hidden && &modified") == '1':
+            if vim_eval("bufname('%')") is None:
+                echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
+                return False
+            else:
+                vim_command('w')
         vim_command('edit %s %s' % (options, escape_file_path(path)))
     # sometimes syntax is being disabled and the filetype not set.
     if vim_eval('!exists("g:syntax_on")') == '1':
         vim_command('syntax enable')
     if vim_eval("&filetype != 'python'") == '1':
         vim_command('set filetype=python')
-    return True
-
-
-@catch_and_print_exceptions
-def can_switch_buffers():
-    if vim_eval("!&hidden && &modified") == '1':
-        if vim_eval("bufname('%')") is None:
-            echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
-            return False
-        else:
-            vim_command('w')
     return True
 
 
