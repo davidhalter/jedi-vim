@@ -601,8 +601,6 @@ def new_buffer(path, options='', using_tagstack=False):
             print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options.keys()))
         else:
             vim_command(split_options[user_split_option] + " %s" % path)
-    elif using_tagstack:
-        return True
     else:
         if vim_eval("!&hidden && &modified") == '1':
             if vim_eval("bufname('%')") is None:
@@ -610,6 +608,8 @@ def new_buffer(path, options='', using_tagstack=False):
                 return False
             else:
                 vim_command('w')
+        if using_tagstack:
+            return True
         vim_command('edit %s %s' % (options, escape_file_path(path)))
     # sometimes syntax is being disabled and the filetype not set.
     if vim_eval('!exists("g:syntax_on")') == '1':
