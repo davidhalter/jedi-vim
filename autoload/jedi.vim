@@ -36,16 +36,16 @@ let s:default_settings = {
     \ 'smart_auto_mappings': 1
 \ }
 
-for [key, val] in items(s:deprecations)
-    if exists('g:jedi#'.key)
-        echom "'g:jedi#".key."' is deprecated. Please use 'g:jedi#".val."' instead. Sorry for the inconvenience."
-        exe 'let g:jedi#'.val.' = g:jedi#'.key
+for [s:key, s:val] in items(s:deprecations)
+    if exists('g:jedi#'.s:key)
+        echom "'g:jedi#".s:key."' is deprecated. Please use 'g:jedi#".s:val."' instead. Sorry for the inconvenience."
+        exe 'let g:jedi#'.s:val.' = g:jedi#'.s:key
     endif
 endfor
 
-for [key, val] in items(s:default_settings)
-    if !exists('g:jedi#'.key)
-        exe 'let g:jedi#'.key.' = '.val
+for [s:key, s:val] in items(s:default_settings)
+    if !exists('g:jedi#'.s:key)
+        exe 'let g:jedi#'.s:key.' = '.s:val
     endif
 endfor
 
