@@ -36,12 +36,13 @@ Contents				*jedi-vim-contents*
     6.4. popup_select_first		|g:jedi#popup_select_first|
     6.5. auto_close_doc			|g:jedi#auto_close_doc|
     6.6. show_call_signatures		|g:jedi#show_call_signatures|
-    6.7. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
-    6.8. squelch_py_warning		|g:jedi#squelch_py_warning|
-    6.9. completions_enabled		|g:jedi#completions_enabled|
-    6.10. use_splits_not_buffers	|g:jedi#use_splits_not_buffers|
-    6.11. force_py_version              |g:jedi#force_py_version|
-    6.12. smart_auto_mappings           |g:jedi#smart_auto_mappings|
+    6.7. show_call_signatures_delay	|g:jedi#show_call_signatures_delay|
+    6.8. use_tabs_not_buffers		|g:jedi#use_tabs_not_buffers|
+    6.9. squelch_py_warning		|g:jedi#squelch_py_warning|
+    6.10. completions_enabled		|g:jedi#completions_enabled|
+    6.11. use_splits_not_buffers	|g:jedi#use_splits_not_buffers|
+    6.12. force_py_version              |g:jedi#force_py_version|
+    6.13. smart_auto_mappings           |g:jedi#smart_auto_mappings|
 7. Testing				|jedi-vim-testing|
 8. Contributing				|jedi-vim-contributing|
 9. License				|jedi-vim-license|
@@ -422,7 +423,17 @@ manually by calling a function in your configuration file: >
     call jedi#configure_call_signatures()
 
 ------------------------------------------------------------------------------
-6.7. `g:jedi#use_tabs_not_buffers`	*g:jedi#use_tabs_not_buffers*
+6.7. `g:jedi#show_call_signatures_delay`  *g:jedi#show_call_signatures_delay*
+
+The delay to be used with |g:jedi#show_call_signatures|.  If it is greater
+than 0 it will use Vim's |CursorHoldI| event instead of |CursorMovedI|.
+It will temporarily set Vim's |'updatetime'| option during insert mode.
+
+Options: delay in milliseconds
+Default: 500
+
+------------------------------------------------------------------------------
+6.8. `g:jedi#use_tabs_not_buffers`	*g:jedi#use_tabs_not_buffers*
 
 You can make jedi-vim open a new tab if you use the "go to", "show
 definition", or "related names" commands. When you leave this at the default
@@ -432,7 +443,7 @@ Options: 0 or 1
 Default: 0 (Command output is put in a new tab)
 
 ------------------------------------------------------------------------------
-6.8. `g:jedi#squelch_py_warning`	*g:jedi#squelch_py_warning*
+6.9. `g:jedi#squelch_py_warning`	*g:jedi#squelch_py_warning*
 
 When Vim has not been compiled with +python, jedi-vim shows a warning to that
 effect and aborts loading itself. Set this to 1 to suppress that warning.
@@ -441,7 +452,7 @@ Options: 0 or 1
 Default: 0 (Warning is shown)
 
 ------------------------------------------------------------------------------
-6.9. `g:jedi#completions_enabled`	*g:jedi#completions_enabled*
+6.10. `g:jedi#completions_enabled`	*g:jedi#completions_enabled*
 
 If you don't want Jedi completion, but all the other features, you can disable
 it in favor of another completion engine (that probably also uses Jedi, like
@@ -451,7 +462,7 @@ Options: 0 or 1
 Default: 1
 
 ------------------------------------------------------------------------------
-6.10. `g:jedi#use_splits_not_buffers`	*g:jedi#use_splits_not_buffers*
+6.11. `g:jedi#use_splits_not_buffers`	*g:jedi#use_splits_not_buffers*
 
 If you want to open new split for "go to", you could set this option to the
 direction which you want to open a split with.
@@ -465,7 +476,7 @@ means that if the window is big enough it will be split vertically but if it is
 small a horizontal split happens.
 
 ------------------------------------------------------------------------------
-6.11. `g:jedi#force_py_version`                *g:jedi#force_py_version*
+6.12. `g:jedi#force_py_version`                *g:jedi#force_py_version*
 
 If you have installed both python 2 and python 3, you can force which one jedi
 should use by setting this variable. It forces the internal Vim command, which
@@ -483,7 +494,7 @@ Function: `jedi#force_py_version(py_version)`
 Options: 2 or 3
 Default: "auto" (will use sys.version_info from "python" in your $PATH)
 ------------------------------------------------------------------------------
-6.12. `g:jedi#smart_auto_mappings`	            *g:jedi#smart_auto_mappings*
+6.13. `g:jedi#smart_auto_mappings`	            *g:jedi#smart_auto_mappings*
 
 When you start typing `from module.name<space>` jedi-vim automatically
 adds the "import" statement and displays the autocomplete popup.

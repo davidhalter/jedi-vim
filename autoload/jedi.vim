@@ -26,6 +26,7 @@ let s:default_settings = {
     \ 'popup_on_dot': 1,
     \ 'documentation_command': "'K'",
     \ 'show_call_signatures': 1,
+    \ 'show_call_signatures_delay': 500,
     \ 'call_signature_escape': "'=`='",
     \ 'auto_close_doc': 1,
     \ 'max_doc_height': 30,
@@ -366,12 +367,59 @@ function! jedi#do_popup_on_dot_in_highlight()
 endfunc
 
 
+let s:show_call_signatures_last = [0, 0, '']
+function! jedi#show_call_signatures()
+    let [line, col] = [line('.'), col('.')]
+    let curline = getline(line)
+    let reload_signatures = 1
+
+    " Caching.  On the same line only.
+    if line == s:show_call_signatures_last[0]
+        " Check if the number of commas before or after the cursor has
+        " not changed: this means that the argument position was not
+        " changed and we can skip repainting.
+        let prevcol = s:show_call_signatures_last[1]
+        let prevline = s:show_call_signatures_last[2]
+        if substitute(curline[:col-2], '[^,]', '', 'g')
+                    \ == substitute(prevline[:prevcol-2], '[^,]', '', 'g')
+                    \ && substitute(curline[(col-2):], '[^,]', '', 'g')
+                    \ == substitute(prevline[(prevcol-2):], '[^,]', '', 'g')
+            let reload_signatures = 0
+        endif
+    endif
+    let s:show_call_signatures_last = [line, col, curline]
+
+    if reload_signatures
+        PythonJedi jedi_vim.show_call_signatures()
+    endif
+endfunction
+
+
+function! jedi#clear_call_signatures()
+    let s:show_call_signatures_last = [0, 0, '']
+    PythonJedi jedi_vim.clear_call_signatures()
+endfunction
+
+
 function! jedi#configure_call_signatures()
+    augroup jedi_call_signatures
+    au!
     if g:jedi#show_call_signatures == 2  " Command line call signatures
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
-    autocmd InsertLeave <buffer> PythonJedi jedi_vim.clear_call_signatures()
-    autocmd CursorMovedI <buffer> PythonJedi jedi_vim.show_call_signatures()
+    autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
+    if g:jedi#show_call_signatures_delay > 0
+        autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
+                    \ | let &updatetime = g:jedi#show_call_signatures_delay
+        autocmd InsertLeave <buffer> if exists('b:_jedi_orig_updatetime')
+                    \ |   let &updatetime = b:_jedi_orig_updatetime
+                    \ |   unlet b:_jedi_orig_updatetime
+                    \ | endif
+        autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
+    else
+        autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
+    endif
+    augroup END
 endfunction
 
 
