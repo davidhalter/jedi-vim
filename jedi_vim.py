@@ -413,9 +413,10 @@ def cmdline_call_signatures(signatures):
         params = get_params(signatures[0])
     text = ', '.join(params).replace('"', '\\"').replace(r'\n', r'\\n')
 
-    # Allow 12 characters for ruler/showcmd - setting noruler/noshowcmd
-    # here causes incorrect undo history
-    max_msg_len = int(vim_eval('&columns')) - 12
+    # Allow 12 characters for showcmd plus 18 for ruler - setting
+    # noruler/noshowcmd here causes incorrect undo history
+    max_msg_len = int(vim_eval('&columns')) - (
+        30 if int(vim_eval('&ruler')) else 12)
     max_num_spaces = (max_msg_len - len(signatures[0].call_name)
                       - len(text) - 2)  # 2 accounts for parentheses
     if max_num_spaces < 0:
