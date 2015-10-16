@@ -391,33 +391,65 @@ def cmdline_call_signatures(signatures):
     def get_params(s):
         return [p.description.replace('\n', '') for p in s.params]
 
+    def escape(string):
+        return string.replace('"', '\\"').replace(r'\n', r'\\n')
+
+    def join():
+        return ', '.join(filter(None, (left, center, right)))
+
+    def too_long():
+        return len(join()) > max_msg_len
+
     if len(signatures) > 1:
         params = zip_longest(*map(get_params, signatures), fillvalue='_')
         params = ['(' + ', '.join(p) + ')' for p in params]
     else:
         params = get_params(signatures[0])
-    text = ', '.join(params).replace('"', '\\"').replace(r'\n', r'\\n')
+
+    index = next(iter(s.index for s in signatures if s.index is not None), None)
 
     # Allow 12 characters for showcmd plus 18 for ruler - setting
     # noruler/noshowcmd here causes incorrect undo history
-    max_msg_len = int(vim_eval('&columns')) - (
-        30 if int(vim_eval('&ruler')) else 12)
-    max_num_spaces = (max_msg_len - len(signatures[0].call_name)
-                      - len(text) - 2)  # 2 accounts for parentheses
-    if max_num_spaces < 0:
-        return  # No room for the message
-    _, column = signatures[0].bracket_start
-    num_spaces = min(int(vim_eval('g:jedi#first_col +'
-                     'wincol() - col(".")')) +
-                     column - len(signatures[0].call_name),
-                     max_num_spaces)
-    spaces = ' ' * num_spaces
+    max_msg_len = int(vim_eval('&columns')) - 12
+    if int(vim_eval('&ruler')):
+        max_msg_len -= 18
+    max_msg_len -= len(signatures[0].call_name) + 2  # call name + parentheses
 
-    try:
-        index = [s.index for s in signatures if isinstance(s.index, int)][0]
-        escaped_param = params[index].replace(r'\n', r'\\n')
-        left = text.index(escaped_param)
-        right = left + len(escaped_param)
+    if max_msg_len < 0:
+        return
+    elif index is None:
+        pass
+    elif max_msg_len < len('...'):
+        return
+    else:
+        left = escape(', '.join(params[:index]))
+        center = escape(params[index])
+        right = escape(', '.join(params[index + 1:]))
+        while too_long():
+            if left and left != '...':
+                left = '...'
+                continue
+            if right and right != '...':
+                right = '...'
+                continue
+            if (left or right) and center != '...':
+                left = right = None
+                center = '...'
+                continue
+            if too_long():
+                # Should never reach here
+                return
+
+    max_num_spaces = max_msg_len
+    if index is not None:
+        max_num_spaces -= len(join())
+    _, column = signatures[0].bracket_start
+    spaces = min(int(vim_eval('g:jedi#first_col +'
+                              'wincol() - col(".")')) +
+                 column - len(signatures[0].call_name),
+                 max_num_spaces) * ' '
+
+    if index is not None:
         vim_command('                      echon "%s" | '
                     'echohl Function     | echon "%s" | '
                     'echohl None         | echon "("  | '
@@ -425,15 +457,14 @@ def cmdline_call_signatures(signatures):
                     'echohl jediFat      | echon "%s" | '
                     'echohl jediFunction | echon "%s" | '
                     'echohl None         | echon ")"'
-                    % (spaces, signatures[0].call_name, text[:left],
-                       text[left:right], text[right:]))
-    except (TypeError, IndexError):
+                    % (spaces, signatures[0].call_name,
+                       left + ', ' if left else '',
+                       center, ', ' + right if right else ''))
+    else:
         vim_command('                      echon "%s" | '
                     'echohl Function     | echon "%s" | '
-                    'echohl None         | echon "("  | '
-                    'echohl jediFunction | echon "%s" | '
-                    'echohl None         | echon ")"'
-                    % (spaces, signatures[0].call_name, text))
+                    'echohl None         | echon "()"'
+                    % (spaces, signatures[0].call_name))
 
 
 @_check_jedi_availability(show_error=True)
