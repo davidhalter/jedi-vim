@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The Python parts of the Jedi library for VIM. It is mostly about communicating
 with VIM.
@@ -16,7 +17,10 @@ except ImportError:
 
 is_py3 = sys.version_info[0] >= 3
 if is_py3:
+    ELLIPSIS = "…"
     unicode = str
+else:
+    ELLIPSIS = u"…"
 
 
 class PythonToVimStr(unicode):
@@ -419,22 +423,22 @@ def cmdline_call_signatures(signatures):
         return
     elif index is None:
         pass
-    elif max_msg_len < len('...'):
+    elif max_msg_len < len(ELLIPSIS):
         return
     else:
         left = escape(', '.join(params[:index]))
         center = escape(params[index])
         right = escape(', '.join(params[index + 1:]))
         while too_long():
-            if left and left != '...':
-                left = '...'
+            if left and left != ELLIPSIS:
+                left = ELLIPSIS
                 continue
-            if right and right != '...':
-                right = '...'
+            if right and right != ELLIPSIS:
+                right = ELLIPSIS
                 continue
-            if (left or right) and center != '...':
+            if (left or right) and center != ELLIPSIS:
                 left = right = None
-                center = '...'
+                center = ELLIPSIS
                 continue
             if too_long():
                 # Should never reach here
