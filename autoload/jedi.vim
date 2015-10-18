@@ -396,19 +396,14 @@ function! jedi#show_call_signatures()
 endfunction
 
 
-function! jedi#clear_call_signatures()
-    let s:show_call_signatures_last = [0, 0, '']
-    PythonJedi jedi_vim.clear_call_signatures()
-endfunction
-
-
 function! jedi#configure_call_signatures()
     augroup jedi_call_signatures
     au!
     if g:jedi#show_call_signatures == 2  " Command line call signatures
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
-    autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
+    autocmd InsertEnter <buffer> let s:show_call_signatures_last = [0, 0, '']
+    autocmd InsertLeave <buffer> PythonJedi jedi_vim.clear_call_signatures()
     if g:jedi#show_call_signatures_delay > 0
         autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
                     \ | let &updatetime = g:jedi#show_call_signatures_delay
