@@ -43,6 +43,7 @@ Contents				*jedi-vim-contents*
     6.11. use_splits_not_buffers	|g:jedi#use_splits_not_buffers|
     6.12. force_py_version              |g:jedi#force_py_version|
     6.13. smart_auto_mappings           |g:jedi#smart_auto_mappings|
+    6.14. use_tag_stack                 |g:jedi#use_tag_stack|
 7. Testing				|jedi-vim-testing|
 8. Contributing				|jedi-vim-contributing|
 9. License				|jedi-vim-license|
@@ -502,6 +503,17 @@ adds the "import" statement and displays the autocomplete popup.
 This option can be disabled in the .vimrc:
 
 `let g:jedi#smart_auto_mappings = 0`
+
+Options: 0 or 1
+Default: 1 (enabled by default)
+
+------------------------------------------------------------------------------
+6.14. `g:jedi#use_tag_stack`			*g:jedi#use_tag_stack*
+
+Write results of |jedi#goto| to a temporary file and use the *:tjump* command
+to enable full |tagstack| functionality. Use of the tag stack allows
+returning to the usage of a function with CTRL-T after exploring the
+definition with arbitrary changes to the |jumplist|.
 
 Options: 0 or 1
 Default: 1 (enabled by default)
