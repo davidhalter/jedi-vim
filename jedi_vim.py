@@ -258,7 +258,7 @@ def goto(mode="goto", no_output=False):
                         tagname = d.name
                         while vim_eval('taglist("^%s$")' % tagname) != []:
                             tagname = d.name + ' ' + ''.join(
-                                [random.choice(string.lowercase)
+                                [random.choice(string.ascii_lowercase)
                                  for _ in range(4)])
                         f.write('{0}\t{1}\t{2}'.format(tagname, d.module_path,
                             'call cursor({0}, {1})'.format(d.line, d.column + 1)))
