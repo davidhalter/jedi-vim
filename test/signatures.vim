@@ -17,8 +17,16 @@ describe 'signatures'
 
         Expect getline(1) == '=`=jedi=0, =`=   (*_*number*_*) =`=jedi=`='
 
-        doautocmd InsertLeave 
+        doautocmd InsertLeave
         Expect getline(1) == ''
+    end
+
+    it 'simple after CursorHoldI with only parenthesis'
+        noautocmd normal o
+        doautocmd CursorHoldI
+        noautocmd normal iabs( 
+        doautocmd CursorHoldI
+        Expect getline(1) == '=`=jedi=0, =`=   (*_*number*_*) =`=jedi=`='
     end
 
     it 'no signature'
