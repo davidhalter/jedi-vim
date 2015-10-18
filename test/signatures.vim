@@ -68,22 +68,22 @@ describe 'signatures'
         put = 'def '.funcname.'(arg1, arg2, arg3, a, b, c):'
         put = '    pass'
         execute "normal o".funcname."( "
-        Expect Signature() == "\n".funcname."(arg1, ...)"
+        Expect Signature() == "\n".funcname."(arg1, …)"
 
         normal sarg1, 
-        Expect Signature() == "\n".funcname."(..., arg2, ...)"
+        Expect Signature() == "\n".funcname."(…, arg2, …)"
 
         normal sarg2, arg3, 
-        Expect Signature() == "\n".funcname."(..., a, b, c)"
+        Expect Signature() == "\n".funcname."(…, a, b, c)"
 
         normal sa, b, 
-        Expect Signature() == "\n".funcname."(..., c)"
+        Expect Signature() == "\n".funcname."(…, c)"
 
         g/^/d
         put = 'def '.funcname.'('.repeat('b', 20).', arg2):'
         put = '    pass'
         execute "normal o".funcname."( "
-        Expect Signature() == "\n".funcname."(...)"
+        Expect Signature() == "\n".funcname."(…)"
     end
 
     it 'command line no signature'
