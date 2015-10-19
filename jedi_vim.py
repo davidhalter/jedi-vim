@@ -8,9 +8,8 @@ import traceback  # for exception output
 import re
 import os
 import sys
-import string
-import random
 from shlex import split as shsplit
+from tempfile import NamedTemporaryFile
 try:
     from itertools import zip_longest
 except ImportError:
@@ -254,18 +253,17 @@ def goto(mode="goto", no_output=False):
                     if not result:
                         return []
                 if d.module_path and vim_eval('g:jedi#use_tag_stack') == '1':
-                    with open(vim_eval('tempname()'), 'w') as f:
+                    with NamedTemporaryFile('w', prefix=vim_eval('tempname()')) as f:
                         tagname = d.name
-                        while vim_eval('taglist("^%s$")' % tagname) != []:
-                            tagname = d.name + ' ' + ''.join(
-                                [random.choice(string.ascii_lowercase)
-                                 for _ in range(4)])
                         f.write('{0}\t{1}\t{2}'.format(tagname, d.module_path,
                             'call cursor({0}, {1})'.format(d.line, d.column + 1)))
-                        f.seek(0)
-                        vim.command('set tags+=%s' % f.name)
-                        vim.command('tjump %s' % tagname)
-                        vim.command('set tags-=%s' % f.name)
+                        f.flush()
+                        old_tags = vim.eval('&tags')
+                        try:
+                            vim.command('set tags=%s' % f.name)
+                            vim.command('tjump %s' % tagname)
+                        finally:
+                            vim.command('set tags=%s' % old_tags)
                 vim.current.window.cursor = d.line, d.column
         else:
             # multiple solutions
