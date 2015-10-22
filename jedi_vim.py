@@ -248,22 +248,27 @@ def goto(mode="goto", no_output=False):
                     echo_highlight("Builtin modules cannot be displayed (%s)."
                                    % d.desc_with_module)
             else:
+                using_tagstack = vim_eval('g:jedi#use_tag_stack') == '1'
                 if d.module_path != vim.current.buffer.name:
-                    result = new_buffer(d.module_path, using_tagstack=True)
+                    result = new_buffer(d.module_path,
+                                        using_tagstack=using_tagstack)
                     if not result:
                         return []
-                if d.module_path and vim_eval('g:jedi#use_tag_stack') == '1':
+                if d.module_path and using_tagstack:
                     with NamedTemporaryFile('w', prefix=vim_eval('tempname()')) as f:
                         tagname = d.name
                         f.write('{0}\t{1}\t{2}'.format(tagname, d.module_path,
                             'call cursor({0}, {1})'.format(d.line, d.column + 1)))
                         f.flush()
                         old_tags = vim.eval('&tags')
+                        old_wildignore = vim.eval('&wildignore')
                         try:
+                            vim.command('set wildignore=')
                             vim.command('set tags=%s' % f.name)
                             vim.command('tjump %s' % tagname)
                         finally:
                             vim.command('set tags=%s' % old_tags)
+                            vim.command('let &wildignore = "%s"' % old_wildignore)
                 vim.current.window.cursor = d.line, d.column
         else:
             # multiple solutions
