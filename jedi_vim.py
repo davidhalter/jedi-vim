@@ -263,6 +263,7 @@ def goto(mode="goto", no_output=False):
                         old_tags = vim.eval('&tags')
                         old_wildignore = vim.eval('&wildignore')
                         try:
+                            # Clear wildignore to ensure tag file isn't ignored
                             vim.command('set wildignore=')
                             vim.command('set tags=%s' % f.name)
                             vim.command('tjump %s' % tagname)
