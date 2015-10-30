@@ -9,7 +9,7 @@ import re
 import os
 import sys
 from shlex import split as shsplit
-from tempfile import NamedTemporaryFile
+from contextlib import contextmanager
 try:
     from itertools import zip_longest
 except ImportError:
@@ -205,6 +205,17 @@ def completions():
         vim.command('return ' + strout)
 
 
+@contextmanager
+def tempfile(content):
+    # Using this instead of the tempfile module because Windows won't read
+    # from a file not yet written to disk
+    with open(vim_eval('tempname()'), 'w') as f:
+        f.write(content)
+    try:
+        yield f
+    finally:
+        os.unlink(f.name)
+
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
 def goto(mode="goto", no_output=False):
@@ -255,21 +266,22 @@ def goto(mode="goto", no_output=False):
                     if not result:
                         return []
                 if d.module_path and using_tagstack:
-                    with NamedTemporaryFile('w', prefix=vim_eval('tempname()')) as f:
-                        tagname = d.name
-                        f.write('{0}\t{1}\t{2}'.format(tagname, d.module_path,
-                            'call cursor({0}, {1})'.format(d.line, d.column + 1)))
-                        f.flush()
+                    tagname = d.name
+                    with tempfile('{0}\t{1}\t{2}'.format(tagname, d.module_path,
+                            'call cursor({0}, {1})'.format(d.line, d.column + 1))) as f:
                         old_tags = vim.eval('&tags')
                         old_wildignore = vim.eval('&wildignore')
                         try:
                             # Clear wildignore to ensure tag file isn't ignored
                             vim.command('set wildignore=')
-                            vim.command('set tags=%s' % f.name)
+                            vim.command('let &tags = %s' %
+                                        repr(PythonToVimStr(f.name)))
                             vim.command('tjump %s' % tagname)
                         finally:
-                            vim.command('set tags=%s' % old_tags)
-                            vim.command('let &wildignore = "%s"' % old_wildignore)
+                            vim.command('let &tags = %s' %
+                                        repr(PythonToVimStr(old_tags)))
+                            vim.command('let &wildignore = %s' %
+                                        repr(PythonToVimStr(old_wildignore)))
                 vim.current.window.cursor = d.line, d.column
         else:
             # multiple solutions
