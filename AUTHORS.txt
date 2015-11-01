@@ -47,6 +47,7 @@ Matthew Tylee Atkinson (@matatk)
 Pedro Ferrari (@petobens)
 Daniel Hahler (@blueyed)
 Dave Honneffer (@pearofducks)
+Bagrat Aznauryan (@n9code)
 
 
 @something are github user names.
