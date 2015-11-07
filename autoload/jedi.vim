@@ -404,7 +404,7 @@ endfunction
 
 function! jedi#configure_call_signatures()
     augroup jedi_call_signatures
-    au!
+    autocmd! * <buffer>
     if g:jedi#show_call_signatures == 2  " Command line call signatures
         autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
     endif
