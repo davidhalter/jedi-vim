@@ -21,6 +21,22 @@ describe 'signatures'
         Expect getline(1) == ''
     end
 
+    it 'multiple buffers'
+        set hidden
+        new
+        setfiletype python
+        redir => autocmds
+        autocmd jedi_call_signatures * <buffer>
+        redir END
+        Expect autocmds =~# 'jedi_call_signatures'
+        buffer #
+        redir => autocmds
+        autocmd jedi_call_signatures * <buffer>
+        redir END
+        Expect autocmds =~# 'jedi_call_signatures'
+        bd!
+    end
+
     it 'simple after CursorHoldI with only parenthesis'
         noautocmd normal o
         doautocmd CursorHoldI
