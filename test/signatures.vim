@@ -75,6 +75,13 @@ describe 'signatures'
         doautocmd InsertLeave 
         redir END
         Expect msg == "\n"
+
+        normal Sdef foo(a, b): pass
+        normal ofoo(a, b, c, 
+        redir => msg
+        Python jedi_vim.show_call_signatures()
+        redir END
+        Expect msg == "\nfoo(a, b)"
     end
 
     it 'command line truncation'

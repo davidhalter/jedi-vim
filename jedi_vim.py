@@ -450,10 +450,12 @@ def cmdline_call_signatures(signatures):
         max_msg_len -= 18
     max_msg_len -= len(signatures[0].call_name) + 2  # call name + parentheses
 
-    if max_msg_len < 0:
+    if max_msg_len < (1 if params else 0):
         return
     elif index is None:
-        pass
+        text = escape(', '.join(params))
+        if params and len(text) > max_msg_len:
+            text = ELLIPSIS
     elif max_msg_len < len(ELLIPSIS):
         return
     else:
@@ -498,8 +500,8 @@ def cmdline_call_signatures(signatures):
     else:
         vim_command('                      echon "%s" | '
                     'echohl Function     | echon "%s" | '
-                    'echohl None         | echon "()"'
-                    % (spaces, signatures[0].call_name))
+                    'echohl None         | echon "(%s)"'
+                    % (spaces, signatures[0].call_name, text))
 
 
 @_check_jedi_availability(show_error=True)
