@@ -491,8 +491,10 @@ function! jedi#complete_opened(is_popup_on_dot)
             return "\<Down>"
         endif
         if a:is_popup_on_dot
-            " Prevent completion of the first entry with dot completion.
-            return "\<C-p>"
+            if &completeopt !~ '\(noinsert\|noselect\)'
+                " Prevent completion of the first entry with dot completion.
+                return "\<C-p>"
+            endif
         endif
     endif
     return ""
