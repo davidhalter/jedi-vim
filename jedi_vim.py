@@ -4,9 +4,11 @@ The Python parts of the Jedi library for VIM. It is mostly about communicating
 with VIM.
 """
 
+import json
 import traceback  # for exception output
 import re
 import os
+import subprocess
 import sys
 from shlex import split as shsplit
 from contextlib import contextmanager
@@ -135,6 +137,64 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
+class JediRemote(object):
+    python = 'python'
+    remote_cmd = 'jedi_remote.py'
+
+    def __init__(self):
+        cmd = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), self.remote_cmd)
+        self._process = subprocess.Popen(
+            [self.python, cmd], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+    def __del__(self):
+        self._process.kill()
+
+    def __getattr__(self, name):
+        return (lambda *args, **kwargs: self._call(name, *args, **kwargs))
+
+    def _call(self, func, *args, **kwargs):
+        self._process.stdin.write(
+            json.dumps({'func': func, 'args': args, 'kwargs': kwargs}))
+        self._process.stdin.write('\n')
+        self._process.stdin.flush()
+
+        ret = json.loads(self._process.stdout.readline(), object_hook=ObjectDict)
+
+        if ret['code'] == 'ok':
+            return ret['return']
+
+        elif ret['message'].startswith('jedi.api.NotFoundError'):
+            raise jedi.NotFoundError()
+
+        else:
+            raise Exception(ret['message'])
+
+    @catch_and_print_exceptions
+    def set_script(self, source=None, column=None):
+        self.set_additional_dynamic_modules(
+            [b.name for b in vim.buffers if b.name is not None and b.name.endswith('.py')])
+        if source is None:
+            source = '\n'.join(vim.current.buffer)
+        row = vim.current.window.cursor[0]
+        if column is None:
+            column = vim.current.window.cursor[1]
+        buf_path = vim.current.buffer.name
+        encoding = vim_eval('&encoding') or 'latin1'
+        self._call('set_script', source, row, column, buf_path, encoding)
+
+
+class ObjectDict(dict):
+    def __getattr__(self, name):
+        return self[name]
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+
+jedi_remote = JediRemote()
+
+
 @catch_and_print_exceptions
 def get_script(source=None, column=None):
     jedi.settings.additional_dynamic_modules = \
@@ -177,9 +237,9 @@ def completions():
         # here again hacks, because jedi has a different interface than vim
         column += len(base)
         try:
-            script = get_script(source=source, column=column)
-            completions = script.completions()
-            signatures = script.call_signatures()
+            jedi_remote.set_script(source=source, column=column)
+            completions = jedi_remote.completions()
+            signatures = jedi_remote.call_signatures()
 
             out = []
             for c in completions:
@@ -187,7 +247,7 @@ def completions():
                          abbr=PythonToVimStr(c.name),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
-                         info=PythonToVimStr(c.docstring()),  # docstr
+                         info=PythonToVimStr(c.docstring),  # docstr
                          icase=1,  # case insensitive
                          dup=1  # allow duplicates (maybe later remove this)
                          )
@@ -224,19 +284,19 @@ def goto(mode="goto", no_output=False):
     :return: list of definitions/assignments
     :rtype: list
     """
-    script = get_script()
+    jedi_remote.set_script()
     try:
         if mode == "goto":
-            definitions = [x for x in script.goto_definitions()
-                           if not x.in_builtin_module()]
+            definitions = [x for x in jedi_remote.goto_definitions()
+                           if not x.in_builtin_module]
             if not definitions:
-                definitions = script.goto_assignments()
+                definitions = jedi_remote.goto_assignments()
         elif mode == "related_name":
-            definitions = script.usages()
+            definitions = jedi_remote.usages()
         elif mode == "definition":
-            definitions = script.goto_definitions()
+            definitions = jedi_remote.goto_definitions()
         elif mode == "assignment":
-            definitions = script.goto_assignments()
+            definitions = jedi_remote.goto_assignments()
     except jedi.NotFoundError:
         echo_highlight("Cannot follow nothing. Put your cursor on a valid name.")
         definitions = []
@@ -252,7 +312,7 @@ def goto(mode="goto", no_output=False):
             vim_command('normal! m`')
 
             d = list(definitions)[0]
-            if d.in_builtin_module():
+            if d.in_builtin_module:
                 if d.is_keyword:
                     echo_highlight("Cannot get the definition of Python keywords.")
                 else:
@@ -287,7 +347,7 @@ def goto(mode="goto", no_output=False):
             # multiple solutions
             lst = []
             for d in definitions:
-                if d.in_builtin_module():
+                if d.in_builtin_module:
                     lst.append(dict(text=PythonToVimStr('Builtin ' + d.description)))
                 else:
                     lst.append(dict(filename=PythonToVimStr(d.module_path),
@@ -301,9 +361,9 @@ def goto(mode="goto", no_output=False):
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
 def show_documentation():
-    script = get_script()
+    set_script()
     try:
-        definitions = script.goto_definitions()
+        definitions = jedi_remote.goto_definitions()
     except jedi.NotFoundError:
         definitions = []
     except Exception:
@@ -568,7 +628,7 @@ def do_rename(replace, orig=None):
                          key=lambda x: (x.module_path, x.start_pos))
     buffers = set()
     for r in temp_rename:
-        if r.in_builtin_module():
+        if r.in_builtin_module:
             continue
 
         if os.path.abspath(vim.current.buffer.name) != r.module_path:
@@ -613,7 +673,7 @@ def py_import():
     except IndexError:
         echo_highlight('Cannot find %s in sys.path!' % import_path)
     else:
-        if completion.in_builtin_module():
+        if completion.in_builtin_module:
             echo_highlight('%s is a builtin module.' % import_path)
         else:
             cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
@@ -630,8 +690,8 @@ def py_import_completions():
         comps = []
     else:
         text = 'import %s' % argl
-        script = jedi.Script(text, 1, len(text), '')
-        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
+        jedi_remote.set_script(text, 1, len(text), '')
+        comps = ['%s%s' % (argl, c.complete) for c in jedi_remote.completions()]
     vim.command("return '%s'" % '\n'.join(comps))
 
 
