@@ -142,24 +142,39 @@ class JediRemote(object):
     remote_cmd = 'jedi_remote.py'
 
     def __init__(self):
-        cmd = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), self.remote_cmd)
-        self._process = subprocess.Popen(
-            [self.python, cmd], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        self._process = None
 
     def __del__(self):
-        self._process.kill()
+        self._process.terminate()
+        self._process = None
 
     def __getattr__(self, name):
         return (lambda *args, **kwargs: self._call(name, *args, **kwargs))
 
-    def _call(self, func, *args, **kwargs):
-        self._process.stdin.write(
-            json.dumps({'func': func, 'args': args, 'kwargs': kwargs}))
-        self._process.stdin.write('\n')
-        self._process.stdin.flush()
+    @property
+    def process(self):
+        if self._process is None:
+            cmd = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), self.remote_cmd)
+            self._process = subprocess.Popen(
+                [self.python, cmd],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+            )
 
-        ret = json.loads(self._process.stdout.readline(), object_hook=ObjectDict)
+        return self._process
+
+    def reload(self):
+        self._process.terminate()
+        self._process = None
+
+    def _call(self, func, *args, **kwargs):
+        self.process.stdin.write(
+            json.dumps({'func': func, 'args': args, 'kwargs': kwargs}))
+        self.process.stdin.write('\n')
+        self.process.stdin.flush()
+
+        ret = json.loads(self.process.stdout.readline(), object_hook=ObjectDict)
 
         if ret['code'] == 'ok':
             return ret['return']
