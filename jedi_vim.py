@@ -171,12 +171,13 @@ class JediRemote(object):
             self._process = None
 
     def _call(self, func, *args, **kwargs):
-        self.process.stdin.write(
-            json.dumps({'func': func, 'args': args, 'kwargs': kwargs}))
-        self.process.stdin.write('\n')
+        data = json.dumps({'func': func, 'args': args, 'kwargs': kwargs})
+        self.process.stdin.write(data.encode('utf-8'))
+        self.process.stdin.write(b'\n')
         self.process.stdin.flush()
 
-        ret = json.loads(self.process.stdout.readline(), object_hook=ObjectDict)
+        ret = json.loads(self.process.stdout.readline().decode('utf-8'),
+                         object_hook=ObjectDict)
 
         if ret['code'] == 'ok':
             return ret['return']
