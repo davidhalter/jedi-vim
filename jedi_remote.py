@@ -26,15 +26,8 @@ class PoorRPC(object):
         for line in iter(self.input.readline, ''):
             data = json.loads(line)
 
-            func = getattr(self, 'func_' + data['func'])
-
-            if func is None:
-                self._write_output({
-                    'code': 'ng', 'message': 'no such func',
-                })
-                continue
-
             try:
+                func = getattr(self, 'func_' + data['func'])
                 ret = func(*data['args'], **data['kwargs'])
             except Exception as e:
                 result = {'code': 'ng', 'message': repr(e)}
