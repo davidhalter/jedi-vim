@@ -154,7 +154,7 @@ class JediRemote(object):
 
     @property
     def process(self):
-        if self._process is None:
+        if not (self._process and self._process.poll() is None):
             cmd = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)), self.remote_cmd)
             self._process = subprocess.Popen(
