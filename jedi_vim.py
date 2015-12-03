@@ -145,8 +145,9 @@ class JediRemote(object):
         self._process = None
 
     def __del__(self):
-        self._process.terminate()
-        self._process = None
+        if self._process is not None:
+            self._process.terminate()
+            self._process = None
 
     def __getattr__(self, name):
         return (lambda *args, **kwargs: self._call(name, *args, **kwargs))
@@ -165,8 +166,9 @@ class JediRemote(object):
         return self._process
 
     def reload(self):
-        self._process.terminate()
-        self._process = None
+        if self._process is not None:
+            self._process.terminate()
+            self._process = None
 
     def _call(self, func, *args, **kwargs):
         self.process.stdin.write(
