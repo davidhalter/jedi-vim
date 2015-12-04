@@ -44,8 +44,8 @@ class PoorRPC(object):
     def func_set_additional_dynamic_modules(self, modules):
         jedi.settings.additional_dynamic_modules = modules
 
-    def func_set_script(self, source, row, column, buf_path, encoding):
-        self.script = jedi.Script(source, row, column, buf_path, encoding)
+    def func_set_script(self, *args, **kwargs):
+        self.script = jedi.Script(*args, **kwargs)
 
     def func_completions(self):
         return [_completion2dict(c) for c in self.script.completions()]
@@ -79,6 +79,7 @@ def _definition2dict(defi):
                   'is_keyword', 'desc_with_module', 'module_path',
                   'description', 'name', 'line', 'column')
     d['in_builtin_module'] = defi.in_builtin_module()
+    d['docstring'] = defi.docstring()
 
     return d
 

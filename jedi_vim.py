@@ -188,18 +188,18 @@ class JediRemote(object):
         else:
             raise Exception(ret['message'])
 
-    @catch_and_print_exceptions
-    def set_script(self, source=None, column=None):
-        self.set_additional_dynamic_modules(
-            [b.name for b in vim.buffers if b.name is not None and b.name.endswith('.py')])
-        if source is None:
-            source = '\n'.join(vim.current.buffer)
-        row = vim.current.window.cursor[0]
-        if column is None:
-            column = vim.current.window.cursor[1]
-        buf_path = vim.current.buffer.name
-        encoding = vim_eval('&encoding') or 'latin1'
-        self._call('set_script', source, row, column, buf_path, encoding)
+@catch_and_print_exceptions
+def set_script(source=None, column=None):
+    jedi_remote.set_additional_dynamic_modules(
+        [b.name for b in vim.buffers if b.name is not None and b.name.endswith('.py')])
+    if source is None:
+        source = '\n'.join(vim.current.buffer)
+    row = vim.current.window.cursor[0]
+    if column is None:
+        column = vim.current.window.cursor[1]
+    buf_path = vim.current.buffer.name
+    encoding = vim_eval('&encoding') or 'latin1'
+    jedi_remote.set_script(source, row, column, buf_path, encoding)
 
 
 class ObjectDict(dict):
@@ -255,7 +255,7 @@ def completions():
         # here again hacks, because jedi has a different interface than vim
         column += len(base)
         try:
-            jedi_remote.set_script(source=source, column=column)
+            set_script(source=source, column=column)
             completions = jedi_remote.completions()
             signatures = jedi_remote.call_signatures()
 
@@ -302,7 +302,7 @@ def goto(mode="goto", no_output=False):
     :return: list of definitions/assignments
     :rtype: list
     """
-    jedi_remote.set_script()
+    set_script()
     try:
         if mode == "goto":
             definitions = [x for x in jedi_remote.goto_definitions()
@@ -394,8 +394,8 @@ def show_documentation():
         echo_highlight('No documentation found for that.')
         vim.command('return')
     else:
-        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.docstring())
-                if d.docstring() else '|No Docstring for %s|' % d for d in definitions]
+        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.docstring)
+                if d.docstring else '|No Docstring for %s|' % d for d in definitions]
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
@@ -685,9 +685,9 @@ def py_import():
     args = shsplit(vim.eval('a:args'))
     import_path = args.pop()
     text = 'import %s' % import_path
-    scr = jedi.Script(text, 1, len(text), '')
+    jedi_remote.set_script(text, 1, len(text), '')
     try:
-        completion = scr.goto_assignments()[0]
+        completion = jedi_remote.goto_assignments()[0]
     except IndexError:
         echo_highlight('Cannot find %s in sys.path!' % import_path)
     else:
