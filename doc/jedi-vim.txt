@@ -518,6 +518,16 @@ definition with arbitrary changes to the |jumplist|.
 Options: 0 or 1
 Default: 1 (enabled by default)
 
+------------------------------------------------------------------------------
+6.15. `g:jedi#use_rpc`                    *g:jedi#use_rpc*
+
+Fork external jedi process using system "python" command, instead of vim's
+internal |:python| interface.
+It allow you to get completion from python version other than vim link with.
+
+Options: 0 or 1
+Default: 0 (disabled by default)
+
 ==============================================================================
 7. Testing                              *jedi-vim-testing*
 

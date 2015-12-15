@@ -111,8 +111,9 @@ else:
         if version < (0, 7):
             echo_highlight('Please update your Jedi version, it is too old.')
 
-    import jedi_remote
-    jedi = jedi_remote.JediRemote()
+    if vim.vars.get('jedi#use_rpc'):
+        import jedi_remote
+        jedi = jedi_remote.JediRemote()
 
 
 def catch_and_print_exceptions(func):

@@ -35,7 +35,8 @@ let s:default_settings = {
     \ 'completions_enabled': 1,
     \ 'force_py_version': "'auto'",
     \ 'smart_auto_mappings': 1,
-    \ 'use_tag_stack': 1
+    \ 'use_tag_stack': 1,
+    \ 'use_rpc': 0
 \ }
 
 for [s:key, s:val] in items(s:deprecations)
