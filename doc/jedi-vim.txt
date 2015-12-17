@@ -519,14 +519,14 @@ Options: 0 or 1
 Default: 1 (enabled by default)
 
 ------------------------------------------------------------------------------
-6.15. `g:jedi#use_rpc`                    *g:jedi#use_rpc*
+6.15. `g:jedi#use_external_python`              *g:jedi#use_external_python*
 
-Fork external jedi process using system "python" command, instead of vim's
-internal |:python| interface.
+Spawn external jedi process using system python command specified by this
+option, instead of vim's internal |:python| interface.
 It allow you to get completion from python version other than vim link with.
 
-Options: 0 or 1
-Default: 0 (disabled by default)
+Options: "python" or any other interpreter name you want to use
+Default: "" (disabled by default)
 
 ==============================================================================
 7. Testing                              *jedi-vim-testing*
