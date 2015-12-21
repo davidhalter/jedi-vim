@@ -93,7 +93,7 @@ function! s:init_python()
 
         " Add a warning in case the auto-detected version is not available,
         " usually because of a missing neovim module in a VIRTUAL_ENV.
-        if has('nvim')
+        if has('nvim') && (!exists('g:python3_host_prog') && !exists('g:python_host_prog'))
             echohl WarningMsg
             echom "jedi-vim: the detected Python version (".s:def_py.")"
                         \ "is not functional."
