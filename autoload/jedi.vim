@@ -489,6 +489,8 @@ function! jedi#complete_opened(is_popup_on_dot)
         " option is set.
         if g:jedi#popup_select_first && stridx(&completeopt, 'longest') > -1
             return "\<Down>"
+        else
+            return ""
         endif
         if a:is_popup_on_dot
             if &completeopt !~ '\(noinsert\|noselect\)'
