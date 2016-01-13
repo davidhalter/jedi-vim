@@ -80,14 +80,14 @@ def vim_eval(string):
 def no_jedi_warning(error=None):
     msg = "Please install Jedi if you want to use jedi-vim."
     if error:
-        msg = '{} The error was: {}'.format(msg, error)
+        msg = '{0} The error was: {1}'.format(msg, error)
     vim.command('echohl WarningMsg'
                 '| echom "Please install Jedi if you want to use jedi-vim."'
                 '| echohl None')
 
 
 def echo_highlight(msg):
-    vim_command('echohl WarningMsg | echom "{}" | echohl None'.format(
+    vim_command('echohl WarningMsg | echom "{0}" | echohl None'.format(
         msg.replace('"', '\\"')))
 
 
@@ -101,7 +101,7 @@ else:
     try:
         version = jedi.__version__
     except Exception as e:  # e.g. AttributeError
-        echo_highlight("Could not load jedi python module: {}".format(e))
+        echo_highlight("Could not load jedi python module: {0}".format(e))
         jedi = None
     else:
         if isinstance(version, str):
@@ -574,7 +574,7 @@ def do_rename(replace, orig=None):
         if os.path.abspath(vim.current.buffer.name) != r.module_path:
             result = new_buffer(r.module_path)
             if not result:
-                echo_highlight("Jedi-vim: failed to create buffer window for {}!".format(r.module_path))
+                echo_highlight("Jedi-vim: failed to create buffer window for {0}!".format(r.module_path))
                 continue
 
         buffers.add(vim.current.buffer.name)
@@ -584,20 +584,20 @@ def do_rename(replace, orig=None):
 
         # Replace original word.
         vim.current.window.cursor = r.start_pos
-        vim_command('normal! c{:d}l{}'.format(len(orig), replace))
+        vim_command('normal! c{0:d}l{1}'.format(len(orig), replace))
 
         # Restore view.
         vim_command('call winrestview(%s)' % saved_view)
 
     # Restore previous tab and window.
-    vim_command('tabnext {:d}'.format(saved_tab))
-    vim_command('{:d}wincmd w'.format(saved_win))
+    vim_command('tabnext {0:d}'.format(saved_tab))
+    vim_command('{0:d}wincmd w'.format(saved_win))
 
     if len(buffers) > 1:
-        echo_highlight('Jedi did {:d} renames in {:d} buffers!'.format(
+        echo_highlight('Jedi did {0:d} renames in {1:d} buffers!'.format(
             len(temp_rename), len(buffers)))
     else:
-        echo_highlight('Jedi did {:d} renames!'.format(len(temp_rename)))
+        echo_highlight('Jedi did {0:d} renames!'.format(len(temp_rename)))
 
 
 @_check_jedi_availability(show_error=True)
