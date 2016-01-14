@@ -21,7 +21,7 @@ class IntegrationTestFile(object):
             [VSPEC_RUNNER, '.', VSPEC_FOLDER, self.path])
         for line in output.splitlines():
             if line.startswith(b'not ok') or line.startswith(b'Error'):
-                pytest.fail("{} failed:\n{}".format(
+                pytest.fail("{0} failed:\n{1}".format(
                     self.path, output.decode('utf-8')), pytrace=False)
 
     def __repr__(self):
