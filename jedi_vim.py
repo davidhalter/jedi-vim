@@ -356,7 +356,11 @@ def show_call_signatures(signatures=()):
         return
 
     if signatures == ():
-        signatures = get_script().call_signatures()
+        sig_strs = []
+        for sig in get_script().call_signatures():
+            if str(sig) not in sig_strs:
+                sig_strs += [str(sig)]
+                signatures += (sig,)
     clear_call_signatures()
 
     if not signatures:
