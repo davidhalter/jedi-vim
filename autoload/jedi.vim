@@ -126,12 +126,11 @@ function! jedi#init_python()
         try
             let s:_init_python = s:init_python()
         catch
-            if !exists("g:jedi#squelch_py_warning")
-                echohl WarningMsg
-                echom "Error: jedi-vim failed to initialize Python: ".v:exception." (in ".v:throwpoint.")"
-                echohl None
-            endif
             let s:_init_python = 0
+            if !exists("g:jedi#squelch_py_warning")
+                echoerr "Error: jedi-vim failed to initialize Python: "
+                            \ .v:exception." (in ".v:throwpoint.")"
+            endif
         endtry
     endif
     return s:_init_python
@@ -202,12 +201,7 @@ function! jedi#_vim_exceptions(str, is_eval)
     return l:result
 endfunction
 
-
-if !jedi#init_python()
-    " Do not define any functions when Python initialization failed.
-    finish
-endif
-
+call jedi#init_python()  " Might throw an error.
 
 " ------------------------------------------------------------------------
 " functions that call python code
