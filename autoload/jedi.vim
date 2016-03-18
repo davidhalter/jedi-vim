@@ -153,11 +153,11 @@ function! jedi#setup_py_version(py_version)
 
     try
         execute cmd_init.' '.s:script_path.'/initialize.py'
-        execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
-        return 1
     catch
         throw "jedi#setup_py_version: ".v:exception
     endtry
+    execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
+    return 1
 endfunction
 
 
