@@ -78,12 +78,11 @@ def vim_eval(string):
 
 
 def no_jedi_warning(error=None):
-    msg = "Please install Jedi if you want to use jedi-vim."
+    vim.command('echohl WarningMsg')
+    vim.command('echom "Please install Jedi if you want to use jedi-vim."')
     if error:
-        msg = '{0} The error was: {1}'.format(msg, error)
-    vim.command('echohl WarningMsg'
-                '| echom "Please install Jedi if you want to use jedi-vim."'
-                '| echohl None')
+        vim.command('echom "The error was: {0}"'.format(error))
+    vim.command('echohl None')
 
 
 def echo_highlight(msg):
