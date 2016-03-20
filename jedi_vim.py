@@ -507,8 +507,10 @@ def cmdline_call_signatures(signatures):
 @catch_and_print_exceptions
 def rename():
     if not int(vim.eval('a:0')):
+        # Need to save the cursor position before insert mode
+        cursor = vim.current.window.cursor
         vim_command('augroup jedi_rename')
-        vim_command('autocmd InsertLeave <buffer> call jedi#rename(1)')
+        vim_command('autocmd InsertLeave <buffer> call jedi#rename({}, {})'.format(cursor[0], cursor[1]))
         vim_command('augroup END')
 
         vim_command("let s:jedi_replace_orig = expand('<cword>')")
@@ -520,6 +522,8 @@ def rename():
         # Remove autocommand.
         vim_command('autocmd! jedi_rename InsertLeave')
 
+        cursor = tuple(int(x) for x in vim.eval('a:000'))
+
         # Get replacement, if there is something on the cursor.
         # This won't be the case when the user ends insert mode right away,
         # and `<cword>` would pick up the nearest word instead.
@@ -527,8 +531,6 @@ def rename():
             replace = vim_eval("expand('<cword>')")
         else:
             replace = None
-
-        cursor = vim.current.window.cursor
 
         # Undo new word, but only if something was changed, which is not the
         # case when ending insert mode right away.
