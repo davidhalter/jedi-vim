@@ -18,5 +18,10 @@ import traceback
 
 # update the sys path to include the jedi_vim script
 sys.path.insert(0, vim.eval('expand(s:script_path)'))
-import jedi_vim
-sys.path.pop(1)
+try:
+    import jedi_vim
+except Exception as excinfo:
+    raise Exception('Failed to import jedi_vim: {0}\n{1}'.format(
+        excinfo, traceback.format_exc()))
+finally:
+    sys.path.pop(1)
