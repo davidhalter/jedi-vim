@@ -509,8 +509,10 @@ def rename():
     if not int(vim.eval('a:0')):
         # Need to save the cursor position before insert mode
         cursor = vim.current.window.cursor
+        changenr = vim.eval('changenr()') # track undo tree
         vim_command('augroup jedi_rename')
-        vim_command('autocmd InsertLeave <buffer> call jedi#rename({}, {})'.format(cursor[0], cursor[1]))
+        vim_command('autocmd InsertLeave <buffer> call jedi#rename'
+                '({}, {}, {})'.format(cursor[0], cursor[1], changenr))
         vim_command('augroup END')
 
         vim_command("let s:jedi_replace_orig = expand('<cword>')")
@@ -522,7 +524,9 @@ def rename():
         # Remove autocommand.
         vim_command('autocmd! jedi_rename InsertLeave')
 
-        cursor = tuple(int(x) for x in vim.eval('a:000'))
+        args = vim.eval('a:000')
+        cursor = tuple(int(x) for x in args[:2])
+        changenr = args[2]
 
         # Get replacement, if there is something on the cursor.
         # This won't be the case when the user ends insert mode right away,
@@ -532,11 +536,7 @@ def rename():
         else:
             replace = None
 
-        # Undo new word, but only if something was changed, which is not the
-        # case when ending insert mode right away.
-        if vim_eval('b:changedtick != s:jedi_changedtick') == '1':
-            vim_command('normal! u')  # Undo new word.
-        vim_command('normal! u')  # Undo diw.
+        vim_command('undo {}'.format(changenr))
 
         vim.current.window.cursor = cursor
 
