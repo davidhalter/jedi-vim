@@ -62,19 +62,19 @@ def _catch_exception(string, is_eval):
     Interface between vim and python calls back to it.
     Necessary, because the exact error message is not given by `vim.error`.
     """
-    e = 'jedi#_vim_exceptions(%s, %s)'
-    result = vim.eval(e % (repr(PythonToVimStr(string, 'UTF-8')), is_eval))
+    result = vim.eval('jedi#_vim_exceptions({0}, {1})'.format(
+        repr(PythonToVimStr(string, 'UTF-8')), int(is_eval)))
     if 'exception' in result:
         raise VimError(result['exception'], result['throwpoint'], string)
     return result['result']
 
 
 def vim_command(string):
-    _catch_exception(string, 0)
+    _catch_exception(string, False)
 
 
 def vim_eval(string):
-    return _catch_exception(string, 1)
+    return _catch_exception(string, True)
 
 
 def no_jedi_warning(error=None):
