@@ -190,6 +190,9 @@ function! jedi#_vim_exceptions(str, is_eval)
     try
         if a:is_eval
             let l:result.result = eval(a:str)
+            if type(l:result.result) != type('')
+                let l:result.result = string(l:result.result)
+            endif
         else
             execute a:str
             let l:result.result = ''
