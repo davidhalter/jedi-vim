@@ -154,7 +154,7 @@ def completions():
     row, column = vim.current.window.cursor
     # Clear call signatures in the buffer so they aren't seen by the completer.
     # Call signatures in the command line can stay.
-    if vim_eval("g:jedi#show_call_signatures") == '1':
+    if int(vim_eval("g:jedi#show_call_signatures")) == 1:
         clear_call_signatures()
     if vim.eval('a:findstart') == '1':
         count = 0
@@ -258,7 +258,7 @@ def goto(mode="goto", no_output=False):
                     echo_highlight("Builtin modules cannot be displayed (%s)."
                                    % d.desc_with_module)
             else:
-                using_tagstack = vim_eval('g:jedi#use_tag_stack') == '1'
+                using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
                 if d.module_path != vim.current.buffer.name:
                     result = new_buffer(d.module_path,
                                         using_tagstack=using_tagstack)
@@ -326,7 +326,7 @@ def show_documentation():
 @catch_and_print_exceptions
 def clear_call_signatures():
     # Check if using command line call signatures
-    if vim_eval("g:jedi#show_call_signatures") == '2':
+    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
         vim_command('echo ""')
         return
     cursor = vim.current.window.cursor
@@ -351,7 +351,7 @@ def clear_call_signatures():
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
 def show_call_signatures(signatures=()):
-    if vim_eval("has('conceal') && g:jedi#show_call_signatures") == '0':
+    if int(vim_eval("has('conceal') && g:jedi#show_call_signatures")) == 0:
         return
 
     if signatures == ():
@@ -361,7 +361,7 @@ def show_call_signatures(signatures=()):
     if not signatures:
         return
 
-    if vim_eval("g:jedi#show_call_signatures") == '2':
+    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
         return cmdline_call_signatures(signatures)
 
     for i, signature in enumerate(signatures):
@@ -639,9 +639,9 @@ def py_import_completions():
 @catch_and_print_exceptions
 def new_buffer(path, options='', using_tagstack=False):
     # options are what you can to edit the edit options
-    if vim_eval('g:jedi#use_tabs_not_buffers') == '1':
+    if int(vim_eval('g:jedi#use_tabs_not_buffers')) == 1:
         _tabnew(path, options)
-    elif not vim_eval('g:jedi#use_splits_not_buffers') == '1':
+    elif not vim_eval('g:jedi#use_splits_not_buffers') in [1, '1']:
         user_split_option = vim_eval('g:jedi#use_splits_not_buffers')
         split_options = {
             'top': 'topleft split',
@@ -650,14 +650,16 @@ def new_buffer(path, options='', using_tagstack=False):
             'bottom': 'botright split',
             'winwidth': 'vs'
         }
-        if user_split_option == 'winwidth' and vim.current.window.width <= 2 * int(vim_eval("&textwidth ? &textwidth : 80")):
+        if (user_split_option == 'winwidth' and
+                vim.current.window.width <= 2 * int(vim_eval(
+                    "&textwidth ? &textwidth : 80"))):
             split_options['winwidth'] = 'sp'
         if user_split_option not in split_options:
             print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options.keys()))
         else:
             vim_command(split_options[user_split_option] + " %s" % escape_file_path(path))
     else:
-        if vim_eval("!&hidden && &modified") == '1':
+        if int(vim_eval("!&hidden && &modified")) == 1:
             if vim_eval("bufname('%')") is None:
                 echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
                 return False
@@ -667,9 +669,9 @@ def new_buffer(path, options='', using_tagstack=False):
             return True
         vim_command('edit %s %s' % (options, escape_file_path(path)))
     # sometimes syntax is being disabled and the filetype not set.
-    if vim_eval('!exists("g:syntax_on")') == '1':
+    if int(vim_eval('!exists("g:syntax_on")')) == 1:
         vim_command('syntax enable')
-    if vim_eval("&filetype != 'python'") == '1':
+    if int(vim_eval("&filetype != 'python'")) == 1:
         vim_command('set filetype=python')
     return True
 
@@ -682,7 +684,7 @@ def _tabnew(path, options=''):
     :param options: `:tabnew` options, read vim help.
     """
     path = os.path.abspath(path)
-    if vim_eval('has("gui")') == '1':
+    if int(vim_eval('has("gui")')) == 1:
         vim_command('tab drop %s %s' % (options, escape_file_path(path)))
         return
 
