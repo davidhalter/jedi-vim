@@ -653,7 +653,9 @@ def new_buffer(path, options='', using_tagstack=False):
         if user_split_option == 'winwidth' and vim.current.window.width <= 2 * int(vim_eval("&textwidth ? &textwidth : 80")):
             split_options['winwidth'] = 'sp'
         if user_split_option not in split_options:
-            print('g:jedi#use_splits_not_buffers value is not correct, valid options are: %s' % ','.join(split_options.keys()))
+            print('Unsupported value for g:jedi#use_splits_not_buffers: {0}. '
+                  'Valid options are: {1}.'.format(
+                      user_split_option, ', '.join(split_options.keys())))
         else:
             vim_command(split_options[user_split_option] + " %s" % escape_file_path(path))
     else:
