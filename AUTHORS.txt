@@ -49,5 +49,6 @@ Daniel Hahler (@blueyed)
 Dave Honneffer (@pearofducks)
 Bagrat Aznauryan (@n9code)
 Tomoyuki Kashiro (@kashiro)
+Frédéric Hamel (@FredericHamel)
 
 @something are github user names.
