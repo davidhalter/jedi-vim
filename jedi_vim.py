@@ -147,6 +147,9 @@ def get_script(source=None, column=None):
     encoding = vim_eval('&encoding') or 'latin1'
     return jedi.Script(source, row, column, buf_path, encoding)
 
+@catch_and_print_exceptions
+def get_script_import(source, column):
+    return jedi.Script(source, 1, column, vim_eval('&encoding') or 'latin1')
 
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
@@ -163,6 +166,35 @@ def completions():
                 break
             count += 1
         vim.command('return %i' % (column - count))
+    elif re.match('[ ]*from[ ]*\w*[]*import[ ]*\w*,([ ]*\w*,?)+', vim.current.line):
+        # Completion of multiple import like:  'from ... import ..., ..., ...'
+        base = vim.eval('a:base')
+        stmt = vim.current.line.split('import')
+        source = stmt[0]+'import '+base
+        imported = re.split('[ ]*,[ ]*', stmt[1].strip())
+        column = len(source)
+        try:
+            script = get_script_import(source, column)
+            completions = script.completions()
+            out = []
+            for c in completions:
+                name = c.name[:len(base)] + c.complete
+                if name not in imported:
+                    d = dict(word=PythonToVimStr(name),
+                        abbr=PythonToVimStr(c.name),
+                        # stuff directly behind the completion
+                        menu=PythonToVimStr(c.description),
+                        info=PythonToVimStr(c.docstring()),  # docstr
+                        icase=1,  # case insensitive
+                        dup=1  # allow duplicates (maybe later remove this)
+                        )
+                    out.append(d)
+            strout = str(out)
+        except Exception:
+            print(traceback.format_exc())
+            strout = ''
+            completions = []
+        vim.command('return %s' % strout)
     else:
         base = vim.eval('a:base')
         source = ''
