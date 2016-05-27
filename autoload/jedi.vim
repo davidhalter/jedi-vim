@@ -364,6 +364,9 @@ endfunc
 
 let s:show_call_signatures_last = [0, 0, '']
 function! jedi#show_call_signatures()
+    if s:_init_python == 0
+        return 1
+    endif
     let [line, col] = [line('.'), col('.')]
     let curline = getline(line)
     let reload_signatures = 1
@@ -391,8 +394,12 @@ endfunction
 
 
 function! jedi#clear_call_signatures()
+    if s:_init_python == 0
+        return 1
+    endif
+
     let s:show_call_signatures_last = [0, 0, '']
-    PythonJedi jedi_vim.clear_call_signatures()
+    jedi_vim.clear_call_signatures()
 endfunction
 
 
