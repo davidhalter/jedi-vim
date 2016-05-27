@@ -399,7 +399,7 @@ function! jedi#clear_call_signatures()
     endif
 
     let s:show_call_signatures_last = [0, 0, '']
-    jedi_vim.clear_call_signatures()
+    PythonJedi jedi_vim.clear_call_signatures()
 endfunction
 
 
