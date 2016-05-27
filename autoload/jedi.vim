@@ -354,7 +354,7 @@ function! jedi#do_popup_on_dot_in_highlight()
     for a in highlight_groups
         for b in ['pythonString', 'pythonComment', 'pythonNumber']
             if a == b
-                return 0 
+                return 0
             endif
         endfor
     endfor
@@ -399,7 +399,7 @@ function! jedi#clear_call_signatures()
     endif
 
     let s:show_call_signatures_last = [0, 0, '']
-    jedi_vim.clear_call_signatures()
+    PythonJedi jedi_vim.clear_call_signatures()
 endfunction
 
 
