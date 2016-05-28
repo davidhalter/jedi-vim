@@ -1,23 +1,20 @@
-''' ------------------------------------------------------------------------
-Python initialization
----------------------------------------------------------------------------
-here we initialize the jedi stuff '''
+"""Python initialization for jedi module."""
 
-import vim
+try:
+    import traceback
+except Exception as excinfo:
+    raise Exception('Failed to import traceback: {0}'.format(excinfo))
 
-# update the system path, to include the jedi path
-import sys
-import os
+try:
+    import os, sys, vim
+    jedi_path = os.path.join(vim.eval('expand(s:script_path)'), 'jedi')
+    sys.path.insert(0, jedi_path)
+    jedi_vim_path = vim.eval('expand(s:script_path)')
+    sys.path.insert(0, jedi_vim_path)
+except Exception as excinfo:
+    raise Exception('Failed to add to sys.path: {0}\n{1}'.format(
+        excinfo, traceback.format_exc()))
 
-# vim.command('echom expand("<sfile>:p:h:h")') # broken, <sfile> inside function
-# sys.path.insert(0, os.path.join(vim.eval('expand("<sfile>:p:h:h")'), 'jedi'))
-sys.path.insert(0, os.path.join(vim.eval('expand(s:script_path)'), 'jedi'))
-
-# to display errors correctly
-import traceback
-
-# update the sys path to include the jedi_vim script
-sys.path.insert(0, vim.eval('expand(s:script_path)'))
 try:
     import jedi_vim
 except Exception as excinfo:
