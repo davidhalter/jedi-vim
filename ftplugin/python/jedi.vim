@@ -43,6 +43,9 @@ if g:jedi#auto_initialization
 
     if g:jedi#auto_close_doc
         " close preview if its still open after insert
-        autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
+        augroup jedi_preview
+            autocmd!
+            autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
+        augroup END
     endif
 endif
