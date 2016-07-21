@@ -183,7 +183,7 @@ def completions():
             out = []
             for c in completions:
                 d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
-                         abbr=PythonToVimStr(c.name),
+                         abbr=PythonToVimStr(c.name_with_symbols),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
                          info=PythonToVimStr(c.docstring()),  # docstr
