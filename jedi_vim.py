@@ -30,10 +30,12 @@ class PythonToVimStr(unicode):
     __slots__ = []
 
     def __new__(cls, obj, encoding='UTF-8'):
-        if is_py3 or isinstance(obj, unicode):
-            return unicode.__new__(cls, obj)
-        else:
-            return unicode.__new__(cls, obj, encoding)
+        if not (is_py3 or isinstance(obj, unicode)):
+            obj = unicode.__new__(cls, obj, encoding)
+
+        # Vim cannot deal with zero bytes:
+        obj = obj.replace('\0', '\\0')
+        return unicode.__new__(cls, obj)
 
     def __repr__(self):
         # this is totally stupid and makes no sense but vim/python unicode
