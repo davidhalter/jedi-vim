@@ -87,8 +87,8 @@ def no_jedi_warning(error=None):
 
 
 def echo_highlight(msg):
-    vim_command('echohl WarningMsg | echom "{0}" | echohl None'.format(
-        msg.replace('"', '\\"')))
+    vim_command('echohl WarningMsg | echom "jedi-vim: {0}" | echohl None'.format(
+        str(msg).replace('"', '\\"')))
 
 
 try:
