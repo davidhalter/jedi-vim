@@ -100,7 +100,10 @@ else:
     try:
         version = jedi.__version__
     except Exception as e:  # e.g. AttributeError
-        echo_highlight("Could not load jedi python module: {0}".format(e))
+        echo_highlight(
+            "Error when loading the jedi python module ({0}). "
+            "Please ensure that Jedi is installed correctly (see Installation "
+            "in the README.".format(e))
         jedi = None
     else:
         if isinstance(version, str):
