@@ -68,28 +68,47 @@ Apart from that, jedi-vim supports the following commands
 Installation
 ============
 
+Requirements
+------------
+You need a VIM version that was compiled with Python 2.6 or later
+(``+python`` or ``+python3``), which is typical for most distributions on
+Linux.  You can check this from within VIM using
+``:python3 import sys; print sys.version`` (use ``:python`` for Python 2).
+
+Manual installation
+-------------------
+
 You might want to use `pathogen <https://github.com/tpope/vim-pathogen>`_ or
-`vundle <https://github.com/gmarik/vundle>`_ to install jedi in VIM. Also you
-need a VIM version that was compiled with ``+python``, which is typical for most
-distributions on Linux.  The Python version compiled into VIM must be 2.6 or later
-(you can check this from within VIM using ``:python import sys; print sys.version`` )
+`Vundle <https://github.com/gmarik/vundle>`_ to install jedi-vim.
 
 The first thing you need after that is an up-to-date version of Jedi. You can
-either get it via ``pip install jedi`` or with ``git submodule update --init``
-in your jedi-vim repository.
+either install it via ``pip install jedi`` or with
+``git submodule update --init`` in your jedi-vim repository.
 
-Example Installation Command using Pathogen:
+Example installation command using Pathogen:
 
 .. code-block:: sh
 
     cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
 
 
-On Arch Linux, you can also install jedi-vim from official repositories as `vim-jedi
-<https://www.archlinux.org/packages/community/any/vim-jedi/>`__. It is also available
-on `Debian (≥8) <https://packages.debian.org/vim-python-jedi>`__ and `Ubuntu (≥14.04)
-<http://packages.ubuntu.com/vim-python-jedi>`__ as vim-python-jedi. On Fedora Linux,
-it is available as `vim-jedi <https://apps.fedoraproject.org/packages/vim-jedi>`__.
+Installation with your distribution
+-----------------------------------
+
+On Arch Linux, you can also install jedi-vim from official repositories as
+`vim-jedi <https://www.archlinux.org/packages/community/any/vim-jedi/>`__.
+It is also available on
+`Debian (≥8) <https://packages.debian.org/vim-python-jedi>`__ and
+`Ubuntu (≥14.04) <http://packages.ubuntu.com/vim-python-jedi>`__ as
+vim-python-jedi.
+On Fedora Linux, it is available as
+`vim-jedi <https://apps.fedoraproject.org/packages/vim-jedi>`__.
+
+Please note that this version might be quite old compared to using jedi-vim
+from Git.
+
+Caveats
+-------
 
 Note that the `python-mode <https://github.com/klen/python-mode>`_ VIM plugin seems
 to conflict with jedi-vim, therefore you should disable it before enabling
