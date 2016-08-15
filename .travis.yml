@@ -1,3 +1,4 @@
+sudo: false
 language: python
 install:
     - pip install --quiet --use-mirrors pytest
