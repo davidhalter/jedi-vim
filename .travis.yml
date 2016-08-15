@@ -1,6 +1,7 @@
+sudo: false
 language: python
 install:
-    - pip install --quiet --use-mirrors pytest
+    - pip install pytest
 script:
     - vim --version
     - py.test
