@@ -250,11 +250,6 @@ def goto(mode="goto", no_output=False):
         if not definitions:
             echo_highlight("Couldn't find any definitions for this.")
         elif len(definitions) == 1 and mode != "related_name":
-            # just add some mark to add the current position to the jumplist.
-            # this is ugly, because it overrides the mark for '`', so if anyone
-            # has a better idea, let me know.
-            vim_command('normal! m`')
-
             d = list(definitions)[0]
             if d.in_builtin_module():
                 if d.is_keyword:
