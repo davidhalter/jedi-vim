@@ -1,8 +1,6 @@
-### Expected behavior
+### Issue
 
-### Actual behavior
-
-### Steps to reproduce the behavior
+### Steps to reproduce
 
 ### Versions
 
@@ -11,3 +9,7 @@
  - Python:
 
 In case you are not using jedi-vim from Git master, please test it there, too.
+
+### Output of the ":messages" command
+
+### Output of ":scriptnames" command
