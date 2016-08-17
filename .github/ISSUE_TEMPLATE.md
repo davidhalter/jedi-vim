@@ -10,6 +10,8 @@
 
 In case you are not using jedi-vim from Git master, please test it there, too.
 
-### Output of the ":messages" command
+### Output of the "JediDebugInfo" command (in a Python buffer)
 
-### Output of ":scriptnames" command
+### Output of the "messages" Vim command
+
+### Output of "scriptnames" Vim command
