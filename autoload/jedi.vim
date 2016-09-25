@@ -162,7 +162,19 @@ endfunction
 
 
 function! jedi#debug_info()
-    echom "Using Python version:" s:python_version
+    if s:python_version ==# 'null'
+        call s:init_python()
+    endif
+    echo 'Using Python version:' s:python_version
+    let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
+    PythonJedi print(' - sys.version: {0}'.format(', '.join([x.strip() for x in __import__('sys').version.split("\n")])))
+    PythonJedi print(' - site module: {0}'.format(__import__('site').__file__))
+    PythonJedi print('Jedi path: {0}'.format(jedi_vim.jedi.__file__))
+    PythonJedi print('Jedi version: {}'.format(jedi_vim.jedi.__version__))
+    echo 'jedi-vim git status: '
+    echon system('git -C '.s:script_path.' describe --tags --always --dirty')
+    echo 'jedi git status: '
+    echon system('git -C '.s:script_path.' submodule status')
 endfunction
 
 
