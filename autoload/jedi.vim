@@ -171,10 +171,10 @@ function! jedi#debug_info()
     PythonJedi print(' - site module: {0}'.format(__import__('site').__file__))
     PythonJedi print('Jedi path: {0}'.format(jedi_vim.jedi.__file__))
     PythonJedi print('Jedi version: {}'.format(jedi_vim.jedi.__version__))
-    echo 'jedi-vim git status: '
-    echon system('git -C '.s:script_path.' describe --tags --always --dirty')
-    echo 'jedi git status: '
-    echon system('git -C '.s:script_path.' submodule status')
+    echo 'jedi-vim git version: '
+    echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
+    echo 'jedi git submodule status: '
+    echon substitute(system('git -C '.s:script_path.' submodule status'), '\v\n$', '', '')
 endfunction
 
 
