@@ -121,8 +121,9 @@ function! jedi#reinit_python()
 endfunction
 
 
+let s:_init_python = -1
 function! jedi#init_python()
-    if !exists('s:_init_python')
+    if s:_init_python == -1
         try
             let s:_init_python = s:init_python()
         catch
