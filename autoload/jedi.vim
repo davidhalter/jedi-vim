@@ -267,6 +267,13 @@ function! jedi#py_import_completions(argl, cmdl, pos)
     PythonJedi jedi_vim.py_import_completions()
 endfun
 
+function! jedi#clear_cache(bang)
+    PythonJedi jedi_vim.jedi.cache.clear_time_caches(True)
+    if a:bang
+        PythonJedi jedi_vim.jedi.parser.utils.ParserPickling.clear_cache()
+    endif
+endfunction
+
 
 " ------------------------------------------------------------------------
 " show_documentation
