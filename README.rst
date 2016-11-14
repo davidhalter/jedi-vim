@@ -73,7 +73,7 @@ Requirements
 You need a VIM version that was compiled with Python 2.6 or later
 (``+python`` or ``+python3``), which is typical for most distributions on
 Linux.  You can check this from within VIM using
-``:python3 import sys; print sys.version`` (use ``:python`` for Python 2).
+``:python3 import sys; print(sys.version)`` (use ``:python`` for Python 2).
 
 Manual installation
 -------------------
