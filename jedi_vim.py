@@ -150,7 +150,7 @@ def get_script(source=None, column=None):
         column = vim.current.window.cursor[1]
     buf_path = vim.current.buffer.name
     encoding = vim_eval('&encoding') or 'latin1'
-    return jedi.Script(source, row, column, buf_path, encoding)
+    return jedi.Script(source, row, column, buf_path.split("/")[-1], encoding)
 
 
 @_check_jedi_availability(show_error=False)
