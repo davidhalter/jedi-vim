@@ -27,7 +27,7 @@ let s:default_settings = {
     \ 'documentation_command': "'K'",
     \ 'show_call_signatures': 1,
     \ 'show_call_signatures_delay': 500,
-    \ 'call_signature_escape': "'=`='",
+    \ 'call_signature_escape': "'?!?'",
     \ 'auto_close_doc': 1,
     \ 'max_doc_height': 30,
     \ 'popup_select_first': 1,
