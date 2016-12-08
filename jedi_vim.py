@@ -335,7 +335,8 @@ def clear_call_signatures():
     # 1. Search for a line with a call signature and save the appended
     #    characters
     # 2. Actually replace the line and redo the status quo.
-    py_regex = r'%sjedi=([0-9]+), (.*?)%s.*?%sjedi%s'.replace('%s', e)
+    py_regex = r'%sjedi=([0-9]+), (.*?)%s.*?%sjedi%s'.replace(
+        '%s', re.escape(e))
     for i, line in enumerate(vim.current.buffer):
         match = re.search(py_regex, line)
         if match is not None:
