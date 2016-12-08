@@ -120,6 +120,26 @@ function! jedi#reinit_python()
     call jedi#init_python()
 endfunction
 
+fun! s:JobHandler(jobid, data, event)
+    if a:event == 'stdout'
+        let s:def_py = a:data[0]
+        if &verbose
+            echom "jedi-vim: auto-detected Python: ".s:def_py
+        endif
+    elseif a:event == 'stderr'
+        if !exists("g:jedi#squelch_py_warning")
+            echohl WarningMsg
+            echom "Warning: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
+            echom "Falling back to version 2."
+            echohl None
+        endif
+        let s:def_py = 2
+    else
+        return
+    endif
+    call s:next_action(s:def_py)
+endf
+
 fun! s:async_init()
     if g:jedi#force_py_version != 'auto'
         " Always use the user supplied version.
@@ -131,25 +151,6 @@ fun! s:async_init()
         " Neovim usually has both python providers. Skipping the `has` check
         " avoids starting both of them.
 
-        fun! s:JobHandler(jobid, data, event)
-            if a:event == 'stdout'
-                let s:def_py = a:data[0]
-                if &verbose
-                    echom "jedi-vim: auto-detected Python: ".s:def_py
-                endif
-            elseif a:event == 'stderr'
-                if !exists("g:jedi#squelch_py_warning")
-                    echohl WarningMsg
-                    echom "Warning: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
-                    echom "Falling back to version 2."
-                    echohl None
-                endif
-                let s:def_py = 2
-            else
-                return
-            endif
-            call s:next_action(s:def_py)
-        endf
         let s:handlers = {'on_stdout': function('s:JobHandler'), 'on_stderr': function('s:JobHandler'), 'on_exit': function('s:JobHandler')}
         call jobstart('python -c '.shellescape('import sys; print(str(sys.version_info[0]))'), s:handlers)
     endif
