@@ -63,6 +63,7 @@ function! s:init_python()
         try
             return jedi#force_py_version(g:jedi#force_py_version)
         catch
+            echom "error"
             throw "Could not setup g:jedi#force_py_version: ".v:exception
         endtry
     endif
@@ -143,7 +144,8 @@ endf
 fun! s:async_init()
     if g:jedi#force_py_version != 'auto'
         " Always use the user supplied version.
-            call s:next_action(g:jedi#force_py_version)
+        call s:next_action(g:jedi#force_py_version)
+        return
     endif
 
     " Handle "auto" version.
