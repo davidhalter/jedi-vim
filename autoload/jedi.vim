@@ -573,12 +573,35 @@ function! jedi#show_call_signatures() abort
     endif
 endfunction
 
+function! s:show_call_signatures_delayed_cb(timer) abort
+    if getpos('.') == s:show_call_signatures_delayed_pos
+        call jedi#show_call_signatures()
+    endif
+endfunction
+
+function! jedi#show_call_signatures_delayed() abort
+    if exists('s:show_call_signatures_timer')
+        call timer_stop(s:show_call_signatures_timer)
+    endif
+    " Clear call signatures immediately when changing the line.
+    if line('.') != s:show_call_signatures_last[0]
+        call jedi#clear_call_signatures()
+    endif
+    let s:show_call_signatures_delayed_pos = getpos('.')
+    let s:show_call_signatures_timer = timer_start(
+                \ g:jedi#show_call_signatures_delay,
+                \ function('s:show_call_signatures_delayed_cb'))
+endfunction
+
 
 function! jedi#clear_call_signatures() abort
     if s:_init_python == 0
         return 1
     endif
-
+    if s:show_call_signatures_last[0] == 0
+        " No call signature displayed currently.
+        return
+    endif
     let s:show_call_signatures_last = [0, 0, '']
     python3 jedi_vim.clear_call_signatures()
 endfunction
@@ -663,19 +686,24 @@ function! jedi#configure_call_signatures(...) abort
 
         autocmd InsertEnter <buffer> let s:show_call_signatures_last = [0, 0, '']
         autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
+
         if g:jedi#show_call_signatures_delay > 0
-            autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
-                        \ | let &updatetime = g:jedi#show_call_signatures_delay
-            autocmd InsertLeave <buffer> if exists('b:_jedi_orig_updatetime')
-                        \ |   let &updatetime = b:_jedi_orig_updatetime
-                        \ |   unlet b:_jedi_orig_updatetime
-                        \ | endif
-            autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
-            " Clear signatures immediately when changing lines.
-            autocmd CursorMovedI <buffer>
-                        \ if line('.') != s:show_call_signatures_last[0]
-                        \ | call jedi#clear_call_signatures()
-                        \ | endif
+            if has('timers')
+                autocmd InsertEnter,CursorMovedI <buffer> call jedi#show_call_signatures_delayed()
+            else
+                autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
+                            \ | let &updatetime = g:jedi#show_call_signatures_delay
+                autocmd InsertLeave <buffer> if exists('b:_jedi_orig_updatetime')
+                            \ |   let &updatetime = b:_jedi_orig_updatetime
+                            \ |   unlet b:_jedi_orig_updatetime
+                            \ | endif
+                autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
+                " Clear signatures immediately when changing lines.
+                autocmd CursorMovedI <buffer>
+                            \ if line('.') != s:show_call_signatures_last[0]
+                            \ | call jedi#clear_call_signatures()
+                            \ | endif
+            endif
         else
             autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
         endif

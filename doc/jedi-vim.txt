@@ -424,9 +424,12 @@ function directly to change it: >
 ------------------------------------------------------------------------------
 6.7. `g:jedi#show_call_signatures_delay`  *g:jedi#show_call_signatures_delay*
 
-The delay to be used with |g:jedi#show_call_signatures|.  If it is greater
-than 0 it will use Vim's |CursorHoldI| event instead of |CursorMovedI|.
-It will temporarily set Vim's |'updatetime'| option during insert mode.
+The delay to be used with |g:jedi#show_call_signatures|.
+If it is greater than 0 it will use Vim's |+timers| feature to delay the
+display of the signature, instead of on |CursorMovedI| directly.
+
+(If |+timers| is not available, a fallback through the |CursorHoldI| event is
+used, where Vim's |'updatetime'| option is changed while in insert mode)
 
 Options: delay in milliseconds
 Default: 500
