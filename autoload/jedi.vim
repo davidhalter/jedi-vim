@@ -671,6 +671,11 @@ function! jedi#configure_call_signatures(...) abort
                         \ |   unlet b:_jedi_orig_updatetime
                         \ | endif
             autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
+            " Clear signatures immediately when changing lines.
+            autocmd CursorMovedI <buffer>
+                        \ if line('.') != s:show_call_signatures_last[0]
+                        \ | call jedi#clear_call_signatures()
+                        \ | endif
         else
             autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
         endif
