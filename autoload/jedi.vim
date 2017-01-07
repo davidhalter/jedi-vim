@@ -645,12 +645,17 @@ function! jedi#configure_call_signatures(...) abort
         else
             hi def jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=#555555
         endif
+
+    elseif g:jedi#show_call_signatures == 2
+        " Init (from InsertEnter), for when jedi-vim is lazy-loaded on
+        " InsertEnter.
+        let s:callsig_cmd_first_col = s:save_first_col()
     endif
 
     augroup jedi_call_signatures
         autocmd! * <buffer>
         if g:jedi#show_call_signatures == 2  " Command line call signatures
-            autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
+            autocmd InsertEnter <buffer> let s:callsig_cmd_first_col = s:save_first_col()
         elseif g:jedi#show_call_signatures == 1
             autocmd ColorScheme <buffer> call jedi#configure_call_signatures()
             " autocmd Syntax <buffer> debug call jedi#configure_call_signatures()

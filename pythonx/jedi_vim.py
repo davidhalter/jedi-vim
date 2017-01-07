@@ -965,7 +965,7 @@ def cmdline_call_signatures(signatures):
     if index is not None:
         max_num_spaces -= len(join())
     _, column = signatures[0].bracket_start
-    spaces = min(int(vim_eval('g:jedi#first_col +'
+    spaces = min(int(vim_eval('s:callsig_cmd_first_col +'
                               'wincol() - col(".")')) +
                  column - len(signatures[0].name),
                  max_num_spaces) * ' '
