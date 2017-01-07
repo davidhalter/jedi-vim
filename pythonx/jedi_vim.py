@@ -803,23 +803,16 @@ def clear_call_signatures():
         vim_command('echo ""')
         return
     cursor = vim.current.window.cursor
-    e = vim_eval('g:jedi#call_signature_escape')
-    # We need two turns here to search and replace certain lines:
-    # 1. Search for a line with a call signature and save the appended
-    #    characters
-    # 2. Actually replace the line and redo the status quo.
-    py_regex = r'%sjedi=([0-9]+), (.*?)%s.*?%sjedi%s'.replace(
-        '%s', re.escape(e))
-    for i, line in enumerate(vim.current.buffer):
-        match = re.search(py_regex, line)
-        if match is not None:
-            # Some signs were added to minimize syntax changes due to call
-            # signatures. We have to remove them again. The number of them is
-            # specified in `match.group(1)`.
-            after = line[match.end() + int(match.group(1)):]
-            line = line[:match.start()] + match.group(2) + after
-            vim.current.buffer[i] = line
-    vim.current.window.cursor = cursor
+
+    if not int(vim_eval("exists('b:_jedi_callsig_orig')")):
+        return
+    for linenr, line in vim_eval('b:_jedi_callsig_orig').items():
+        # Check that the line would be reset, helps with keeping a single
+        # undochain.
+        if line != vim.current.buffer[int(linenr)-1]:
+            vim_command('silent! undojoin')
+            vim.current.buffer[int(linenr)-1] = line
+    vim_command('unlet b:_jedi_callsig_orig')
 
 
 @_check_jedi_availability(show_error=False)
@@ -842,6 +835,7 @@ def show_call_signatures(signatures=()):
         return cmdline_call_signatures(signatures)
 
     seen_sigs = []
+    set_lines = []
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
         # signatures are listed above each other
@@ -902,7 +896,17 @@ def show_call_signatures(signatures=()):
         tup = '%s, %s' % (len(add), replace)
         repl = prefix + (regex % (tup, text)) + add + line[end_column:]
 
-        vim_eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
+        set_lines.append((line_to_replace, repl))
+
+    if not set_lines:
+        return
+
+    orig_lines = {}
+    for linenr, line in set_lines:
+        orig_lines[linenr] = vim.current.buffer[linenr-1]
+        vim_command('silent! undojoin')
+        vim.current.buffer[int(linenr)-1] = line
+    vim_command("let b:_jedi_callsig_orig = {!r}".format(orig_lines))
 
 
 @catch_and_print_exceptions
