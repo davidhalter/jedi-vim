@@ -29,6 +29,7 @@ let s:default_settings = {
     \ 'documentation_command': "'K'",
     \ 'show_call_signatures': has('conceal') ? 1 : 2,
     \ 'show_call_signatures_delay': 500,
+    \ 'show_call_signatures_modes': "'i'",
     \ 'call_signature_escape': "'?!?'",
     \ 'auto_close_doc': 1,
     \ 'max_doc_height': 30,
@@ -574,7 +575,7 @@ function! jedi#show_call_signatures() abort
 endfunction
 
 function! s:show_call_signatures_delayed_cb(timer) abort
-    if getpos('.') == s:show_call_signatures_delayed_pos
+    if [getpos('.'), mode()] == s:show_call_signatures_delayed_posmode
         call jedi#show_call_signatures()
     endif
 endfunction
@@ -587,7 +588,7 @@ function! jedi#show_call_signatures_delayed() abort
     if line('.') != s:show_call_signatures_last[0]
         call jedi#clear_call_signatures()
     endif
-    let s:show_call_signatures_delayed_pos = getpos('.')
+    let s:show_call_signatures_delayed_posmode = [getpos('.'), mode()]
     let s:show_call_signatures_timer = timer_start(
                 \ g:jedi#show_call_signatures_delay,
                 \ function('s:show_call_signatures_delayed_cb'))
@@ -615,6 +616,9 @@ function! jedi#configure_call_signatures(...) abort
     else
         let old = s:prev_show_call_signatures
         let new = g:jedi#show_call_signatures
+    endif
+    if a:0 > 1
+        let g:jedi#show_call_signatures_modes = a:2
     endif
 
     if new == 1 && !has('conceal')
@@ -684,12 +688,20 @@ function! jedi#configure_call_signatures(...) abort
             " autocmd Syntax <buffer> debug call jedi#configure_call_signatures()
         endif
 
-        autocmd InsertEnter <buffer> let s:show_call_signatures_last = [0, 0, '']
-        autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
+        if g:jedi#show_call_signatures_modes =~# 'i' && g:jedi#show_call_signatures_modes !~# 'n'
+            autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
+        endif
 
         if g:jedi#show_call_signatures_delay > 0
             if has('timers')
-                autocmd InsertEnter,CursorMovedI <buffer> call jedi#show_call_signatures_delayed()
+                if g:jedi#show_call_signatures_modes =~# 'n'
+                    autocmd WinEnter,CursorMoved <buffer> call jedi#show_call_signatures_delayed()
+                endif
+                if g:jedi#show_call_signatures_modes =~# 'i'
+                    autocmd InsertEnter,CursorMovedI <buffer> call jedi#show_call_signatures_delayed()
+                elseif g:jedi#show_call_signatures_modes =~# 'n'
+                    autocmd InsertEnter <buffer> call jedi#clear_call_signatures()
+                endif
             else
                 autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
                             \ | let &updatetime = g:jedi#show_call_signatures_delay
@@ -697,15 +709,35 @@ function! jedi#configure_call_signatures(...) abort
                             \ |   let &updatetime = b:_jedi_orig_updatetime
                             \ |   unlet b:_jedi_orig_updatetime
                             \ | endif
-                autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
-                " Clear signatures immediately when changing lines.
-                autocmd CursorMovedI <buffer>
-                            \ if line('.') != s:show_call_signatures_last[0]
-                            \ | call jedi#clear_call_signatures()
-                            \ | endif
+
+                if g:jedi#show_call_signatures_modes =~# 'n'
+                    " Note: does not use g:jedi#show_call_signatures_delay!
+                    autocmd WinEnter,CursorHold <buffer> call jedi#show_call_signatures()
+                    " Clear signatures immediately when changing lines.
+                    autocmd CursorMoved <buffer>
+                                \ if line('.') != s:show_call_signatures_last[0]
+                                \ | call jedi#clear_call_signatures()
+                                \ | endif
+                endif
+                if g:jedi#show_call_signatures_modes =~# 'i'
+                    autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
+                    " Clear signatures immediately when changing lines.
+                    autocmd CursorMovedI <buffer>
+                                \ if line('.') != s:show_call_signatures_last[0]
+                                \ | call jedi#clear_call_signatures()
+                                \ | endif
+                endif
             endif
         else
-            autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
+            if g:jedi#show_call_signatures_modes =~# 'n'
+                " Note: does not use g:jedi#show_call_signatures_delay!
+                " Should probably have a warning, at least in the docs about that
+                " option!  (without any delay)
+                autocmd CursorMoved <buffer> call jedi#show_call_signatures()
+            endif
+            if g:jedi#show_call_signatures_modes =~# 'i'
+                autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
+            endif
         endif
     augroup END
 endfunction
