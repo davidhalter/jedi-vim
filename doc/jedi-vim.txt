@@ -398,13 +398,15 @@ Default: 1 (Automatically close preview window upon leaving insert mode)
 ------------------------------------------------------------------------------
 6.6. `g:jedi#show_call_signatures`      *g:jedi#show_call_signatures*
 
-Jedi-vim can display a small window detailing the arguments of the currently
-completed function and highlighting the currently selected argument. This can
-be disabled by setting this option to 0. Setting this option to 2 shows call
-signatures in the command line instead of a popup window.
+Jedi-vim can display call signatures (detailing the arguments) of the
+currently completed function and highlight the currently selected argument in
+an overlay.
+This uses Vim's |conceal| feature, and temporarily changes the buffer, which
+can lead to problems.
+Use 2 to show call signatures in the command line instead.
 
 Options: 0, 1, or 2
-Default: 1 (Show call signatures window)
+Default: 1 (Show call signatures overlay)
 
 Note: 'showmode' must be disabled for command line call signatures to be
 visible.
@@ -414,7 +416,11 @@ that case, if you want to see call signatures, you have to set it up
 manually by calling a function in your configuration file: >
 
     call jedi#configure_call_signatures()
-
+<
+You should also call this function after changing the setting, or use the
+function directly to change it: >
+    call jedi#configure_call_signatures(1)
+<
 ------------------------------------------------------------------------------
 6.7. `g:jedi#show_call_signatures_delay`  *g:jedi#show_call_signatures_delay*
 

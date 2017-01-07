@@ -584,25 +584,91 @@ function! jedi#clear_call_signatures() abort
 endfunction
 
 
-function! jedi#configure_call_signatures() abort
-    augroup jedi_call_signatures
-    autocmd! * <buffer>
-    if g:jedi#show_call_signatures == 2  " Command line call signatures
-        autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
-    endif
-    autocmd InsertEnter <buffer> let s:show_call_signatures_last = [0, 0, '']
-    autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
-    if g:jedi#show_call_signatures_delay > 0
-        autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
-                    \ | let &updatetime = g:jedi#show_call_signatures_delay
-        autocmd InsertLeave <buffer> if exists('b:_jedi_orig_updatetime')
-                    \ |   let &updatetime = b:_jedi_orig_updatetime
-                    \ |   unlet b:_jedi_orig_updatetime
-                    \ | endif
-        autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
+let s:prev_show_call_signatures = 0
+function! jedi#configure_call_signatures(...) abort
+    if a:0
+        let old = g:jedi#show_call_signatures
+        let new = a:1
     else
-        autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
+        let old = s:prev_show_call_signatures
+        let new = g:jedi#show_call_signatures
     endif
+
+    if new == 1 && !has('conceal')
+        echohl WarningMsg
+        echom "jedi-vim's show_call_signatures=1 requires the conceal feature."
+        echohl None
+        return
+    endif
+
+    let g:jedi#show_call_signatures = new
+
+    if new != s:prev_show_call_signatures
+        " Cleanup.
+        if s:prev_show_call_signatures == 1
+            syn clear jediIgnore jediFatSymbol jediFat jediSpace jediFunction
+            setl conceallevel&
+        endif
+    endif
+    let s:prev_show_call_signatures = g:jedi#show_call_signatures
+
+    if g:jedi#show_call_signatures == 0
+        augroup jedi_call_signatures
+            au!
+        augroup END
+        return
+
+    elseif g:jedi#show_call_signatures == 1
+        let e = g:jedi#call_signature_escape
+        let full = e.'jedi=.\{-}'.e.'.\{-}'.e.'jedi'.e
+        let ignore = e.'jedi.\{-}'.e
+        exe 'syn match jediIgnore "'.ignore.'" contained conceal'
+        setlocal conceallevel=2
+        syn match jediFatSymbol "\*_\*" contained conceal
+        syn match jediFat "\*_\*.\{-}\*_\*" contained contains=jediFatSymbol
+        syn match jediSpace "\v[ ]+( )@=" contained
+        exe 'syn match jediFunction "'.full.'" keepend extend '
+                    \ .' contains=jediIgnore,jediFat,jediSpace'
+                    \ .' containedin=pythonComment,pythonString,pythonRawString'
+
+        hi def link jediIgnore Ignore
+        hi def link jediFatSymbol Ignore
+        hi def link jediSpace Normal
+
+        if hlexists('CursorLine')
+            hi def link jediFunction CursorLine
+        else
+            hi def jediFunction term=NONE cterm=NONE ctermfg=6 guifg=Black gui=NONE ctermbg=0 guibg=Grey
+        endif
+        if hlexists('TabLine')
+            hi def link jediFat TabLine
+        else
+            hi def jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=#555555
+        endif
+    endif
+
+    augroup jedi_call_signatures
+        autocmd! * <buffer>
+        if g:jedi#show_call_signatures == 2  " Command line call signatures
+            autocmd InsertEnter <buffer> let g:jedi#first_col = s:save_first_col()
+        elseif g:jedi#show_call_signatures == 1
+            autocmd ColorScheme <buffer> call jedi#configure_call_signatures()
+            " autocmd Syntax <buffer> debug call jedi#configure_call_signatures()
+        endif
+
+        autocmd InsertEnter <buffer> let s:show_call_signatures_last = [0, 0, '']
+        autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
+        if g:jedi#show_call_signatures_delay > 0
+            autocmd InsertEnter <buffer> let b:_jedi_orig_updatetime = &updatetime
+                        \ | let &updatetime = g:jedi#show_call_signatures_delay
+            autocmd InsertLeave <buffer> if exists('b:_jedi_orig_updatetime')
+                        \ |   let &updatetime = b:_jedi_orig_updatetime
+                        \ |   unlet b:_jedi_orig_updatetime
+                        \ | endif
+            autocmd CursorHoldI <buffer> call jedi#show_call_signatures()
+        else
+            autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
+        endif
     augroup END
 endfunction
 
@@ -706,37 +772,6 @@ function! jedi#smart_auto_mappings() abort
     return "\<space>"
 endfunction
 
-let s:prev_show_call_signatures = 0
-function! jedi#setup_call_signatures(...) abort
-  if g:jedi#show_call_signatures > 0 && has('conceal')
-      " +conceal is the default for vim >= 7.3
-
-      let s:e = g:jedi#call_signature_escape
-      let s:full = s:e.'jedi=.\{-}'.s:e.'.\{-}'.s:e.'jedi'.s:e
-      let s:ignore = s:e.'jedi.\{-}'.s:e
-      exe 'syn match jediIgnore "'.s:ignore.'" contained conceal'
-      setlocal conceallevel=2
-      syn match jediFatSymbol "\*_\*" contained conceal
-      syn match jediFat "\*_\*.\{-}\*_\*" contained contains=jediFatSymbol
-      syn match jediSpace "\v[ ]+( )@=" contained
-      exe 'syn match jediFunction "'.s:full.'" keepend extend '
-                  \ .' contains=jediIgnore,jediFat,jediSpace'
-                  \ .' containedin=pythonComment,pythonString,pythonRawString'
-      unlet! s:e s:full s:ignore
-
-      hi def link jediIgnore Ignore
-      hi def link jediFatSymbol Ignore
-      hi def link jediSpace Normal
-
-      if exists('g:colors_name')
-          hi def link jediFunction CursorLine
-          hi def link jediFat TabLine
-      else
-          hi def jediFunction term=NONE cterm=NONE ctermfg=6 guifg=Black gui=NONE ctermbg=0 guibg=Grey
-          hi def jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=#555555
-      endif
-  endif
-endfunction
 
 function! jedi#setup_completion() abort
     " We need our own omnifunc, so this overrides the omnifunc set by
