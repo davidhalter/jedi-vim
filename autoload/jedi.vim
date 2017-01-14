@@ -181,7 +181,8 @@ function! jedi#debug_info()
       PythonJedi print(' - sys.version: {0}'.format(', '.join([x.strip() for x in __import__('sys').version.split("\n")])))
       PythonJedi print(' - site module: {0}'.format(__import__('site').__file__))
       PythonJedi print('Jedi path: {0}'.format(jedi_vim.jedi.__file__))
-      PythonJedi print('Jedi version: {}'.format(jedi_vim.jedi.__version__))
+      PythonJedi print(' - version: {}'.format(jedi_vim.jedi.__version__))
+      PythonJedi print(' - sys_path:\n    - {}'.format("\n    - ".join(jedi_vim.jedi.Script('')._evaluator.sys_path)))
     endif
     echo 'jedi-vim git version: '
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
