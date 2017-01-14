@@ -168,10 +168,21 @@ function! jedi#debug_info()
     endif
     echo 'Using Python version:' s:python_version
     let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
-    PythonJedi print(' - sys.version: {0}'.format(', '.join([x.strip() for x in __import__('sys').version.split("\n")])))
-    PythonJedi print(' - site module: {0}'.format(__import__('site').__file__))
-    PythonJedi print('Jedi path: {0}'.format(jedi_vim.jedi.__file__))
-    PythonJedi print('Jedi version: {}'.format(jedi_vim.jedi.__version__))
+    let s:pythonjedi_called = 0
+    PythonJedi import vim; vim.command('let s:pythonjedi_called = 1')
+    if !s:pythonjedi_called
+      echohl WarningMsg
+      echom 'PythonJedi failed to run, likely a Python config issue.'
+      if exists(':CheckHealth') == 2
+        echom 'Try :CheckHealth for more information.'
+      endif
+      echohl None
+    else
+      PythonJedi print(' - sys.version: {0}'.format(', '.join([x.strip() for x in __import__('sys').version.split("\n")])))
+      PythonJedi print(' - site module: {0}'.format(__import__('site').__file__))
+      PythonJedi print('Jedi path: {0}'.format(jedi_vim.jedi.__file__))
+      PythonJedi print('Jedi version: {}'.format(jedi_vim.jedi.__version__))
+    endif
     echo 'jedi-vim git version: '
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
     echo 'jedi git submodule status: '
