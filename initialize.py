@@ -9,8 +9,10 @@ try:
     import os, sys, vim
     jedi_path = os.path.join(vim.eval('expand(s:script_path)'), 'jedi')
     sys.path.insert(0, jedi_path)
+
     jedi_vim_path = vim.eval('expand(s:script_path)')
-    sys.path.insert(0, jedi_vim_path)
+    if jedi_vim_path not in sys.path:  # Might happen when reloading.
+        sys.path.insert(0, jedi_vim_path)
 except Exception as excinfo:
     raise Exception('Failed to add to sys.path: {0}\n{1}'.format(
         excinfo, traceback.format_exc()))
@@ -21,4 +23,4 @@ except Exception as excinfo:
     raise Exception('Failed to import jedi_vim: {0}\n{1}'.format(
         excinfo, traceback.format_exc()))
 finally:
-    sys.path.pop(1)
+    sys.path.remove(jedi_path)
