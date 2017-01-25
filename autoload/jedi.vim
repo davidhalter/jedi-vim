@@ -166,6 +166,7 @@ function! jedi#debug_info()
     if s:python_version ==# 'null'
         call s:init_python()
     endif
+    echo '#### Jedi-vim debug information'
     echo 'Using Python version:' s:python_version
     let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
     let s:pythonjedi_called = 0
@@ -188,8 +189,19 @@ function! jedi#debug_info()
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
     echo 'jedi git submodule status: '
     echon substitute(system('git -C '.s:script_path.' submodule status'), '\v\n$', '', '')
+    echo "\n"
+    echo '##### Settings'
+    echo '```'
+    for [k, V] in items(filter(copy(g:), "v:key =~# '\\v^jedi#'"))
+      let k = substitute(k, '\v^jedi#', '', '')
+      exe 'let default = '.get(s:default_settings, k, "'-'")
+      if default !=# V
+        echo printf('g:%s = %s (default: %s)', k, string(V), string(default))
+        unlet! V  " Fix variable type mismatch with Vim 7.3.
+      endif
+    endfor
+    echo '```'
 endfunction
-
 
 function! jedi#force_py_version(py_version)
     let g:jedi#force_py_version = a:py_version
