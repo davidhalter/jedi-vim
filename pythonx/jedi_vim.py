@@ -326,10 +326,6 @@ def get_pos(column=None):
 @catch_and_print_exceptions
 def completions():
     row, column = vim.current.window.cursor
-    # Clear call signatures in the buffer so they aren't seen by the completer.
-    # Call signatures in the command line can stay.
-    if int(vim_eval("g:jedi#show_call_signatures")) == 1:
-        clear_call_signatures()
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
@@ -337,51 +333,65 @@ def completions():
                 break
             count += 1
         vim.command('return %i' % (column - count))
-    else:
-        base = vim.eval('a:base')
-        source = ''
-        for i, line in enumerate(vim.current.buffer):
-            # enter this path again, otherwise source would be incomplete
-            if i == row - 1:
-                source += line[:column] + base + line[column:]
-            else:
-                source += line
-            source += '\n'
-        # here again hacks, because jedi has a different interface than vim
-        column += len(base)
-        try:
-            script = get_script(source=source)
-            completions = script.complete(*get_pos(column))
-            signatures = script.get_signatures(*get_pos(column))
+        return
 
-            add_info = "preview" in vim.eval("&completeopt").split(",")
-            out = []
-            for c in completions:
-                d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
-                         abbr=PythonToVimStr(c.name_with_symbols),
-                         # stuff directly behind the completion
-                         menu=PythonToVimStr(c.description),
-                         icase=1,  # case insensitive
-                         dup=1  # allow duplicates (maybe later remove this)
-                         )
-                if add_info:
-                    try:
-                        d["info"] = PythonToVimStr(c.docstring())
-                    except Exception:
-                        print("jedi-vim: error with docstring for %r: %s" % (
-                            c, traceback.format_exc()))
-                out.append(d)
+    # Clear call signatures in the buffer so they aren't seen by the completer.
+    # Call signatures in the command line can stay.
+    if int(vim_eval("g:jedi#show_call_signatures")) == 1:
+        restore_signatures = False
+        for linenr, line in vim_eval('get(b:, "_jedi_callsig_orig", {})').items():
+            # Check that the line would be reset, helps with keeping a single
+            # undochain.
+            if line != vim.current.buffer[int(linenr)-1]:
+                vim_command('silent! undojoin')
+                vim.current.buffer[int(linenr)-1] = line
+                restore_signatures = True
 
-            strout = str(out)
-        except Exception:
-            # print to stdout, will be in :messages
-            print(traceback.format_exc())
-            strout = ''
-            completions = []
-            signatures = []
+    base = vim.eval('a:base')
+    source = ''
+    for i, line in enumerate(vim.current.buffer):
+        # enter this path again, otherwise source would be incomplete
+        if i == row - 1:
+            source += line[:column] + base + line[column:]
+        else:
+            source += line
+        source += '\n'
+    # here again hacks, because jedi has a different interface than vim
+    column += len(base)
+    try:
+        script = get_script(source=source)
+        completions = script.complete(*get_pos(column))
 
-        show_call_signatures(signatures)
-        vim.command('return ' + strout)
+        add_info = "preview" in vim.eval("&completeopt").split(",")
+        out = []
+        for c in completions:
+            d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
+                     abbr=PythonToVimStr(c.name_with_symbols),
+                     # stuff directly behind the completion
+                     menu=PythonToVimStr(c.description),
+                     icase=1,  # case insensitive
+                     dup=1  # allow duplicates (maybe later remove this)
+                     )
+            if add_info:
+                try:
+                    d["info"] = PythonToVimStr(c.docstring())
+                except Exception:
+                    print("jedi-vim: error with docstring for %r: %s" % (
+                        c, traceback.format_exc()))
+            out.append(d)
+
+        strout = str(out)
+    except Exception:
+        # print to stdout, will be in :messages
+        print(traceback.format_exc())
+        strout = ''
+        completions = []
+
+    if restore_signatures:
+        cursor = vim.current.window.cursor
+        vim_command('undo')
+        vim.current.window.cursor = cursor
+    vim.command('return ' + strout)
 
 
 @contextmanager
