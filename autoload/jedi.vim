@@ -580,7 +580,7 @@ function! s:show_call_signatures_delayed_cb(timer) abort
     endif
 endfunction
 
-function! jedi#show_call_signatures_delayed() abort
+function! jedi#show_call_signatures_delayed(mode) abort
     if exists('s:show_call_signatures_timer')
         call timer_stop(s:show_call_signatures_timer)
     endif
@@ -588,7 +588,7 @@ function! jedi#show_call_signatures_delayed() abort
     if line('.') != s:show_call_signatures_last[0]
         call jedi#clear_call_signatures()
     endif
-    let s:show_call_signatures_delayed_posmode = [getpos('.'), mode()]
+    let s:show_call_signatures_delayed_posmode = [getpos('.'), a:mode]
     let s:show_call_signatures_timer = timer_start(
                 \ g:jedi#show_call_signatures_delay,
                 \ function('s:show_call_signatures_delayed_cb'))
@@ -698,7 +698,7 @@ function! jedi#configure_call_signatures(...) abort
                     autocmd WinEnter,CursorMoved <buffer> call jedi#show_call_signatures_delayed()
                 endif
                 if g:jedi#show_call_signatures_modes =~# 'i'
-                    autocmd InsertEnter,CursorMovedI <buffer> call jedi#show_call_signatures_delayed()
+                    autocmd InsertEnter,CursorMovedI <buffer> call jedi#show_call_signatures_delayed('i')
                 elseif g:jedi#show_call_signatures_modes =~# 'n'
                     autocmd InsertEnter <buffer> call jedi#clear_call_signatures()
                 endif
