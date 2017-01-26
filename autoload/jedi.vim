@@ -696,7 +696,7 @@ function! jedi#configure_call_signatures(...) abort
         if g:jedi#show_call_signatures_delay > 0
             if has('timers')
                 if g:jedi#show_call_signatures_modes =~# 'n'
-                    autocmd WinEnter,CursorMoved <buffer> call jedi#show_call_signatures_delayed()
+                    autocmd WinEnter,CursorMoved <buffer> call jedi#show_call_signatures_delayed('n')
                 endif
                 if g:jedi#show_call_signatures_modes =~# 'i'
                     autocmd InsertEnter,CursorMovedI <buffer> call jedi#show_call_signatures_delayed('i')
