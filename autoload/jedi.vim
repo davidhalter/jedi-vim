@@ -583,6 +583,7 @@ endfunction
 function! jedi#show_call_signatures_delayed(mode) abort
     if exists('s:show_call_signatures_timer')
         call timer_stop(s:show_call_signatures_timer)
+        unlet s:show_call_signatures_timer
     endif
     " Clear call signatures immediately when changing the line.
     if line('.') != s:show_call_signatures_last[0]
