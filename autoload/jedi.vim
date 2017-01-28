@@ -63,6 +63,7 @@ function! s:init_python()
         try
             return jedi#force_py_version(g:jedi#force_py_version)
         catch
+            echom "error"
             throw "Could not setup g:jedi#force_py_version: ".v:exception
         endtry
     endif
@@ -120,21 +121,73 @@ function! jedi#reinit_python()
     call jedi#init_python()
 endfunction
 
+fun! s:JobHandler(jobid, data, event)
+    if a:event == 'stdout'
+        let s:def_py = a:data[0]
+        if &verbose
+            echom "jedi-vim: auto-detected Python: ".s:def_py
+        endif
+    elseif a:event == 'stderr'
+        if !exists("g:jedi#squelch_py_warning")
+            echohl WarningMsg
+            echom "Warning: jedi-vim failed to get Python version from sys.version_info: " . s:def_py
+            echom "Falling back to version 2."
+            echohl None
+        endif
+        let s:def_py = 2
+    else
+        return
+    endif
+    call s:next_action(s:def_py)
+endf
+
+fun! s:async_init()
+    if g:jedi#force_py_version != 'auto'
+        " Always use the user supplied version.
+        call s:next_action(g:jedi#force_py_version)
+        return
+    endif
+
+    " Handle "auto" version.
+    if has('nvim') || (has('python') && has('python3'))
+        " Neovim usually has both python providers. Skipping the `has` check
+        " avoids starting both of them.
+
+        let s:handlers = {'on_stdout': function('s:JobHandler'), 'on_stderr': function('s:JobHandler'), 'on_exit': function('s:JobHandler')}
+        call jobstart('python -c '.shellescape('import sys; print(str(sys.version_info[0]))'), s:handlers)
+    endif
+endf
+
+fun! s:next_action(py_version)
+    try
+        let s:_init_python = jedi#force_py_version(a:py_version)
+    catch
+        let s:_init_python = 0
+        if !exists("g:jedi#squelch_py_warning")
+            echoerr "Error: jedi-vim failed to initialize Python: "
+                        \ .v:exception." (in ".v:throwpoint.")"
+        endif
+    endtry
+endf
 
 let s:_init_python = -1
 function! jedi#init_python()
     if s:_init_python == -1
-        try
-            let s:_init_python = s:init_python()
-        catch
-            let s:_init_python = 0
-            if !exists("g:jedi#squelch_py_warning")
-                echoerr "Error: jedi-vim failed to initialize Python: "
-                            \ .v:exception." (in ".v:throwpoint.")"
-            endif
-        endtry
+        if has('nvim')
+            call s:async_init()
+        else
+            try
+                let s:_init_python = s:init_python()
+            catch
+                let s:_init_python = 0
+                if !exists("g:jedi#squelch_py_warning")
+                    echoerr "Error: jedi-vim failed to initialize Python: "
+                                \ .v:exception." (in ".v:throwpoint.")"
+                endif
+            endtry
+        endif
     endif
-    return s:_init_python
+    return 1
 endfunction
 
 
