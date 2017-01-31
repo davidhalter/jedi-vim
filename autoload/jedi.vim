@@ -202,6 +202,8 @@ function! jedi#debug_info() abort
       endif
       " vint: +ProhibitUsingUndeclaredVariable
     endfor
+    echo "\n"
+    verb set omnifunc? completeopt?
     echo '```'
 endfunction
 
