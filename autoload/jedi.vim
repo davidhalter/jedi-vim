@@ -545,7 +545,7 @@ function! jedi#complete_opened(is_popup_on_dot) abort
             endif
         endif
     endif
-    return
+    return 0
 endfunction
 
 
