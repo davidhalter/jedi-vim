@@ -631,6 +631,9 @@ function! jedi#configure_call_signatures(...) abort
 
     let g:jedi#show_call_signatures = new
 
+    if s:prev_show_call_signatures
+      call jedi#clear_call_signatures()
+    endif
     if new != s:prev_show_call_signatures
         " Cleanup.
         if s:prev_show_call_signatures == 1
