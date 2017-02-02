@@ -338,14 +338,7 @@ def completions():
     # Clear call signatures in the buffer so they aren't seen by the completer.
     # Call signatures in the command line can stay.
     if int(vim_eval("g:jedi#show_call_signatures")) == 1:
-        restore_signatures = False
-        for linenr, line in vim_eval('get(b:, "_jedi_callsig_orig", {})').items():
-            # Check that the line would be reset, helps with keeping a single
-            # undochain.
-            if line != vim.current.buffer[int(linenr)-1]:
-                vim_command('silent! undojoin')
-                vim.current.buffer[int(linenr)-1] = line
-                restore_signatures = True
+        restore_signatures = clear_call_signatures(True)
 
     base = vim.eval('a:base')
     source = ''
@@ -388,9 +381,7 @@ def completions():
         completions = []
 
     if restore_signatures:
-        cursor = vim.current.window.cursor
-        vim_command('undo')
-        vim.current.window.cursor = cursor
+        show_call_signatures()
     vim.command('return ' + strout)
 
 
@@ -807,22 +798,30 @@ def show_documentation():
 
 
 @catch_and_print_exceptions
-def clear_call_signatures():
+def clear_call_signatures(temporary=False):
     # Check if using command line call signatures
     if int(vim_eval("g:jedi#show_call_signatures")) == 2:
         vim_command('echo ""')
         return
-    cursor = vim.current.window.cursor
 
-    if not int(vim_eval("exists('b:_jedi_callsig_orig')")):
-        return
-    for linenr, line in vim_eval('b:_jedi_callsig_orig').items():
-        # Check that the line would be reset, helps with keeping a single
-        # undochain.
-        if line != vim.current.buffer[int(linenr)-1]:
-            vim_command('silent! undojoin')
-            vim.current.buffer[int(linenr)-1] = line
-    vim_command('unlet b:_jedi_callsig_orig')
+    r = False
+    orig_lines = vim_eval("get(b:, '_jedi_callsig_orig', {})")
+    if orig_lines:
+        orig_modified = int(vim_eval("&modified"))
+
+        for linenr, line in orig_lines.items():
+            # Check that the line would be reset, helps with keeping a single
+            # undochain.
+            # assert line != vim.current.buffer[int(linenr)-1]
+            if line != vim.current.buffer[int(linenr)-1]:
+                vim.current.buffer[int(linenr)-1] = line
+                vim_command('let b:_jedi_changing_text = changenr()')
+                r = True
+        if not orig_modified:
+            vim_command('set nomodified')
+        if not temporary:
+            vim_command('unlet b:_jedi_callsig_orig')
+    return r
 
 
 @_check_jedi_availability(show_error=False)
@@ -911,12 +910,15 @@ def show_call_signatures(signatures=()):
     if not set_lines:
         return
 
+    orig_modified = int(vim_eval("&modified"))
     orig_lines = {}
     for linenr, line in set_lines:
         orig_lines[linenr] = vim.current.buffer[linenr-1]
         vim_command('silent! undojoin')
         vim.current.buffer[int(linenr)-1] = line
     vim_command("let b:_jedi_callsig_orig = {!r}".format(orig_lines))
+    if not orig_modified:
+        vim_command('set nomodified')
 
 
 @catch_and_print_exceptions
