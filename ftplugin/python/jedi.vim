@@ -33,7 +33,7 @@ if g:jedi#auto_initialization
         call jedi#configure_call_signatures()
     endif
 
-    if g:jedi#completions_enabled == 1
+    if g:jedi#completions_enabled == 1 && g:jedi#popup_on_dot == 1
         inoremap <silent> <buffer> . .<C-R>=jedi#complete_string(1)<CR>
     endif
 
