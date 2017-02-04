@@ -94,11 +94,12 @@ def echo_highlight(msg):
 
 
 try:
-    import jedi
+    import jedi_client as jedi
 except ImportError as e:
     no_jedi_warning(str(e))
     jedi = None
-else:
+
+if False:
     try:
         version = jedi.__version__
     except Exception as e:  # e.g. AttributeError
@@ -110,8 +111,7 @@ else:
     else:
         if isinstance(version, str):
             # the normal use case, now.
-            from jedi import utils
-            version = utils.version_info()
+            version = tuple(map(int, version.split('.')))
         if version < (0, 7):
             echo_highlight('Please update your Jedi version, it is too old.')
 
@@ -625,7 +625,7 @@ def py_import():
 def py_import_completions():
     argl = vim.eval('a:argl')
     try:
-        import jedi
+        import jedi_client as jedi
     except ImportError:
         print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
         comps = []
