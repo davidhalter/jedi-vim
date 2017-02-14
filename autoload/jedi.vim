@@ -179,11 +179,28 @@ function! jedi#debug_info() abort
       endif
       echohl None
     else
-      PythonJedi print(' - sys.version: {0}'.format(', '.join([x.strip() for x in __import__('sys').version.split("\n")])))
-      PythonJedi print(' - site module: {0}'.format(__import__('site').__file__))
-      PythonJedi print('Jedi path: {0}'.format(jedi_vim.jedi.__file__))
-      PythonJedi print(' - version: {}'.format(jedi_vim.jedi.__version__))
-      PythonJedi print(' - sys_path:\n    - {}'.format("\n    - ".join(jedi_vim.jedi.Script('')._evaluator.sys_path)))
+      PythonJedi << EOF
+vim.command("echo printf(' - sys.version: %s', {0!r})".format(', '.join([x.strip() for x in __import__('sys').version.split('\n')])))
+vim.command("echo printf(' - site module: %s', {0!r})".format(__import__('site').__file__))
+
+try:
+  jedi_vim
+except Exception as e:
+  vim.command("echo printf('ERROR: jedi_vim is not available: %s: %s', {0!r}, {1!r})".format(e.__class__.__name__, str(e)))
+else:
+  try:
+    if jedi_vim.jedi is None:
+      vim.command("echo 'ERROR: the \"jedi\" Python module could not be imported.'")
+      vim.command("echo printf('       The error was: %s', {0!r})".format(getattr(jedi_vim, "jedi_import_error", "UNKNOWN")))
+    else:
+      vim.command("echo printf('Jedi path: %s', {0!r})".format(jedi_vim.jedi.__file__))
+      vim.command("echo printf(' - version: %s', {0!r})".format(jedi_vim.jedi.__version__))
+      vim.command("echo ' - sys_path:'")
+      for p in jedi_vim.jedi.Script('')._evaluator.sys_path:
+        vim.command("echo printf('    - %s', {0!r})".format(p))
+  except Exception as e:
+    vim.command("echo printf('There was an error accessing jedi_vim.jedi: %s', {0!r})".format(e))
+EOF
     endif
     echo 'jedi-vim git version: '
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
