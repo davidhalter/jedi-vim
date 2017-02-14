@@ -98,6 +98,7 @@ try:
 except ImportError as e:
     no_jedi_warning(str(e))
     jedi = None
+    jedi_import_error = str(e)
 else:
     try:
         version = jedi.__version__
