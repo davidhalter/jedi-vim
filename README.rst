@@ -91,6 +91,20 @@ Example installation command using Pathogen:
 
     cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
 
+If you don't want to use Vim plugin managers, you can install the plugin by following the steps below:
+
+- Clone the project to ``~/.vim/bundle``
+  
+  .. code-block:: sh
+
+      git clone https://github.com/davidhalter/jedi-vim.git
+
+- Set the `runtime path <http://vimdoc.sourceforge.net/htmldoc/options.html#%27runtimepath%27>`__ in your ``~/.vimrc``
+  
+  .. code-block:: vim
+
+      set rtp+=~/.vim/bundle/jedi-vim
+      set rtp+=~/.vim/bundle/jedi-vim/after
 
 Installation with your distribution
 -----------------------------------
