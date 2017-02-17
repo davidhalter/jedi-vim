@@ -1,17 +1,43 @@
 ### Issue
 
+<!--
+Please describe the issue here.
+
+If you are not using jedi-vim from Git (but e.g. from a distribution's package,
+please try it with jedi-vim's Git master, too).
+-->
+
 ### Steps to reproduce
 
-### Versions
+<!--
+Include if relevant.
 
- - jedi-vim:
- - Vim / Neovim:
- - Python:
+Please provide steps to reproduce it here, preferably based on a minimal Vim
+configuration.
 
-In case you are not using jedi-vim from Git master, please test it there, too.
+You can use the following template (save it as `minimal.vimrc`, and run Vim
+with `vim -u minimal.vimrc`):
 
-### Output of the "JediDebugInfo" command (in a Python buffer)
+```
+set nocompatible
 
-### Output of the "messages" Vim command
+let script_dir = fnamemodify(expand('<sfile>'), ':h')
+let &runtimepath .= ','.script_dir.','.script_dir.'/after'
 
-### Output of "scriptnames" Vim command
+" Put your config changes here.
+" let g:jedi#show_call_signatures=1
+
+syntax on
+filetype plugin indent on
+```
+
+Please provide the `minimal.vimrc` you have used here, too.
+-->
+
+### Output of “:verbose JediDebugInfo”
+
+<!--
+Please execute `:redir @+> | silent verb JediDebugInfo | redir END` in a
+Python buffer to copy debug information into your clipboard.
+Then paste it here.
+-->

@@ -166,6 +166,11 @@ function! jedi#debug_info() abort
     if s:python_version ==# 'null'
         call s:init_python()
     endif
+    if &verbose
+      if &filetype !=# 'python'
+        echohl WarningMsg | echo 'You should run this in a buffer with filetype "python".' | echohl None
+      endif
+    endif
     echo '#### Jedi-vim debug information'
     echo 'Using Python version:' s:python_version
     let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
@@ -180,8 +185,8 @@ function! jedi#debug_info() abort
       echohl None
     else
       PythonJedi << EOF
-vim.command("echo printf(' - sys.version: %s', {0!r})".format(', '.join([x.strip() for x in __import__('sys').version.split('\n')])))
-vim.command("echo printf(' - site module: %s', {0!r})".format(__import__('site').__file__))
+vim.command("echo printf(' - sys.version: `%s`', {0!r})".format(', '.join([x.strip() for x in __import__('sys').version.split('\n')])))
+vim.command("echo printf(' - site module: `%s`', {0!r})".format(__import__('site').__file__))
 
 try:
   jedi_vim
@@ -193,18 +198,18 @@ else:
       vim.command("echo 'ERROR: the \"jedi\" Python module could not be imported.'")
       vim.command("echo printf('       The error was: %s', {0!r})".format(getattr(jedi_vim, "jedi_import_error", "UNKNOWN")))
     else:
-      vim.command("echo printf('Jedi path: %s', {0!r})".format(jedi_vim.jedi.__file__))
+      vim.command("echo printf('Jedi path: `%s`', {0!r})".format(jedi_vim.jedi.__file__))
       vim.command("echo printf(' - version: %s', {0!r})".format(jedi_vim.jedi.__version__))
       vim.command("echo ' - sys_path:'")
       for p in jedi_vim.jedi.Script('')._evaluator.sys_path:
-        vim.command("echo printf('    - %s', {0!r})".format(p))
+        vim.command("echo printf('    - `%s`', {0!r})".format(p))
   except Exception as e:
     vim.command("echo printf('There was an error accessing jedi_vim.jedi: %s', {0!r})".format(e))
 EOF
     endif
-    echo 'jedi-vim git version: '
+    echo ' - jedi-vim git version: '
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
-    echo 'jedi git submodule status: '
+    echo ' - jedi git submodule status: '
     echon substitute(system('git -C '.s:script_path.' submodule status'), '\v\n$', '', '')
     echo "\n"
     echo '##### Settings'
@@ -222,6 +227,26 @@ EOF
     echo "\n"
     verb set omnifunc? completeopt?
     echo '```'
+
+    if &verbose
+      echo "\n"
+      echo '#### :version'
+      echo '```'
+      version
+      echo '```'
+      echo "\n"
+      echo '#### :messages'
+      echo '```'
+      messages
+      echo '```'
+      echo "\n"
+      echo "<details><summary>:scriptnames</summary>"
+      echo "\n"
+      echo '```'
+      scriptnames
+      echo '```'
+      echo "</details>"
+    endif
 endfunction
 
 function! jedi#force_py_version(py_version) abort
