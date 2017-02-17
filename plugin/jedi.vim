@@ -4,7 +4,7 @@
 " This part of the software is just the vim interface. The really big deal is
 " the Jedi Python library.
 
-if get(g:, 'jedi#auto_vim_configuration', 0)
+if get(g:, 'jedi#auto_vim_configuration', 1)
     " jedi-vim doesn't work in compatible mode (vim script syntax problems)
     if &compatible
         " vint: -ProhibitSetNoCompatible
