@@ -10,16 +10,9 @@ matrix:
     - env: ENV=test
 install:
   - |
-    if [ "$ENV" = "check" ]; then
-      pip install vim-vint
-    else
+    if [ "$ENV" = "test" ]; then
       pip install pytest
     fi
 script:
   - vim --version
-  - |
-    if [ "$ENV" = "check" ]; then
-      vint after autoload ftplugin plugin
-    else
-      pytest
-    fi
+  - make "$ENV"
