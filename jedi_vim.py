@@ -567,7 +567,7 @@ def do_rename(replace, orig=None):
     # Sort the whole thing reverse (positions at the end of the line
     # must be first, because they move the stuff before the position).
     temp_rename = sorted(temp_rename, reverse=True,
-                         key=lambda x: (x.module_path, x.start_pos))
+                         key=lambda x: (x.module_path, x.line, x.column))
     buffers = set()
     for r in temp_rename:
         if r.in_builtin_module():
@@ -585,7 +585,7 @@ def do_rename(replace, orig=None):
         saved_view = vim_eval('string(winsaveview())')
 
         # Replace original word.
-        vim.current.window.cursor = r.start_pos
+        vim.current.window.cursor = (r.line, r.column)
         vim_command('normal! c{0:d}l{1}'.format(len(orig), replace))
 
         # Restore view.
