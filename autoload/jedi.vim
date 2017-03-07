@@ -696,6 +696,11 @@ function! jedi#configure_call_signatures(...) abort
             autocmd InsertLeave <buffer> call jedi#clear_call_signatures()
         endif
 
+        if g:jedi#show_call_signatures_modes =~# 'n'
+            autocmd BufWritePre <buffer> call jedi#clear_call_signatures()
+            autocmd BufWritePost <buffer> call jedi#show_call_signatures()
+        endif
+
         if g:jedi#show_call_signatures_delay > 0
             if has('timers')
                 if g:jedi#show_call_signatures_modes =~# 'n'
