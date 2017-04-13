@@ -254,17 +254,17 @@ function! jedi#force_py_version(py_version) abort
     return jedi#setup_py_version(a:py_version)
 endfunction
 
-
 function! jedi#force_py_version_switch() abort
     if g:jedi#force_py_version == 2
-        call jedi#force_py_version(3)
+        let ver = 3
     elseif g:jedi#force_py_version == 3
-        call jedi#force_py_version(2)
+        let ver = 2
     else
         throw "Don't know how to switch from ".g:jedi#force_py_version.'!'
     endif
+    echom 'jedi-vim: switching to Python '.ver
+    return jedi#force_py_version(ver)
 endfunction
-
 
 " Helper function instead of `python vim.eval()`, and `.command()` because
 " these also return error definitions.
