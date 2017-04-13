@@ -184,7 +184,9 @@ function! jedi#debug_info() abort
       endif
       echohl None
     else
-      PythonJedi << EOF
+      function! s:python_info() abort
+        " Needs to be wrapped in a function, see `:h script-here`.
+        PythonJedi << EOF
 vim.command("echo printf(' - sys.version: `%s`', {0!r})".format(', '.join([x.strip() for x in __import__('sys').version.split('\n')])))
 vim.command("echo printf(' - site module: `%s`', {0!r})".format(__import__('site').__file__))
 
@@ -206,6 +208,8 @@ else:
   except Exception as e:
     vim.command("echo printf('There was an error accessing jedi_vim.jedi: %s', {0!r})".format(e))
 EOF
+      endfunction
+      call s:python_info()
     endif
     echo ' - jedi-vim git version: '
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
