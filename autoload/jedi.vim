@@ -319,7 +319,15 @@ function! jedi#_vim_exceptions(str, is_eval) abort
     return l:result
 endfunction
 
-call jedi#init_python()  " Might throw an error.
+try
+  call jedi#init_python()  " Might throw an error.
+catch
+  echohl ErrorMsg
+  echom v:exception
+  echom 'Try :JediDebugInfo for more information.'
+  echohl None
+  finish
+endtry
 
 " ------------------------------------------------------------------------
 " functions that call python code
