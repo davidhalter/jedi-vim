@@ -173,11 +173,12 @@ endfunction
 
 
 function! jedi#debug_info() abort
+    let error = ''
     if s:python_version ==# 'null'
       try
         call s:init_python()
       catch
-        echohl WarningMsg | echom v:exception | echohl None
+        let error = 'Failed to initialize Python: '.v:exception.'.'
       endtry
     endif
     if &verbose
@@ -187,20 +188,28 @@ function! jedi#debug_info() abort
     endif
     echo '#### Jedi-vim debug information'
     echo 'Using Python version:' s:python_version
-    let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
-    let s:pythonjedi_called = 0
-    let error = ''
-    try
-      PythonJedi import vim; vim.command('let s:pythonjedi_called = 1')
-    catch
-      let error = v:exception
-    endtry
-    if !s:pythonjedi_called
-      echohl WarningMsg
-      echom 'PythonJedi failed to run, likely a Python config issue.'
-      if !empty(error)
-          echom 'Error: '.error
+    if !exists(':PythonJedi')
+      if empty(error)
+        let error = 'Could not setup Python configuration (missing :PythonJedi).'
       endif
+    else
+      let s:pythonjedi_called = 0
+      try
+        PythonJedi import vim; vim.command('let s:pythonjedi_called = 1')
+      catch
+        let error = v:exception
+      endtry
+      if !s:pythonjedi_called
+        if empty(error)
+          let error = 'PythonJedi failed to run, likely a Python config issue.'
+        else
+          let error = 'Error when running PythonJedi: '.error
+        endif
+      endif
+    endif
+    if !empty(error)
+      echohl WarningMsg
+      echom error
       if exists(':CheckHealth') == 2
         echom 'Try :CheckHealth for more information.'
       endif
