@@ -63,16 +63,26 @@ function! s:init_python() abort
         try
             return jedi#force_py_version(g:jedi#force_py_version)
         catch
-            throw 'Could not setup g:jedi#force_py_version: '.v:exception
+            throw 'could not setup g:jedi#force_py_version: '.v:exception
         endtry
     endif
 
     " Handle "auto" version.
-    if has('nvim') || (has('python') && has('python3'))
+    if has('nvim')
         " Neovim usually has both python providers. Skipping the `has` check
         " avoids starting both of them.
+        let has_python2 = get(g:, 'loaded_python_provider', 1)
+        let has_python3 = get(g:, 'loaded_python3_provider', 1)
+        if !has_python2 && !has_python3
+            throw 'both Neovim Python providers are disabled'
+        endif
+    else
+        let has_python2 = has('python')
+        let has_python3 = has('python3')
+    endif
 
-        " Get default python version from interpreter in $PATH.
+    if has_python2 && has_python3
+        " Get default Python version from interpreter in $PATH.
         let s:def_py = system('python -c '.shellescape('import sys; sys.stdout.write(str(sys.version_info[0]))'))
         if v:shell_error != 0 || !len(s:def_py)
             if !exists('g:jedi#squelch_py_warning')
@@ -104,10 +114,10 @@ function! s:init_python() abort
         endif
     endif
 
-    if has('python')
-        call jedi#setup_py_version(2)
-    elseif has('python3')
+    if has_python3
         call jedi#setup_py_version(3)
+    elseif has_python2
+        call jedi#setup_py_version(2)
     else
         throw 'jedi-vim requires Vim with support for Python 2 or 3.'
     endif
