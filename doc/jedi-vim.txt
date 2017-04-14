@@ -478,22 +478,30 @@ means that if the window is big enough it will be split vertically but if it is
 small a horizontal split happens.
 
 ------------------------------------------------------------------------------
-6.12. `g:jedi#force_py_version`                *g:jedi#force_py_version*
+6.12. *g:jedi#force_py_version*
 
-If your Vim version has support for both Python 2 and Python 3, you can
-use this variable to configure which version Jedi uses.
-To use Python 3, you can use this in your .vimrc: >
+This setting configures which Python main version (2 or 3) Jedi uses.
+The default is "auto": it will use Python 3, if available, and Python 2
+otherwise.
+Using "detect" will query the `python` executable's `sys.version_info` (based
+on your `$PATH`); this works best when switching between Python 2 and 3
+projects often, but the |system()| call slows down initialization. We
+recommend to use autocommands or a plugin like
+https://github.com/embear/vim-localvimrc to configure it per project
+explicitly.
+
+To use Python 3 unconditionally, you can use this in your .vimrc: >
     let g:jedi#force_py_version = 3
 <
 You can toggle this setting during runtime using the following function: >
     call jedi#force_py_version_switch()
 <
-Or set it directly using the following function, which has the same name as
-the variable: >
+Switching between Python 2 and 3 explicitly is possible using the function
+with the same name as this config setting: >
     call jedi#force_py_version(3)
 <
-Options: "auto", 2 or 3
-Default: "auto" (will use sys.version_info from "python" in your $PATH)
+Options: "detect", "auto", 2 or 3
+Default: "detect"
 ------------------------------------------------------------------------------
 6.13. `g:jedi#smart_auto_mappings`                  *g:jedi#smart_auto_mappings*
 
