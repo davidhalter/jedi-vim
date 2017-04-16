@@ -176,7 +176,7 @@ can improve the integrity of Vim's undo history.
 
 .. code-block:: vim
 
-    let g:jedi#show_call_signatures = "1"
+    let g:jedi#show_call_signatures = "2"
 
 Here are a few more defaults for actions, read the docs (``:help jedi-vim``) to
 get more information. If you set them to ``""``, they are not assigned.

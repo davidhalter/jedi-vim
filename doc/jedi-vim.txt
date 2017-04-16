@@ -412,7 +412,7 @@ be disabled by setting this option to 0. Setting this option to 2 shows call
 signatures in the command line instead of a popup window.
 
 Options: 0, 1, or 2
-Default: 1 (Show call signatures window)
+Default: 2 (Show call signatures in command line)
 
 Note: 'showmode' must be disabled for command line call signatures to be
 visible.
