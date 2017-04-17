@@ -19,7 +19,7 @@ let s:default_settings = {
     \ 'goto_command': "'<leader>d'",
     \ 'goto_assignments_command': "'<leader>g'",
     \ 'goto_definitions_command': "''",
-    \ 'completions_command': "'<C-Space>'",
+    \ 'completions_command': "'<Space>'",
     \ 'call_signatures_command': "'<leader>n'",
     \ 'usages_command': "'<leader>n'",
     \ 'rename_command': "'<leader>r'",
