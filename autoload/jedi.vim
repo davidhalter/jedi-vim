@@ -215,8 +215,8 @@ EOF
     echo '##### Settings'
     echo '```'
     for [k, V] in items(filter(copy(g:), "v:key =~# '\\v^jedi#'"))
-      let k = substitute(k, '\v^jedi#', '', '')
-      exe 'let default = '.get(s:default_settings, k, "'-'")
+      exe 'let default = '.get(s:default_settings,
+            \ substitute(k, '\v^jedi#', '', ''), "'-'")
       " vint: -ProhibitUsingUndeclaredVariable
       if default !=# V
         echo printf('g:%s = %s (default: %s)', k, string(V), string(default))
