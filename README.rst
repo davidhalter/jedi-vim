@@ -2,7 +2,7 @@
 jedi-vim - awesome Python autocompletion with VIM
 #################################################
 
-.. image:: https://travis-ci.org/davidhalter/jedi-vim.png?branch=master
+.. image:: https://travis-ci.org/davidhalter/jedi-vim.svg?branch=master
    :target: https://travis-ci.org/davidhalter/jedi-vim
    :alt: Travis-CI build status
 
