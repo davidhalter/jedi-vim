@@ -603,6 +603,8 @@ function! jedi#smart_auto_mappings() abort
 endfunction
 
 
+nnoremap <silent> <Plug>(jedi-goto) :<C-u>call jedi#goto()<CR>
+
 "PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 "PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 
