@@ -887,7 +887,7 @@ def show_call_signatures(signatures=()):
         if hasattr(e, 'decode'):
             e = e.decode('UTF-8')
         # replace line before with cursor
-        regex = "xjedi=%sx%sxjedix".replace('x', e)
+        regex = "xjedi=x{}xjedix".replace('x', e)
 
         prefix, replace = line[:insert_column], line[insert_column:end_column]
 
@@ -902,8 +902,7 @@ def show_call_signatures(signatures=()):
             a = re.search(regex_quotes + '$', prefix)
             add = ('' if a is None else a.group(0)) + add
 
-        tup = '%s, %s' % (len(add), replace)
-        repl = prefix + (regex % (tup, text)) + add + line[end_column:]
+        repl = prefix + regex.format(text) + add + line[end_column:]
 
         set_lines.append((line_to_replace, repl))
 
