@@ -742,10 +742,10 @@ function! jedi#configure_call_signatures(...) abort
                 " Note: does not use g:jedi#show_call_signatures_delay!
                 " Should probably have a warning, at least in the docs about that
                 " option!  (without any delay)
-                autocmd CursorMoved <buffer> call jedi#show_call_signatures()
+                autocmd InsertLeave,CursorMoved <buffer> call jedi#show_call_signatures()
             endif
             if g:jedi#show_call_signatures_modes =~# 'i'
-                autocmd CursorMovedI <buffer> call jedi#show_call_signatures()
+                autocmd InsertEnter,CursorMovedI <buffer> call jedi#show_call_signatures()
             endif
         endif
     augroup END
