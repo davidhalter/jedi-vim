@@ -805,7 +805,7 @@ def clear_call_signatures(temporary=False):
         return
 
     r = False
-    orig_lines = vim_eval("get(b:, '_jedi_callsig_orig', {})")
+    orig_lines = vim.current.buffer.vars.get('_jedi_callsig_orig', {})
     if orig_lines:
         orig_modified = int(vim_eval("&modified"))
 
@@ -913,10 +913,10 @@ def show_call_signatures(signatures=()):
     orig_modified = int(vim_eval("&modified"))
     orig_lines = {}
     for linenr, line in set_lines:
-        orig_lines[linenr] = vim.current.buffer[linenr-1]
+        orig_lines[str(linenr)] = vim.current.buffer[linenr-1]
         vim_command('silent! undojoin')
         vim.current.buffer[int(linenr)-1] = line
-    vim_command("let b:_jedi_callsig_orig = {!r}".format(orig_lines))
+    vim.current.buffer.vars['_jedi_callsig_orig'] = orig_lines
     if not orig_modified:
         vim_command('set nomodified')
 
