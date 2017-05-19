@@ -34,7 +34,8 @@ let s:default_settings = {
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
     \ 'force_py_version': "'auto'",
-    \ 'smart_auto_mappings': 1,
+    \ 'smart_auto_mappings': has('timers'),
+    \ 'smart_auto_mappings_delay': 200,
     \ 'use_tag_stack': 1
 \ }
 
@@ -597,12 +598,28 @@ function! jedi#complete_opened(autocomplete) abort
     return ''
 endfunction
 
-
-function! jedi#smart_auto_mappings() abort
-    " Auto put import statement after from module.name<space> and complete
-    if search('\m^\s*from\s\+[A-Za-z0-9._]\{1,50}\%#\s*$', 'bcn', line('.'))
-        " Enter character and start completion.
-        return "\<space>import \<C-r>=jedi#complete_string(1)\<CR>"
+function! jedi#smart_auto_mappings(...) abort
+    " Auto put import statement after from module.name<space> and complete.
+    if a:0
+        " Callback from timer.
+        if b:changedtick == s:import_timer[1] + 1
+            " Enter characters and start completion.
+            call feedkeys("import \<C-r>=jedi#complete_string(1)\<CR>", 'n')
+        endif
+        return
+    elseif search('\m^\s*from\s\+[A-Za-z0-9._]\{1,50}\%#\s*$', 'bcn', line('.'))
+        if g:jedi#smart_auto_mappings_delay > 0
+            if exists('s:import_timer')
+                call timer_stop(s:import_timer[0])
+                unlet s:import_timer
+            endif
+            let s:import_timer = [
+                  \ timer_start(g:jedi#smart_auto_mappings_delay, function('jedi#smart_auto_mappings')),
+                  \ b:changedtick]
+        else
+            " Enter characters and start completion.
+            return "\<space>import \<C-r>=jedi#complete_string(1)\<CR>"
+        endif
     endif
     return "\<space>"
 endfunction
