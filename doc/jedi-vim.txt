@@ -373,6 +373,7 @@ However, when working with large modules, this can slow down your typing flow
 since you have to wait for jedi to parse the module and show the completion
 menu. By disabling this setting, completion is only started when you manually
 press the completion key.
+You need to also have `g:jedi#completions_enabled` enabled for this.
 
 Options: 0 or 1
 Default: 1 (Start completion on typing a period)
