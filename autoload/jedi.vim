@@ -602,7 +602,10 @@ function! jedi#smart_auto_mappings(...) abort
     " Auto put import statement after from module.name<space> and complete.
     if a:0
         " Callback from timer.
+        let pos = getpos('.')
         if b:changedtick == s:import_timer[1] + 1
+                    \ && mode() ==# 'i'
+                    \ && s:import_timer[2][1:2] == [pos[1], pos[2]-1]
             " Enter characters and start completion.
             call feedkeys("import \<C-r>=jedi#complete_string(1)\<CR>", 'nt')
         endif
@@ -615,7 +618,7 @@ function! jedi#smart_auto_mappings(...) abort
             endif
             let s:import_timer = [
                   \ timer_start(g:jedi#smart_auto_mappings_delay, function('jedi#smart_auto_mappings')),
-                  \ b:changedtick]
+                  \ b:changedtick, getpos('.')]
         else
             " Enter characters and start completion.
             return "\<space>import \<C-r>=jedi#complete_string(1)\<CR>"
