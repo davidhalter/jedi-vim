@@ -607,7 +607,10 @@ function! jedi#smart_auto_mappings(...) abort
                     \ && mode() ==# 'i'
                     \ && s:import_timer[2][1:2] == [pos[1], pos[2]-1]
             " Enter characters and start completion.
-            call feedkeys("import \<C-r>=jedi#complete_string(1)\<CR>", 'nt')
+            call feedkeys('import ', 'nt')
+            if g:jedi#completions_enabled
+                call feedkeys("\<C-r>=jedi#complete_string(1)\<CR>", 'nt')
+            endif
         endif
         return
     elseif search('\m^\s*from\s\+[A-Za-z0-9._]\{1,50}\%#\s*$', 'bcn', line('.'))
