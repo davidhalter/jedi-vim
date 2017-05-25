@@ -15,8 +15,9 @@ Include if relevant.
 Please provide steps to reproduce it here, preferably based on a minimal Vim
 configuration.
 
-You can use the following template (save it as `minimal.vimrc`, and run Vim
-with `vim -u minimal.vimrc`):
+You can use the following template (save it as `minimal.vimrc` in the directory
+where jedi-vim is installed, `cd` into that directory, and run Vim with
+`vim -u minimal.vimrc`):
 
 ```
 set nocompatible
