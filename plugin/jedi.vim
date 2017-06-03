@@ -15,12 +15,11 @@ if get(g:, 'jedi#auto_vim_configuration', 1)
     " jedi-vim really needs, otherwise jedi-vim cannot start.
     filetype plugin on
 
-    " Change completeopt, but only if it has Vim's default value.
-    let s:save_completeopt=&completeopt
-    set completeopt&
-    let s:default_completeopt=&completeopt
-    let &completeopt=s:save_completeopt
-    if s:default_completeopt == &completeopt
+    " Change completeopt, but only if it was not set already.
+    redir => completeopt
+        silent verb set completeopt?
+    redir END
+    if len(split(completeopt, '\n')) == 1
         set completeopt=menuone,longest,preview
     endif
 
