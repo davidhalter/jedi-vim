@@ -373,6 +373,7 @@ function! jedi#show_documentation() abort
     setlocal nomodifiable
     setlocal nomodified
     setlocal filetype=rst
+    setlocal foldlevel=200 " do not fold in __doc__
 
     if l:doc_lines > g:jedi#max_doc_height " max lines for plugin
         let l:doc_lines = g:jedi#max_doc_height
