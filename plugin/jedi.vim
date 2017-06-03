@@ -21,7 +21,7 @@ if get(g:, 'jedi#auto_vim_configuration', 1)
     let s:default_completeopt=&completeopt
     let &completeopt=s:save_completeopt
     if s:default_completeopt == &completeopt
-        set completeopt=menuone,longest,preview
+        set completeopt=menuone,longest,preview,noinsert
     endif
 
     if len(mapcheck('<C-c>', 'i')) == 0
