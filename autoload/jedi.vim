@@ -571,12 +571,14 @@ function! jedi#complete_string(is_popup_on_dot) abort
     if pumvisible() && !a:is_popup_on_dot
         return "\<C-n>"
     else
+        let b:_jedi_vim_is_popup_on_dot = a:is_popup_on_dot
         return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened(".a:is_popup_on_dot.")\<CR>"
     endif
 endfunction
 
 
 function! jedi#complete_opened(is_popup_on_dot) abort
+    unlet! b:_jedi_vim_is_popup_on_dot
     if pumvisible()
         " Only go down if it is visible, user-enabled and the longest
         " option is set.
