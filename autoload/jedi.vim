@@ -35,7 +35,8 @@ let s:default_settings = {
     \ 'quickfix_window_height': 10,
     \ 'force_py_version': "'auto'",
     \ 'smart_auto_mappings': 1,
-    \ 'use_tag_stack': 1
+    \ 'use_tag_stack': 1,
+    \ 'use_external_python': "''"
 \ }
 
 for [s:key, s:val] in items(s:deprecations)
