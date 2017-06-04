@@ -582,31 +582,36 @@ function! s:save_first_col() abort
 endfunction
 
 
-function! jedi#complete_string(is_popup_on_dot) abort
-    if a:is_popup_on_dot && !(g:jedi#popup_on_dot && jedi#do_popup_on_dot_in_highlight())
-        return ''
-    endif
-    if pumvisible() && !a:is_popup_on_dot
+function! jedi#complete_string(autocomplete) abort
+    if a:autocomplete
+        if !(g:jedi#popup_on_dot && jedi#do_popup_on_dot_in_highlight())
+            return ''
+        endif
+
+        let s:saved_completeopt = &completeopt
+        set completeopt-=longest
+        set completeopt+=menuone
+        set completeopt-=menu
+        if &completeopt !~# 'noinsert\|noselect'
+            if g:jedi#popup_select_first
+                set completeopt+=noinsert
+            else
+                set completeopt+=noselect
+            endif
+        endif
+    elseif pumvisible()
         return "\<C-n>"
-    else
-        return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened(".a:is_popup_on_dot.")\<CR>"
     endif
+    return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened(".a:autocomplete.")\<CR>"
 endfunction
 
 
-function! jedi#complete_opened(is_popup_on_dot) abort
-    if pumvisible()
-        " Only go down if it is visible, user-enabled and the longest
-        " option is set.
-        if g:jedi#popup_select_first && stridx(&completeopt, 'longest') > -1
-            return "\<Down>"
-        endif
-        if a:is_popup_on_dot
-            if &completeopt !~# '\(noinsert\|noselect\)'
-                " Prevent completion of the first entry with dot completion.
-                return "\<C-p>"
-            endif
-        endif
+function! jedi#complete_opened(autocomplete) abort
+    if a:autocomplete
+        let &completeopt = s:saved_completeopt
+        unlet s:saved_completeopt
+    elseif pumvisible() && g:jedi#popup_select_first && stridx(&completeopt, 'longest') > -1
+        return "\<Down>"
     endif
     return ''
 endfunction
@@ -616,7 +621,7 @@ function! jedi#smart_auto_mappings() abort
     " Auto put import statement after from module.name<space> and complete
     if search('\m^\s*from\s\+[A-Za-z0-9._]\{1,50}\%#\s*$', 'bcn', line('.'))
         " Enter character and start completion.
-        return "\<space>import \<C-x>\<C-o>\<C-r>=jedi#complete_opened(1)\<CR>"
+        return "\<space>import \<C-r>=jedi#complete_string(1)\<CR>"
     endif
     return "\<space>"
 endfunction
