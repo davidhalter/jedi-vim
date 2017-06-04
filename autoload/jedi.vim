@@ -581,12 +581,10 @@ function! jedi#complete_string(autocomplete) abort
                 set completeopt+=noselect
             endif
         endif
-        return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened(1)\<CR>"
     elseif pumvisible()
         return "\<C-n>"
-    else
-        return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened(0)\<CR>"
     endif
+    return "\<C-x>\<C-o>\<C-r>=jedi#complete_opened(".a:autocomplete.")\<CR>"
 endfunction
 
 
