@@ -603,7 +603,6 @@ function! jedi#smart_auto_mappings() abort
     " Auto put import statement after from module.name<space> and complete
     if search('\m^\s*from\s\+[A-Za-z0-9._]\{1,50}\%#\s*$', 'bcn', line('.'))
         " Enter character and start completion.
-        let b:_jedi_vim_is_popup_on_dot = 1
         return "\<space>import \<C-r>=jedi#complete_string(1)\<CR>"
     endif
     return "\<space>"
