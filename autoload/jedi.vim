@@ -383,15 +383,6 @@ function! jedi#show_documentation() abort
     " quit comands
     nnoremap <buffer> q ZQ
     execute 'nnoremap <buffer> '.g:jedi#documentation_command.' ZQ'
-
-    " highlight python code within rst
-    unlet! b:current_syntax
-    syn include @rstPythonScript syntax/python.vim
-    " 4 spaces
-    syn region rstPythonRegion start=/^\v {4}/ end=/\v^( {4}|\n)@!/ contains=@rstPythonScript
-    " >>> python code -> (doctests)
-    syn region rstPythonRegion matchgroup=pythonDoctest start=/^>>>\s*/ end=/\n/ contains=@rstPythonScript
-    let b:current_syntax = 'rst'
 endfunction
 
 " ------------------------------------------------------------------------
