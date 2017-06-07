@@ -198,6 +198,19 @@ def completions():
                          )
                 out.append(d)
 
+            if (len(out) == 1 and
+                    vim.current.buffer.vars.get('_jedi_vim_is_popup_on_dot')):
+                # Add a fake entry to prevent Vim from completing the only
+                # entry when this is not desired.
+                # The Vim part handles deselecting the automatically selected
+                # entry, but that requires the list to contain more than one
+                # item.
+                completeopt = vim.options['completeopt'].split(',')
+                if 'longest' in completeopt or 'menuone' not in completeopt:
+                    out.append({'word': '',
+                                'abbr': '-',
+                                'menu': '[jedi-vim dummy entry]',
+                                'empty': 1})
             strout = str(out)
         except Exception:
             # print to stdout, will be in :messages
