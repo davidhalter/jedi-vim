@@ -68,8 +68,7 @@ function! s:init_python() abort
     endif
 
     " Handle "auto" version.
-    if has('nvim') || (has('python') && has('python3'))
-        " Neovim usually has both python providers. Skipping the `has` check
+    if (has('python') && has('python3'))
         " avoids starting both of them.
 
         " Get default python version from interpreter in $PATH.
