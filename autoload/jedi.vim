@@ -152,12 +152,12 @@ function! jedi#setup_py_version(py_version) abort
         throw 'jedi#setup_py_version: invalid py_version: '.a:py_version
     endif
 
+    execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
     try
         execute cmd_init.' '.s:script_path.'/initialize.py'
     catch
         throw 'jedi#setup_py_version: '.v:exception
     endtry
-    execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
     return 1
 endfunction
 
