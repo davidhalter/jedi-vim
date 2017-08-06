@@ -141,11 +141,9 @@ endfunction
 let s:python_version = 'null'
 function! jedi#setup_py_version(py_version) abort
     if a:py_version == 2
-        let cmd_init = 'pyfile'
         let cmd_exec = 'python'
         let s:python_version = 2
     elseif a:py_version == 3
-        let cmd_init = 'py3file'
         let cmd_exec = 'python3'
         let s:python_version = 3
     else
@@ -153,15 +151,35 @@ function! jedi#setup_py_version(py_version) abort
     endif
 
     execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
-    let init_script = s:script_path.'/jedi_vim_init.py'
-    if !filereadable(init_script)
-        throw printf('jedi#setup_py_version: init-script is not readable (%s).', init_script)
+
+    let s:init_outcome = 0
+    PythonJedi << EOF
+try:
+    import vim
+    import os, sys
+    jedi_path = os.path.join(vim.eval('expand(s:script_path)'), 'jedi')
+    sys.path.insert(0, jedi_path)
+
+    jedi_vim_path = vim.eval('expand(s:script_path)')
+    if jedi_vim_path not in sys.path:  # Might happen when reloading.
+        sys.path.insert(0, jedi_vim_path)
+except Exception as excinfo:
+    vim.command('let s:init_outcome = "error when adding to sys.path: {0}: {1}"'.format(excinfo.__class__.__name__, excinfo))
+else:
+    try:
+        import jedi_vim
+    except Exception as excinfo:
+        vim.command('let s:init_outcome = "error when importing jedi_vim: {0}: {1}"'.format(excinfo.__class__.__name__, excinfo))
+    else:
+        vim.command('let s:init_outcome = 1')
+    finally:
+        sys.path.remove(jedi_path)
+EOF
+    if !exists('s:init_outcome')
+        throw 'jedi#setup_py_version: failed to run Python for initialization.'
+    elseif s:init_outcome isnot 1
+        throw printf('jedi#setup_py_version: %s.', s:init_outcome)
     endif
-    try
-        execute cmd_init.' '.init_script
-    catch
-        throw 'jedi#setup_py_version: '.v:exception
-    endtry
     return 1
 endfunction
 
