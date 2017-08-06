@@ -61,7 +61,7 @@ function! s:init_python() abort
     if g:jedi#force_py_version !=# 'auto'
         " Always use the user supplied version.
         try
-            return jedi#force_py_version(g:jedi#force_py_version)
+            return jedi#setup_py_version(g:jedi#force_py_version)
         catch
             throw 'Could not setup g:jedi#force_py_version: '.v:exception
         endtry
@@ -88,7 +88,7 @@ function! s:init_python() abort
 
         " Make sure that the auto-detected version is available in Vim.
         if !has('nvim') || has('python'.(s:def_py == 2 ? '' : s:def_py))
-            return jedi#force_py_version(s:def_py)
+            return jedi#setup_py_version(s:def_py)
         endif
 
         " Add a warning in case the auto-detected version is not available,
