@@ -218,17 +218,22 @@ EOF
     echo "\n"
     echo '##### Settings'
     echo '```'
-    for [k, V] in items(filter(copy(g:), "v:key =~# '\\v^jedi#'"))
+    let jedi_settings = items(filter(copy(g:), "v:key =~# '\\v^jedi#'"))
+    let has_nondefault_settings = 0
+    for [k, V] in jedi_settings
       exe 'let default = '.get(s:default_settings,
             \ substitute(k, '\v^jedi#', '', ''), "'-'")
       " vint: -ProhibitUsingUndeclaredVariable
       if default !=# V
         echo printf('g:%s = %s (default: %s)', k, string(V), string(default))
         unlet! V  " Fix variable type mismatch with Vim 7.3.
+        let has_nondefault_settings = 1
       endif
       " vint: +ProhibitUsingUndeclaredVariable
     endfor
-    echo "\n"
+    if has_nondefault_settings
+      echo "\n"
+    endif
     verb set omnifunc? completeopt?
     echo '```'
 
