@@ -153,7 +153,7 @@ function! jedi#setup_py_version(py_version) abort
     endif
 
     execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
-    let init_script = s:script_path.'/initialize.py'
+    let init_script = s:script_path.'/jedi_vim_init.py'
     if !filereadable(init_script)
         throw printf('jedi#setup_py_version: init-script is not readable (%s).', init_script)
     endif
