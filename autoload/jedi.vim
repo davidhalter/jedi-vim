@@ -35,7 +35,7 @@ let s:default_settings = {
     \ 'quickfix_window_height': 10,
     \ 'force_py_version': "'auto'",
     \ 'smart_auto_mappings': has('timers'),
-    \ 'smart_auto_mappings_delay': 200,
+    \ 'smart_auto_mappings_delay': has('timers') ? 200 : 0,
     \ 'use_tag_stack': 1
 \ }
 
@@ -51,6 +51,14 @@ for [s:key, s:val] in items(s:default_settings)
         exe 'let g:jedi#'.s:key.' = '.s:val
     endif
 endfor
+
+if !has('timers')
+    if g:jedi#smart_auto_mappings != 0
+        echom 'jedi-vim: using g:jedi#smart_auto_mappings_delay requires the timers feature.'
+        let g:jedi#smart_auto_mappings_delay = 0
+    endif
+    lockvar g:jedi#smart_auto_mappings_delay
+endif
 
 
 " ------------------------------------------------------------------------
@@ -230,6 +238,7 @@ function! jedi#debug_info() abort
       echo "\n"
     endif
     verb set omnifunc? completeopt?
+    echo '+timers: '.has('timers')
     echo '```'
 
     if &verbose

@@ -502,7 +502,7 @@ When you start typing `from module.name<space>` jedi-vim automatically
 adds the "import" statement and displays the autocomplete popup.
 
 When the |+timers| feature is available it gets triggered after
-`g:jedi#smart_auto_mappings_delay` milliseconds (which defaults to 100).
+`g:jedi#smart_auto_mappings_delay` milliseconds (which defaults to 200).
 If the buffer changed until the timer times out, this gets skipped.
 
 You can disable or configure this option in the .vimrc:
