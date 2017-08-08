@@ -152,9 +152,9 @@ function! jedi#setup_py_version(py_version) abort
 
     execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
 
+    let s:init_outcome = 0
     let init_lines = [
           \ 'import vim',
-          \ 'vim.command(''let s:init_outcome = 0'')',
           \ 'try:',
           \ '    import jedi_vim',
           \ 'except Exception as exc:',
@@ -166,7 +166,7 @@ function! jedi#setup_py_version(py_version) abort
     catch
         throw printf('jedi#setup_py_version: failed to run Python for initialization: %s.', v:exception)
     endtry
-    if !exists('s:init_outcome')
+    if s:init_outcome is 0
         throw 'jedi#setup_py_version: failed to run Python for initialization.'
     elseif s:init_outcome isnot 1
         throw printf('jedi#setup_py_version: %s.', s:init_outcome)
@@ -263,12 +263,12 @@ EOF
       messages
       echo '```'
       echo "\n"
-      echo "<details><summary>:scriptnames</summary>"
+      echo '<details><summary>:scriptnames</summary>'
       echo "\n"
       echo '```'
       scriptnames
       echo '```'
-      echo "</details>"
+      echo '</details>'
     endif
 endfunction
 
