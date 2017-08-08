@@ -631,9 +631,10 @@ function! jedi#smart_auto_mappings(...) abort
             let s:import_timer = [
                   \ timer_start(g:jedi#smart_auto_mappings_delay, function('jedi#smart_auto_mappings')),
                   \ b:changedtick, getpos('.')]
-        else
-            " Enter characters and start completion.
+        elseif g:jedi#completions_enabled
             return "\<space>import \<C-r>=jedi#complete_string(1)\<CR>"
+        else
+            return "\<space>import "
         endif
     endif
     return "\<space>"
