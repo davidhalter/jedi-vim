@@ -93,6 +93,9 @@ def echo_highlight(msg):
         str(msg).replace('"', '\\"')))
 
 
+jedi_path = os.path.join(os.path.dirname(__file__), 'jedi')
+sys.path.insert(0, jedi_path)
+
 try:
     import jedi
 except ImportError as e:
@@ -115,6 +118,8 @@ else:
             version = utils.version_info()
         if version < (0, 7):
             echo_highlight('Please update your Jedi version, it is too old.')
+finally:
+    sys.path.remove(jedi_path)
 
 
 def catch_and_print_exceptions(func):
