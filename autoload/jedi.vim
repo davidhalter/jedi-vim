@@ -186,7 +186,12 @@ endfunction
 
 function! jedi#debug_info() abort
     if s:python_version ==# 'null'
-        call s:init_python()
+        try
+            call s:init_python()
+        catch
+            echohl WarningMsg | echom v:exception | echohl None
+            return
+        endtry
     endif
     if &verbose
       if &filetype !=# 'python'
