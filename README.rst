@@ -221,16 +221,30 @@ Don't even think about changing the Jedi command to ``<Tab>``,
 use `supertab <https://github.com/ervandew/supertab>`_!
 
 
-The completion is waaay too slow!
----------------------------------
+The completion is too slow!
+---------------------------
 
-Completion of complex libraries (like Numpy) should only be slow the first time
-you complete it. After that, the results should be cached and very fast.
+1. Completion of complex libraries (like Numpy) should only be slow the first
+   time you complete them. After that the results should be cached and very fast.
 
-If it's still slow, in case you've installed the python-mode VIM plugin, disable
-it. It seems to conflict with jedi-vim. See issue `#163
-<https://github.com/davidhalter/jedi-vim/issues/163>`__.
+2. If it is still slow after the initial completion and you have installed the
+   python-mode Vim plugin, try disabling its rope mode:
 
+   .. code-block:: vim
+
+       let g:pymode_rope = 0
+
+   See issue `#163 <https://github.com/davidhalter/jedi-vim/issues/163>`__.
+
+3. You can also use `deoplete-jedi <https://github.com/zchee/deoplete-jedi>`__
+   for completions, which uses Jedi, but does completions asynchronously
+   (requires Neovim).
+   It makes sense to use both jedi-vim and deoplete-jedi, but you should disable
+   jedi-vim's completions then:
+
+   .. code-block:: vim
+   
+       let g:jedi#completions_enabled = 0
 
 Testing
 =======
