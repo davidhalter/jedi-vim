@@ -89,7 +89,7 @@ Example installation command using Pathogen:
 
 .. code-block:: sh
 
-    cd ~/.vim/bundle/ && git clone --recursive https://github.com/davidhalter/jedi-vim.git
+    git clone --recursive https://github.com/davidhalter/jedi-vim.git ~/.vim/bundle/jedi-vim
 
 
 Installation with your distribution
