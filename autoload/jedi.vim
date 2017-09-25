@@ -364,7 +364,7 @@ function! jedi#show_documentation() abort
             silent execute 'sbuffer '.bn
         endif
     else
-        split '__doc__'
+        split __doc__
     endif
 
     setlocal modifiable

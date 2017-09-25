@@ -13,7 +13,7 @@ describe 'documentation docstrings'
     it 'simple'
         put = 'ImportError'
         normal GK
-        Expect bufname('%') == "'__doc__'"
+        Expect bufname('%') == "__doc__"
         Expect &filetype == 'rst'
         let content = join(getline(1,'$'), "\n")
         Expect stridx(content, "Import can't find module") > 0
