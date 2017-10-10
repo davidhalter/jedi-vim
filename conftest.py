@@ -1,6 +1,6 @@
 import os
 import subprocess
-import urllib
+import urllib.request
 import zipfile
 
 import pytest
@@ -33,7 +33,7 @@ def pytest_configure(config):
         os.mkdir(CACHE_FOLDER)
 
     if not os.path.exists(VSPEC_FOLDER):
-        name, hdrs = urllib.urlretrieve(VSPEC_URL)
+        name, hdrs = urllib.request.urlretrieve(VSPEC_URL)
         z = zipfile.ZipFile(name)
         for n in z.namelist():
             dest = os.path.join(CACHE_FOLDER, n)
@@ -42,7 +42,7 @@ def pytest_configure(config):
                 os.makedirs(destdir)
             data = z.read(n)
             if not os.path.isdir(dest):
-                with open(dest, 'w') as f:
+                with open(dest, 'wb') as f:
                     f.write(data)
         z.close()
         os.chmod(VSPEC_RUNNER, 0o777)
