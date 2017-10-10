@@ -270,7 +270,7 @@ def goto(mode="goto", no_output=False):
                                         using_tagstack=using_tagstack)
                     if not result:
                         return []
-                if d.module_path and using_tagstack:
+                if d.module_path and os.path.exists(d.module_path) and using_tagstack:
                     tagname = d.name
                     with tempfile('{0}\t{1}\t{2}'.format(tagname, d.module_path,
                             'call cursor({0}, {1})'.format(d.line, d.column + 1))) as f:
