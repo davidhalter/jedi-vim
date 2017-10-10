@@ -454,7 +454,7 @@ def cmdline_call_signatures(signatures):
     max_msg_len = int(vim_eval('&columns')) - 12
     if int(vim_eval('&ruler')):
         max_msg_len -= 18
-    max_msg_len -= len(signatures[0].call_name) + 2  # call name + parentheses
+    max_msg_len -= len(signatures[0].name) + 2  # call name + parentheses
 
     if max_msg_len < (1 if params else 0):
         return
@@ -489,7 +489,7 @@ def cmdline_call_signatures(signatures):
     _, column = signatures[0].bracket_start
     spaces = min(int(vim_eval('g:jedi#first_col +'
                               'wincol() - col(".")')) +
-                 column - len(signatures[0].call_name),
+                 column - len(signatures[0].name),
                  max_num_spaces) * ' '
 
     if index is not None:
@@ -500,7 +500,7 @@ def cmdline_call_signatures(signatures):
                     'echohl jediFat      | echon "%s" | '
                     'echohl jediFunction | echon "%s" | '
                     'echohl None         | echon ")"'
-                    % (spaces, signatures[0].call_name,
+                    % (spaces, signatures[0].name,
                        left + ', ' if left else '',
                        center, ', ' + right if right else ''))
     else:
