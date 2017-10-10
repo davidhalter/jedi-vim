@@ -24,6 +24,12 @@ class IntegrationTestFile(object):
                 pytest.fail("{0} failed:\n{1}".format(
                     self.path, output.decode('utf-8')), pytrace=False)
 
+    @property
+    def name(self):
+        name = os.path.basename(self.path)
+        name, _, _ = name.rpartition('.')
+        return name
+
     def __repr__(self):
         return "<%s: %s>" % (type(self), self.path)
 
@@ -57,4 +63,5 @@ def pytest_generate_tests(metafunc):
             if f.endswith('.vim'):
                 yield IntegrationTestFile(os.path.join(TEST_DIR, f))
 
-    metafunc.parametrize('case', list(collect_tests()))
+    tests = list(collect_tests())
+    metafunc.parametrize('case', tests, ids=[test.name for test in tests])
