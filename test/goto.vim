@@ -2,7 +2,7 @@ let mapleader = '\'
 source plugin/jedi.vim
 source test/utils.vim
 
-describe 'goto_simple'
+describe 'goto simple'
     before
         new  " open a new split
         set filetype=python
@@ -20,13 +20,12 @@ describe 'goto_simple'
         bd!
     end
 
-    it 'goto_definitions'
+    it 'goto definitions'
         silent normal \d
         Expect line('.') == 1
-        "Expect col('.') == 5  " not working yet.
     end
 
-    it 'goto_assignments'
+    it 'goto assignments'
         silent normal \g
         Expect line('.') == 2
         Expect col('.') == 1
@@ -45,7 +44,7 @@ describe 'goto_simple'
 end
 
 
-describe 'goto_with_tabs'
+describe 'goto with tabs'
     before
         set filetype=python
         let g:jedi#use_tabs_not_buffers = 1
@@ -56,7 +55,7 @@ describe 'goto_with_tabs'
         bd!
     end
 
-    it 'follow_import'
+    it 'follow import'
         put = ['import subprocess', 'subprocess']
         silent normal G\g
         Expect getline('.') == 'import subprocess'
@@ -73,7 +72,7 @@ describe 'goto_with_tabs'
         Expect bufname('%') == ''
     end
 
-    it 'multi_definitions'
+    it 'multi definitions'
         " This used to behave differently. Now we don't have any real multi
         " definitions.
 
@@ -96,7 +95,7 @@ describe 'goto_with_tabs'
 end
 
 
-describe 'goto_with_buffers'
+describe 'goto with buffers'
     before
         set filetype=python
         let g:jedi#use_tabs_not_buffers = 0
@@ -108,7 +107,7 @@ describe 'goto_with_buffers'
         set nohidden
     end
 
-    it 'no_new_tabs'
+    it 'no new tabs'
         put = ['import os']
         normal G$
         call jedi#goto_assignments()
@@ -125,7 +124,7 @@ describe 'goto_with_buffers'
         Expect col('.') == 1
     end
 
-    it 'multi_definitions'
+    it 'multi definitions'
         " set hidden
         " put = ['import tokenize']
         " silent normal G$\d
@@ -147,7 +146,7 @@ end
 
 
 
-describe 'goto_with_splits'
+describe 'goto with splits'
     before
         set filetype=python
         let g:jedi#use_splits_not_buffers = 'left'
@@ -158,7 +157,7 @@ describe 'goto_with_splits'
         bd!
     end
 
-    it 'follow_import'
+    it 'follow import'
         put = ['import subprocess', 'subprocess']
         silent normal G\g
         Expect getline('.') == 'import subprocess'
@@ -177,7 +176,7 @@ describe 'goto_with_splits'
 end
 
 
-describe 'goto_wildignore'
+describe 'goto wildignore'
     before
         set filetype=python
         set wildignore=*,with\ spaces,*.pyc
@@ -198,14 +197,14 @@ describe 'goto_wildignore'
         set wildignore&vim
     end
 
-    it 'restores_wildignore'
+    it 'restores wildignore'
         let before = &wildignore
         call jedi#goto()
         Expect getline('.') =~ 'Popen'
         Expect &wildignore == before
     end
 
-    it 'not_using_tagstack'
+    it 'not using tagstack'
         let g:jedi#use_tag_stack = 0
         call jedi#goto()
         Expect CurrentBufferIsModule('subprocess') == 1
