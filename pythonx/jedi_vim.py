@@ -665,7 +665,7 @@ def new_buffer(path, options='', using_tagstack=False):
             vim_command(split_options[user_split_option] + " %s" % escape_file_path(path))
     else:
         if int(vim_eval("!&hidden && &modified")) == 1:
-            if vim_eval("bufname('%')") is None:
+            if not vim_eval("bufname('%')"):
                 echo_highlight('Cannot open a new buffer, use `:set hidden` or save your buffer')
                 return False
             else:
