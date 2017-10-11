@@ -21,7 +21,7 @@ describe 'goto simple'
     end
 
     it 'goto definitions'
-        silent normal \d
+        normal \d
         Expect line('.') == 1
     end
 
