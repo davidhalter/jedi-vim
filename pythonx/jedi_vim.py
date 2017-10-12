@@ -262,7 +262,7 @@ def goto(mode="goto", no_output=False):
                                % d.desc_with_module)
         else:
             using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-            if d.module_path != vim.current.buffer.name:
+            if (d.module_path or '') != vim.current.buffer.name:
                 result = new_buffer(d.module_path,
                                     using_tagstack=using_tagstack)
                 if not result:
