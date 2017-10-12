@@ -505,7 +505,7 @@ def cmdline_call_signatures(signatures):
         vim_command('                      echon "%s" | '
                     'echohl Function     | echon "%s" | '
                     'echohl None         | echon "(%s)"'
-                    % (spaces, signatures[0].call_name, text))
+                    % (spaces, signatures[0].name, text))
 
 
 @_check_jedi_availability(show_error=True)

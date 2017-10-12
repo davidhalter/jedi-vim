@@ -11,14 +11,17 @@ describe 'signatures'
     end
 
     it 'simple'
-        normal oabs( 
+        normal odef xyz(number): return
+        normal o
+        normal oxyz( 
+        normal G$
         " equals doautocmd CursorMovedI
         Python jedi_vim.show_call_signatures()
 
-        Expect getline(1) == '=`=jedi=0, =`=   (*_*number*_*) =`=jedi=`='
+        Expect getline(3) == '?!?jedi=0, ?!?   (*_*number*_*) ?!?jedi?!?'
 
         doautocmd InsertLeave
-        Expect getline(1) == ''
+        Expect getline(3) == ''
     end
 
     it 'multiple buffers'
@@ -40,9 +43,9 @@ describe 'signatures'
     it 'simple after CursorHoldI with only parenthesis'
         noautocmd normal o
         doautocmd CursorHoldI
-        noautocmd normal iabs( 
+        noautocmd normal istr( 
         doautocmd CursorHoldI
-        Expect getline(1) == '=`=jedi=0, =`=   (*_*number*_*) =`=jedi=`='
+        Expect getline(1) == '?!?jedi=0, ?!?   (*_*object*_*) ?!?jedi?!?'
     end
 
     it 'no signature'
@@ -65,11 +68,11 @@ describe 'signatures'
         let g:jedi#show_call_signatures = 2
         call jedi#configure_call_signatures()
 
-        normal oabs( 
+        normal ostr( 
         redir => msg
         Python jedi_vim.show_call_signatures()
         redir END
-        Expect msg == "\nabs(number)"
+        Expect msg == "\nstr(object)"
 
         redir => msg
         doautocmd InsertLeave 
