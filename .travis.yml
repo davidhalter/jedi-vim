@@ -1,5 +1,6 @@
 sudo: false
-language: python3.6
+language: python
+python: 3.6
 env:
   matrix:
     - ENV=test
