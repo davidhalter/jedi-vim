@@ -381,7 +381,8 @@ def show_call_signatures(signatures=()):
         # TODO check if completion menu is above or below
         line = vim_eval("getline(%s)" % line_to_replace)
 
-        params = [p.description.replace('\n', '') for p in signature.params]
+        # Descriptions are usually looking like `param name`, remove the param.
+        params = [p.description.replace('\n', '').replace('param ', '', 1) for p in signature.params]
         try:
             # *_*PLACEHOLDER*_* makes something fat. See after/syntax file.
             params[signature.index] = '*_*%s*_*' % params[signature.index]
@@ -427,7 +428,7 @@ def show_call_signatures(signatures=()):
 @catch_and_print_exceptions
 def cmdline_call_signatures(signatures):
     def get_params(s):
-        return [p.description.replace('\n', '') for p in s.params]
+        return [p.description.replace('\n', '').replace('param ', '', 1) for p in s.params]
 
     def escape(string):
         return string.replace('"', '\\"').replace(r'\n', r'\\n')
