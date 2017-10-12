@@ -572,7 +572,7 @@ function! jedi#complete_string(autocomplete) abort
             " Patch 775 introduced noinsert and noselect, previously these
             " options didn't exist. Setting them in earlier versions results in
             " errors (E474).
-            if has("patch-7.4-775")
+            if has('patch-7.4-775')
                 if g:jedi#popup_select_first
                     set completeopt+=noinsert
                 else
