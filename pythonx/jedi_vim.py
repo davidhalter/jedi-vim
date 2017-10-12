@@ -95,6 +95,8 @@ def echo_highlight(msg):
 
 jedi_path = os.path.join(os.path.dirname(__file__), 'jedi')
 sys.path.insert(0, jedi_path)
+parso_path = os.path.join(os.path.dirname(__file__), 'parso')
+sys.path.insert(0, parso_path)
 
 try:
     import jedi
@@ -120,6 +122,7 @@ else:
             echo_highlight('Please update your Jedi version, it is too old.')
 finally:
     sys.path.remove(jedi_path)
+    sys.path.remove(parso_path)
 
 
 def catch_and_print_exceptions(func):
