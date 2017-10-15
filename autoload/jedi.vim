@@ -579,6 +579,10 @@ function! jedi#complete_string(autocomplete) abort
                     set completeopt+=noselect
                 endif
             else
+                " To pass the tests we use this, it seems to get the closest to
+                " the other options. I'm really not sure if this properly
+                " works, but VIM 7.4-775 is already pretty old, so it might not
+                " be a problem anymore in a few years.
                 set completeopt+=longest
             endif
         endif
