@@ -284,7 +284,7 @@ def tempfile(content):
 
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
-def goto(mode="goto", no_output=False):
+def goto(mode="goto"):
     """
     :param str mode: "definition", "assignment", "goto"
     :return: list of definitions/assignments
@@ -298,8 +298,6 @@ def goto(mode="goto", no_output=False):
     elif mode == "assignment":
         definitions = script.goto_assignments()
 
-    if no_output:
-        return definitions
     if not definitions:
         echo_highlight("Couldn't find any definitions for this.")
     elif len(definitions) == 1 and mode != "related_name":
@@ -362,22 +360,31 @@ def show_goto_multi_results(definitions):
 
 
 @catch_and_print_exceptions
-def usages():
+def usages(visuals=True):
     script = get_script()
     definitions = script.usages()
     if not definitions:
         echo_highlight("No usages found here.")
-        return
+        return definitions
+
+    if visuals:
+        highlight_usages(definitions)
+        show_goto_multi_results(definitions)
+    return definitions
+
+
+def highlight_usages(definitions, length=None):
     for definition in definitions:
         # Only color the current module/buffer.
         if (definition.module_path or '') == vim.current.buffer.name:
             # mathaddpos needs a list of positions where a position is a list
             # of (line, column, length).
             # The column starts with 1 and not 0.
-            positions = [[definition.line, definition.column + 1, len(definition.name)]]
+            positions = [
+                [definition.line, definition.column + 1, length or len(definition.name)]
+            ]
             vim_eval("matchaddpos('jediUsage', %s)" % repr(positions))
 
-    show_goto_multi_results(definitions)
 
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
@@ -646,7 +653,7 @@ def do_rename(replace, orig=None):
     saved_tab = int(vim_eval('tabpagenr()'))
     saved_win = int(vim_eval('winnr()'))
 
-    temp_rename = goto(mode="related_name", no_output=True)
+    temp_rename = usages(visuals=False)
     # Sort the whole thing reverse (positions at the end of the line
     # must be first, because they move the stuff before the position).
     temp_rename = sorted(temp_rename, reverse=True,
@@ -675,6 +682,7 @@ def do_rename(replace, orig=None):
 
         # Restore view.
         vim_command('call winrestview(%s)' % saved_view)
+        highlight_usages([r], length=len(replace))
 
     # Restore previous tab and window.
     vim_command('tabnext {0:d}'.format(saved_tab))
