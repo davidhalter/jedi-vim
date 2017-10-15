@@ -608,8 +608,14 @@ def rename():
         vim_command('augroup END')
 
         vim_command("let s:jedi_replace_orig = expand('<cword>')")
+        line = vim_eval('getline(".")')
         vim_command('normal! diw')
-        vim_command('startinsert')
+        if re.match('\w+$', line[cursor[1]:]):
+            # In case the deleted word is at the end of the line we need to
+            # move the cursor to the end.
+            vim_command('startinsert!')
+        else:
+            vim_command('startinsert')
 
     else:
         # Remove autocommand.
