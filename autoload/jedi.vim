@@ -270,7 +270,16 @@ function! jedi#goto_definitions() abort
 endfunction
 
 function! jedi#usages() abort
-    PythonJedi jedi_vim.goto(mode="related_name")
+    call jedi#remove_usages()
+    PythonJedi jedi_vim.usages()
+endfunction
+
+function! jedi#remove_usages() abort
+    for match in getmatches()
+        if stridx(match['group'], 'jediUsage') == 0
+            call matchdelete(match['id'])
+        endif
+    endfor
 endfunction
 
 function! jedi#rename(...) abort

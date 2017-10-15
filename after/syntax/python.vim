@@ -30,3 +30,5 @@ if g:jedi#show_call_signatures > 0 && has('conceal')
         hi def jediFat term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=#555555
     endif
 endif
+
+hi jediUsage term=NONE cterm=NONE ctermfg=None guifg=None gui=NONE ctermbg=3 guibg=Yellow
