@@ -286,15 +286,13 @@ def tempfile(content):
 @catch_and_print_exceptions
 def goto(mode="goto", no_output=False):
     """
-    :param str mode: "related_name", "definition", "assignment", "auto"
+    :param str mode: "definition", "assignment", "goto"
     :return: list of definitions/assignments
     :rtype: list
     """
     script = get_script()
     if mode == "goto":
         definitions = script.goto_assignments(follow_imports=True)
-    elif mode == "related_name":
-        definitions = script.usages()
     elif mode == "definition":
         definitions = script.goto_definitions()
     elif mode == "assignment":
@@ -340,23 +338,46 @@ def goto(mode="goto", no_output=False):
                                     repr(PythonToVimStr(old_wildignore)))
             vim.current.window.cursor = d.line, d.column
     else:
-        # multiple solutions
-        lst = []
-        for d in definitions:
-            if d.in_builtin_module():
-                lst.append(dict(text=PythonToVimStr('Builtin ' + d.description)))
-            elif d.module_path is None:
-                # Typically a namespace, in the future maybe other things as
-                # well.
-                lst.append(dict(text=PythonToVimStr(d.description)))
-            else:
-                lst.append(dict(filename=PythonToVimStr(d.module_path),
-                                lnum=d.line, col=d.column + 1,
-                                text=PythonToVimStr(d.description)))
-        vim_eval('setqflist(%s)' % repr(lst))
-        vim_eval('jedi#add_goto_window(' + str(len(lst)) + ')')
+        show_goto_multi_results()
     return definitions
 
+
+def show_goto_multi_results(definitions):
+    """Create a quickfix list for multiple definitions."""
+    lst = []
+    for d in definitions:
+        if d.in_builtin_module():
+            lst.append(dict(text=PythonToVimStr('Builtin ' + d.description)))
+        elif d.module_path is None:
+            # Typically a namespace, in the future maybe other things as
+            # well.
+            lst.append(dict(text=PythonToVimStr(d.description)))
+        else:
+            text = '[%s] %s' % (d.description, d.get_line_code().strip())
+            lst.append(dict(filename=PythonToVimStr(d.module_path),
+                            lnum=d.line, col=d.column + 1,
+                            text=PythonToVimStr(text)))
+    vim_eval('setqflist(%s)' % repr(lst))
+    vim_eval('jedi#add_goto_window(' + str(len(lst)) + ')')
+
+
+@catch_and_print_exceptions
+def usages():
+    script = get_script()
+    definitions = script.usages()
+    if not definitions:
+        echo_highlight("No usages found here.")
+        return
+    for definition in definitions:
+        # Only color the current module/buffer.
+        if (definition.module_path or '') == vim.current.buffer.name:
+            # mathaddpos needs a list of positions where a position is a list
+            # of (line, column, length).
+            # The column starts with 1 and not 0.
+            positions = [[definition.line, definition.column + 1, len(definition.name)]]
+            vim_eval("matchaddpos('jediUsage', %s)" % repr(positions))
+
+    show_goto_multi_results(definitions)
 
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
