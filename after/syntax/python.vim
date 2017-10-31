@@ -31,4 +31,4 @@ if g:jedi#show_call_signatures > 0 && has('conceal')
     endif
 endif
 
-hi jediUsage term=NONE cterm=NONE ctermfg=None guifg=None gui=NONE ctermbg=3 guibg=Yellow
+hi def jediUsage cterm=reverse gui=standout
