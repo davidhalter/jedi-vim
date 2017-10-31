@@ -47,5 +47,7 @@ if g:jedi#auto_initialization
             autocmd! InsertLeave <buffer> if pumvisible() == 0|pclose|endif
         augroup END
     endif
-    autocmd TextChanged <buffer> call jedi#remove_usages()
+    augroup jedi_usages
+        autocmd TextChanged <buffer> call jedi#remove_usages()
+    augroup END
 endif
