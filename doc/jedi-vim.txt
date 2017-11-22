@@ -123,7 +123,7 @@ feature (such as MacVim on OS X, which also contains a console binary).
     :helptags <path/to/vimruntime>/doc
 
 ------------------------------------------------------------------------------
-2.1. Installing using Pathogen          *jedi-vim-installation-pathogen*
+2.2. Installing using Pathogen          *jedi-vim-installation-pathogen*
 
 Pathogen simplifies installation considerably.
 
