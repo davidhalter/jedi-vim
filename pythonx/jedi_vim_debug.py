@@ -31,7 +31,7 @@ def display_debug_info():
             echo("printf(' - version: %s', {0!r})".format(
                 jedi_vim.jedi.__version__))
             echo("' - sys_path:'")
-            for p in jedi_vim.jedi.Script('')._evaluator.sys_path:
+            for p in jedi_vim.jedi.Script('')._evaluator.project.sys_path:
                 echo("printf('    - `%s`', {0!r})".format(p))
     except Exception as e:
         echo("printf('There was an error accessing jedi_vim.jedi: %s', "
