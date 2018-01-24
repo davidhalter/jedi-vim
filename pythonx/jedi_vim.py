@@ -304,7 +304,11 @@ def goto(mode="goto", no_output=False):
         return definitions
     if not definitions:
         echo_highlight("Couldn't find any definitions for this.")
-    elif len(definitions) == 1 and mode != "related_name":
+        return definitions
+
+    definitions = [d for d in definitions if d.module_path]
+
+    if len(definitions) == 1 and mode != "related_name":
         d = list(definitions)[0]
         if d.in_builtin_module():
             if d.is_keyword:
