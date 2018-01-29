@@ -294,8 +294,12 @@ def goto(mode="goto", no_output=False):
         for d in definitions:
             if d.in_builtin_module():
                 lst.append(dict(text=PythonToVimStr('Builtin ' + d.description)))
+            elif d.module_path is None:
+                # Typically a namespace, in the future maybe other things as
+                # well.
+                lst.append(dict(text=PythonToVimStr(d.description)))
             else:
-                lst.append(dict(filename=PythonToVimStr(d.module_path),
+                lst.append(dict(filename=PythonToVimStr(d.module_path or ''),
                                 lnum=d.line, col=d.column + 1,
                                 text=PythonToVimStr(d.description)))
         vim_eval('setqflist(%s)' % repr(lst))
@@ -580,6 +584,7 @@ def do_rename(replace, orig=None):
             continue
 
         if os.path.abspath(vim.current.buffer.name) != r.module_path:
+            assert r.module_path is not None
             result = new_buffer(r.module_path)
             if not result:
                 echo_highlight("Jedi-vim: failed to create buffer window for {0}!".format(r.module_path))
