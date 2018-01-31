@@ -299,7 +299,7 @@ def goto(mode="goto", no_output=False):
                 # well.
                 lst.append(dict(text=PythonToVimStr(d.description)))
             else:
-                lst.append(dict(filename=PythonToVimStr(d.module_path or ''),
+                lst.append(dict(filename=PythonToVimStr(d.module_path),
                                 lnum=d.line, col=d.column + 1,
                                 text=PythonToVimStr(d.description)))
         vim_eval('setqflist(%s)' % repr(lst))
