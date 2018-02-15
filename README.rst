@@ -93,7 +93,7 @@ Example installation command using Pathogen:
 
 Example installation using Vundle:
 
-Add the following line in you `~/.vimrc`
+Add the following line in your `~/.vimrc`
     
 .. code-block:: vim
 
