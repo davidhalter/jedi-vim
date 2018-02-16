@@ -91,6 +91,14 @@ Example installation command using Pathogen:
 
     git clone --recursive https://github.com/davidhalter/jedi-vim.git ~/.vim/bundle/jedi-vim
 
+Example installation using Vundle:
+
+Add the following line in your `~/.vimrc`
+    
+.. code-block:: vim
+
+    Plugin 'davidhalter/jedi-vim'
+
 
 Installation with your distribution
 -----------------------------------
