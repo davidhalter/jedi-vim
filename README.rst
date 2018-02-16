@@ -38,7 +38,7 @@ You can read the Jedi library documentation `here <http://jedi.readthedocs.io/en
 
 If you want to report issues, just use the github issue tracker. In case of
 questions about the software, please use `stackoverflow
-<https://stackoverflow.com>`_ and tag your question with ``jedi-vim``.
+<https://stackoverflow.com/questions/tagged/jedi-vim>`_ and tag your question with ``jedi-vim``.
 
 
 Contributing
