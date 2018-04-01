@@ -25,6 +25,15 @@ else:
     ELLIPSIS = u"…"
 
 
+try:
+    sys.prefix = sys.base_prefix
+    sys.exec_prefix = sys.base_exec_prefix
+except AttributeError:
+    # Somehow sys.prefix is set in combination with VIM and virtualenvs.
+    # However the sys path is not affected. Just reset it to the normal value.
+    pass
+
+
 class PythonToVimStr(unicode):
     """ Vim has a different string implementation of single quotes """
     __slots__ = []
