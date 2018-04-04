@@ -157,6 +157,17 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
+def _get_environment():
+    force_python_version = vim_eval("g:jedi#force_py_version")
+    environment = jedi.get_default_environment()
+    if force_python_version != "auto":
+        try:
+            environment = jedi.api.environment.get_python_environment('python' + force_python_version)
+        except jedi.InvalidPythonEnvironment:
+            pass
+    return environment
+
+
 @catch_and_print_exceptions
 def get_script(source=None, column=None):
     jedi.settings.additional_dynamic_modules = [
@@ -170,8 +181,12 @@ def get_script(source=None, column=None):
     if column is None:
         column = vim.current.window.cursor[1]
     buf_path = vim.current.buffer.name
-    encoding = vim_eval('&encoding') or 'latin1'
-    return jedi.Script(source, row, column, buf_path, encoding)
+
+    return jedi.Script(
+        source, row, column, buf_path,
+        encoding=vim_eval('&encoding') or 'latin1',
+        environment=_get_environment(),
+    )
 
 
 @_check_jedi_availability(show_error=False)
@@ -636,7 +651,7 @@ def py_import():
     args = shsplit(vim.eval('a:args'))
     import_path = args.pop()
     text = 'import %s' % import_path
-    scr = jedi.Script(text, 1, len(text), '')
+    scr = jedi.Script(text, 1, len(text), '', environment=_get_environment())
     try:
         completion = scr.goto_assignments()[0]
     except IndexError:
@@ -659,7 +674,7 @@ def py_import_completions():
         comps = []
     else:
         text = 'import %s' % argl
-        script = jedi.Script(text, 1, len(text), '')
+        script = jedi.Script(text, 1, len(text), '', environment=_get_environment())
         comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
     vim.command("return '%s'" % '\n'.join(comps))
 
