@@ -58,15 +58,6 @@ endfor
 let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
 
 function! s:init_python() abort
-    if g:jedi#force_py_version !=# 'auto'
-        " Always use the user supplied version.
-        try
-            return jedi#setup_py_version(g:jedi#force_py_version)
-        catch
-            throw 'Could not setup g:jedi#force_py_version: '.v:exception
-        endtry
-    endif
-
     " Handle "auto" version.
     if has('nvim') || (has('python') && has('python3'))
         " Neovim usually has both python providers. Skipping the `has` check
@@ -88,7 +79,7 @@ function! s:init_python() abort
 
         " Make sure that the auto-detected version is available in Vim.
         if !has('nvim') || has('python'.(s:def_py == 2 ? '' : s:def_py))
-            return jedi#setup_py_version(s:def_py)
+            return jedi#setup_python_imports(s:def_py)
         endif
 
         " Add a warning in case the auto-detected version is not available,
@@ -105,9 +96,9 @@ function! s:init_python() abort
     endif
 
     if has('python')
-        call jedi#setup_py_version(2)
+        call jedi#setup_python_imports(2)
     elseif has('python3')
-        call jedi#setup_py_version(3)
+        call jedi#setup_python_imports(3)
     else
         throw 'jedi-vim requires Vim with support for Python 2 or 3.'
     endif
@@ -139,7 +130,7 @@ endfunction
 
 
 let s:python_version = 'null'
-function! jedi#setup_py_version(py_version) abort
+function! jedi#setup_python_imports(py_version) abort
     if a:py_version == 2
         let cmd_exec = 'python'
         let s:python_version = 2
@@ -147,7 +138,7 @@ function! jedi#setup_py_version(py_version) abort
         let cmd_exec = 'python3'
         let s:python_version = 3
     else
-        throw 'jedi#setup_py_version: invalid py_version: '.a:py_version
+        throw 'jedi#setup_python_imports: invalid py_version: '.a:py_version
     endif
 
     execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
@@ -164,12 +155,12 @@ function! jedi#setup_py_version(py_version) abort
     try
         exe 'PythonJedi exec('''.escape(join(init_lines, '\n'), "'").''')'
     catch
-        throw printf('jedi#setup_py_version: failed to run Python for initialization: %s.', v:exception)
+        throw printf('jedi#setup_python_imports: failed to run Python for initialization: %s.', v:exception)
     endtry
     if s:init_outcome is 0
-        throw 'jedi#setup_py_version: failed to run Python for initialization.'
+        throw 'jedi#setup_python_imports: failed to run Python for initialization.'
     elseif s:init_outcome isnot 1
-        throw printf('jedi#setup_py_version: %s.', s:init_outcome)
+        throw printf('jedi#setup_python_imports: %s.', s:init_outcome)
     endif
     return 1
 endfunction
@@ -251,23 +242,6 @@ function! jedi#debug_info() abort
       echo '</details>'
     endif
 endfunction
-
-function! jedi#force_py_version(py_version) abort
-    let g:jedi#force_py_version = a:py_version
-    return jedi#setup_py_version(a:py_version)
-endfunction
-
-
-function! jedi#force_py_version_switch() abort
-    if g:jedi#force_py_version == 2
-        call jedi#force_py_version(3)
-    elseif g:jedi#force_py_version == 3
-        call jedi#force_py_version(2)
-    else
-        throw "Don't know how to switch from ".g:jedi#force_py_version.'!'
-    endif
-endfunction
-
 
 " Helper function instead of `python vim.eval()`, and `.command()` because
 " these also return error definitions.
