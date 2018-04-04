@@ -480,21 +480,20 @@ small a horizontal split happens.
 ------------------------------------------------------------------------------
 6.12. `g:jedi#force_py_version`                *g:jedi#force_py_version*
 
-If you have installed both python 2 and python 3, you can force which one jedi
-should use by setting this variable. It forces the internal Vim command, which
-will be used for every jedi call to the respective python interpreter.
-The variable can be set in the .vimrc like this to force python 3:
+If you have installed multiple Python versions, you can force the Python
+version that is going to be used. To ensure that jedi environments are used.
+You don't have to compile VIM with multiple Python versions.
+The variable can be set in the .vimrc like this to force python 2:
 
-let g:jedi#force_py_version = 3
+let g:jedi#force_py_version = 2
 
-This variable can be switched during runtime using the following function:
-Function: `jedi#force_py_version_switch()`
+By default jedi loads the latest Python version installed on your system that
+can be found.
 
-or set directly using this function, which has the same name as the variable:
-Function: `jedi#force_py_version(py_version)`
+This variable can be switched during runtime.
 
-Options: 2 or 3
-Default: "auto" (will use sys.version_info from "python" in your $PATH)
+Options: 2, 2.7, 3, 3.3, 3.4, ...
+Default: "auto"
 ------------------------------------------------------------------------------
 6.13. `g:jedi#smart_auto_mappings`                  *g:jedi#smart_auto_mappings*
 
