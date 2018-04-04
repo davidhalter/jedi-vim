@@ -82,11 +82,11 @@ def _catch_exception(string, is_eval):
 
 
 def vim_command(string):
-    _catch_exception(string, False)
+    _catch_exception(string, is_eval=False)
 
 
 def vim_eval(string):
-    return _catch_exception(string, True)
+    return _catch_exception(string, is_eval=True)
 
 
 def no_jedi_warning(error=None):
@@ -157,14 +157,33 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
+last_force_python_error = None
+
+
 def _get_environment():
+    global last_force_python_error
+
     force_python_version = vim_eval("g:jedi#force_py_version")
     environment = jedi.get_default_environment()
     if force_python_version != "auto":
+        if '0000' in force_python_version or '9999' in force_python_version:
+            # It's probably a float that wasn't shortened.
+            try:
+                force_python_version = "{:.1f}".format(float(force_python_version))
+            except ValueError:
+                pass
+
+        elif isinstance(force_python_version, float):
+            force_python_version = "{:.1f}".format(force_python_version)
         try:
             environment = jedi.api.environment.get_python_environment('python' + force_python_version)
         except jedi.InvalidPythonEnvironment:
-            pass
+            if last_force_python_error != force_python_version:
+                vim.command(
+                    'echom "force_python_version=%s is not supported."'
+                    % force_python_version
+                )
+            last_force_python_error = force_python_version
     return environment
 
 
