@@ -160,7 +160,7 @@ def _check_jedi_availability(show_error=False):
 last_force_python_error = None
 
 
-def _get_environment():
+def get_environment():
     global last_force_python_error
 
     force_python_version = vim_eval("g:jedi#force_py_version")
@@ -201,7 +201,7 @@ def get_script(source=None, column=None):
     return jedi.Script(
         source, row, column, buf_path,
         encoding=vim_eval('&encoding') or 'latin1',
-        environment=_get_environment(),
+        environment=get_environment(),
     )
 
 
@@ -663,7 +663,7 @@ def py_import():
     args = shsplit(vim.eval('a:args'))
     import_path = args.pop()
     text = 'import %s' % import_path
-    scr = jedi.Script(text, 1, len(text), '', environment=_get_environment())
+    scr = jedi.Script(text, 1, len(text), '', environment=get_environment())
     try:
         completion = scr.goto_assignments()[0]
     except IndexError:
@@ -686,7 +686,7 @@ def py_import_completions():
         comps = []
     else:
         text = 'import %s' % argl
-        script = jedi.Script(text, 1, len(text), '', environment=_get_environment())
+        script = jedi.Script(text, 1, len(text), '', environment=get_environment())
         comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
     vim.command("return '%s'" % '\n'.join(comps))
 
