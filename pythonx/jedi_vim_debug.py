@@ -34,9 +34,12 @@ def display_debug_info():
 
             script_evaluator = jedi_vim.jedi.Script('')._evaluator
             try:
-                sys_path = script_evaluator.project.sys_path
-            except AttributeError:
-                sys_path = script_evaluator.sys_path
+                sys_path = jedi_vim.get_environment().get_sys_path()
+            except:
+                try:
+                    sys_path = script_evaluator.project.sys_path
+                except AttributeError:
+                    sys_path = script_evaluator.sys_path
             for p in sys_path:
                 echo("printf('    - `%s`', {0!r})".format(p))
     except Exception as e:
