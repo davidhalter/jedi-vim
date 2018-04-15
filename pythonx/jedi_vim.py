@@ -164,7 +164,7 @@ def get_environment():
     global last_force_python_error
 
     force_python_version = vim_eval("g:jedi#force_py_version")
-    environment = jedi.get_default_environment()
+    environment = jedi.api.environment.get_cached_default_environment()
     if force_python_version != "auto":
         if '0000' in force_python_version or '9999' in force_python_version:
             # It's probably a float that wasn't shortened.
@@ -176,7 +176,7 @@ def get_environment():
         elif isinstance(force_python_version, float):
             force_python_version = "{:.1f}".format(force_python_version)
         try:
-            environment = jedi.api.environment.get_python_environment('python' + force_python_version)
+            environment = jedi.get_python_environment(force_python_version)
         except jedi.InvalidPythonEnvironment:
             if last_force_python_error != force_python_version:
                 vim.command(
