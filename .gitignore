@@ -3,4 +3,5 @@
 *.py[cod]
 .ropeproject
 doc/tags
-.cache
+.pytest-cache
+build
