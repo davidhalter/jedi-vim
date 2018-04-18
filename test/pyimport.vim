@@ -1,5 +1,5 @@
 source plugin/jedi.vim
-source test/utils.vim
+source test/_utils.vim
 
 describe 'pyimport'
     before
