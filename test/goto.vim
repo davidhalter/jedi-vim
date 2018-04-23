@@ -22,8 +22,8 @@ describe 'goto simple'
 
     it 'goto definitions'
         normal \d
-        Expect line('.') == 1
-        Expect col('.') == 5
+        Expect line('.') == 2
+        Expect col('.') == 1
     end
 
     it 'goto assignments'

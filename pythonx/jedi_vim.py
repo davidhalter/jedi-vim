@@ -243,10 +243,7 @@ def goto(mode="goto", no_output=False):
     """
     script = get_script()
     if mode == "goto":
-        definitions = [x for x in script.goto_definitions()
-                       if not x.in_builtin_module()]
-        if not definitions:
-            definitions = script.goto_assignments()
+        definitions = script.goto_assignments(follow_imports=True)
     elif mode == "related_name":
         definitions = script.usages()
     elif mode == "definition":
