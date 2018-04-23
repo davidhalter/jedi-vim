@@ -189,8 +189,11 @@ def get_environment():
 
 @catch_and_print_exceptions
 def get_script(source=None, column=None):
-    jedi.settings.additional_dynamic_modules = \
-        [b.name for b in vim.buffers if b.name is not None and b.name.endswith('.py')]
+    jedi.settings.additional_dynamic_modules = [
+        b.name for b in vim.buffers if (
+            b.name is not None and
+            b.name.endswith('.py') and
+            b.options['buflisted'])]
     if source is None:
         source = '\n'.join(vim.current.buffer)
     row = vim.current.window.cursor[0]
@@ -272,6 +275,7 @@ def tempfile(content):
     finally:
         os.unlink(f.name)
 
+
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
 def goto(mode="goto", no_output=False):
@@ -293,7 +297,6 @@ def goto(mode="goto", no_output=False):
     elif mode == "assignment":
         definitions = script.goto_assignments()
 
-
     if no_output:
         return definitions
     if not definitions:
@@ -313,10 +316,12 @@ def goto(mode="goto", no_output=False):
                                     using_tagstack=using_tagstack)
                 if not result:
                     return []
-            if d.module_path and os.path.exists(d.module_path) and using_tagstack:
+            if (using_tagstack and d.module_path and
+                    os.path.exists(d.module_path)):
                 tagname = d.name
-                with tempfile('{0}\t{1}\t{2}'.format(tagname, d.module_path,
-                        'call cursor({0}, {1})'.format(d.line, d.column + 1))) as f:
+                with tempfile('{0}\t{1}\t{2}'.format(
+                        tagname, d.module_path, 'call cursor({0}, {1})'.format(
+                            d.line, d.column + 1))) as f:
                     old_tags = vim.eval('&tags')
                     old_wildignore = vim.eval('&wildignore')
                     try:
@@ -432,7 +437,8 @@ def show_call_signatures(signatures=()):
         line = vim_eval("getline(%s)" % line_to_replace)
 
         # Descriptions are usually looking like `param name`, remove the param.
-        params = [p.description.replace('\n', '').replace('param ', '', 1) for p in signature.params]
+        params = [p.description.replace('\n', '').replace('param ', '', 1)
+                  for p in signature.params]
         try:
             # *_*PLACEHOLDER*_* makes something fat. See after/syntax file.
             params[signature.index] = '*_*%s*_*' % params[signature.index]
@@ -630,7 +636,8 @@ def do_rename(replace, orig=None):
             assert r.module_path is not None
             result = new_buffer(r.module_path)
             if not result:
-                echo_highlight("Jedi-vim: failed to create buffer window for {0}!".format(r.module_path))
+                echo_highlight('Failed to create buffer window for %s!' % (
+                    r.module_path))
                 continue
 
         buffers.add(vim.current.buffer.name)

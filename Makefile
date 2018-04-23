@@ -11,6 +11,6 @@ check: build/vint
 	build/vint/bin/vint $(LINT_FILES)
 
 clean:
-	rm -rf .cache build
+	rm -rf build
 
 .PHONY: test check clean
