@@ -26,11 +26,12 @@ else:
 
 
 try:
+    # Somehow sys.prefix is set in combination with VIM and virtualenvs.
+    # However the sys path is not affected. Just reset it to the normal value.
     sys.prefix = sys.base_prefix
     sys.exec_prefix = sys.base_exec_prefix
 except AttributeError:
-    # Somehow sys.prefix is set in combination with VIM and virtualenvs.
-    # However the sys path is not affected. Just reset it to the normal value.
+    # If we're not in a virtualenv we don't care. Everything is fine.
     pass
 
 
@@ -164,7 +165,7 @@ def get_environment():
     global last_force_python_error
 
     force_python_version = vim_eval("g:jedi#force_py_version")
-    environment = jedi.api.environment.get_cached_default_environment()
+    environment = None
     if force_python_version != "auto":
         if '0000' in force_python_version or '9999' in force_python_version:
             # It's probably a float that wasn't shortened.
@@ -184,6 +185,9 @@ def get_environment():
                     % force_python_version
                 )
             last_force_python_error = force_python_version
+
+    if environment is None:
+        environment = jedi.api.environment.get_cached_default_environment()
     return environment
 
 
