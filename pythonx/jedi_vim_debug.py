@@ -32,7 +32,7 @@ def display_debug_info():
                 jedi_vim.jedi.__version__))
 
             try:
-                environment = jedi_vim.get_environment()
+                environment = jedi_vim.get_environment(use_cache=False)
             except AttributeError:
                 script_evaluator = jedi_vim.jedi.Script('')._evaluator
                 try:
