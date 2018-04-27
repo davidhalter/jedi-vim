@@ -158,36 +158,39 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
-last_force_python_error = None
+current_environment = (None, None)
 
 
-def get_environment():
-    global last_force_python_error
+def get_environment(use_cache=True):
+    global current_environment
 
-    force_python_version = vim_eval("g:jedi#force_py_version")
+    vim_force_python_version = vim_eval("g:jedi#force_py_version")
+    if use_cache and vim_force_python_version == current_environment[0]:
+        return current_environment[1]
+
     environment = None
-    if force_python_version != "auto":
+    if vim_force_python_version == "auto":
+        environment = jedi.api.environment.get_cached_default_environment()
+    else:
+        force_python_version = vim_force_python_version
         if '0000' in force_python_version or '9999' in force_python_version:
             # It's probably a float that wasn't shortened.
             try:
                 force_python_version = "{:.1f}".format(float(force_python_version))
             except ValueError:
                 pass
-
         elif isinstance(force_python_version, float):
             force_python_version = "{:.1f}".format(force_python_version)
-        try:
-            environment = jedi.get_python_environment(force_python_version)
-        except jedi.InvalidPythonEnvironment:
-            if last_force_python_error != force_python_version:
-                vim.command(
-                    'echom "force_python_version=%s is not supported."'
-                    % force_python_version
-                )
-            last_force_python_error = force_python_version
 
-    if environment is None:
-        environment = jedi.api.environment.get_cached_default_environment()
+        try:
+            environment = jedi.get_system_environment(force_python_version)
+        except jedi.InvalidPythonEnvironment as exc:
+            environment = jedi.api.environment.get_cached_default_environment()
+            echo_highlight(
+                "force_python_version=%s is not supported: %s - using %s." % (
+                    vim_force_python_version, str(exc), str(environment)))
+
+    current_environment = (vim_force_python_version, environment)
     return environment
 
 
