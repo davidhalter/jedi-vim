@@ -268,17 +268,18 @@ def goto(mode="goto", no_output=False):
                                % d.desc_with_module)
         else:
             using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-            if (d.module_path or '') != vim.current.buffer.name:
-                result = new_buffer(d.module_path,
+            path = d._name._context.py__path__()[0][0]
+
+            if path != vim.current.buffer.name:
+                result = new_buffer(path,
                                     using_tagstack=using_tagstack)
                 if not result:
                     return []
-            if (using_tagstack and d.module_path and
-                    os.path.exists(d.module_path)):
+            if (using_tagstack and os.path.exists(path)):
                 tagname = d.name
                 with tempfile('{0}\t{1}\t{2}'.format(
-                        tagname, d.module_path, 'call cursor({0}, {1})'.format(
-                            d.line, d.column + 1))) as f:
+                        tagname, path, 'call cursor({0}, {1})'.format(
+                            d.line or 1, (d.column or 0) + 1))) as f:
                     old_tags = vim.eval('&tags')
                     old_wildignore = vim.eval('&wildignore')
                     try:
@@ -292,7 +293,7 @@ def goto(mode="goto", no_output=False):
                                     repr(PythonToVimStr(old_tags)))
                         vim.command('let &wildignore = %s' %
                                     repr(PythonToVimStr(old_wildignore)))
-            vim.current.window.cursor = d.line, d.column
+            vim.current.window.cursor = d.line or 1, d.column or 0
     else:
         # multiple solutions
         lst = []
@@ -302,7 +303,9 @@ def goto(mode="goto", no_output=False):
             elif d.module_path is None:
                 # Typically a namespace, in the future maybe other things as
                 # well.
-                lst.append(dict(text=PythonToVimStr(d.description)))
+                lst.append(dict(filename=PythonToVimStr(d._name._context.py__path__()[0]),
+                                text=PythonToVimStr(d.description),
+                                lnum=1, col=1))
             else:
                 lst.append(dict(filename=PythonToVimStr(d.module_path),
                                 lnum=d.line, col=d.column + 1,
