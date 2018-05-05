@@ -481,7 +481,7 @@ small a horizontal split happens.
 6.12. `g:jedi#force_py_version`                *g:jedi#force_py_version*
 
 If you have installed multiple Python versions, you can force the Python
-version that is going to be used. To ensure that jedi environments are used.
+version that is going to be used.
 You don't have to compile VIM with multiple Python versions.
 The variable can be set in the .vimrc like this to force python 2:
 
