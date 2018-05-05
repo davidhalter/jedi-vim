@@ -490,7 +490,7 @@ let g:jedi#force_py_version = 2
 By default jedi loads the latest Python version installed on your system that
 can be found.
 
-This variable can be switched during runtime.
+This variable can be changed during runtime.
 
 Options: 2, 2.7, 3, 3.3, 3.4, ...
 Default: "auto"
