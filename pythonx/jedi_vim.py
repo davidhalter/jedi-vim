@@ -226,7 +226,7 @@ def completions():
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
-            if not re.match('[\w\d]', char):
+            if not re.match(r'[\w\d]', char):
                 break
             count += 1
         vim.command('return %i' % (column - count))
