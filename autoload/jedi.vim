@@ -58,47 +58,10 @@ endfor
 let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
 
 function! s:init_python() abort
-    " Handle "auto" version.
-    if has('nvim') || (has('python') && has('python3'))
-        " Neovim usually has both python providers. Skipping the `has` check
-        " avoids starting both of them.
-
-        " Get default python version from interpreter in $PATH.
-        let s:def_py = system('python -c '.shellescape('import sys; sys.stdout.write(str(sys.version_info[0]))'))
-        if v:shell_error != 0 || !len(s:def_py)
-            if !exists('g:jedi#squelch_py_warning')
-                echohl WarningMsg
-                echom 'Warning: jedi-vim failed to get Python version from sys.version_info: ' . s:def_py
-                echom 'Falling back to version 2.'
-                echohl None
-            endif
-            let s:def_py = 2
-        elseif &verbose
-            echom 'jedi-vim: auto-detected Python: '.s:def_py
-        endif
-
-        " Make sure that the auto-detected version is available in Vim.
-        if !has('nvim') || has('python'.(s:def_py == 2 ? '' : s:def_py))
-            return jedi#setup_python_imports(s:def_py)
-        endif
-
-        " Add a warning in case the auto-detected version is not available,
-        " usually because of a missing neovim module in a VIRTUAL_ENV.
-        if has('nvim')
-            echohl WarningMsg
-            echom 'jedi-vim: the detected Python version ('.s:def_py.')'
-                        \ 'is not functional.'
-                        \ 'Is the "neovim" module installed?'
-                        \ 'While jedi-vim will work, it might not use the'
-                        \ 'expected Python path.'
-            echohl None
-        endif
-    endif
-
-    if has('python')
-        call jedi#setup_python_imports(2)
-    elseif has('python3')
+    if has('python3')
         call jedi#setup_python_imports(3)
+    elseif has('python')
+        call jedi#setup_python_imports(2)
     else
         throw 'jedi-vim requires Vim with support for Python 2 or 3.'
     endif
