@@ -308,7 +308,7 @@ Default: <leader>r                      Rename variables
 
 Jedi-vim deletes the word currently under the cursor and puts Vim in insert
 mode, where the user is expected to enter the new variable name. Upon leaving
-insert mode, jedi-vim then renames all occurences of the old variable name
+insert mode, jedi-vim then renames all occurrences of the old variable name
 with the new one. The number of performed renames is displayed in the command
 line.
 
