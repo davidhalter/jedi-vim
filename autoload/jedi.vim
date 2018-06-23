@@ -112,7 +112,11 @@ function! jedi#setup_python_imports(py_version) abort
           \ 'try:',
           \ '    import jedi_vim',
           \ 'except Exception as exc:',
-          \ '    vim.command(''let s:init_outcome = "could not import jedi_vim: {0}: {1}"''.format(exc.__class__.__name__, exc))',
+          \ '    if isinstance(exc, SyntaxError):',
+          \ '        exc_msg = repr(exc)',
+          \ '    else:',
+          \ '        exc_msg = "%s: %s" % (exc.__class__.__name__, exc)',
+          \ '    vim.command(''let s:init_outcome = "could not import jedi_vim: {0}"''.format(exc_msg))',
           \ 'else:',
           \ '    vim.command(''let s:init_outcome = 1'')']
     try
