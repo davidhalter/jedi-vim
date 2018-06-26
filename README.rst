@@ -1,4 +1,4 @@
-.. image:: https://github.com/davidhalter/jedi-vim/blob/master/doc/logotype-a.svg
+.. image:: https://github.com/blueyed/jedi-vim/blob/rebase-logo/doc/logotype-a.svg
 
 #################################################
 jedi-vim - awesome Python autocompletion with VIM
