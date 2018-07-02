@@ -139,7 +139,10 @@ function! jedi#setup_python_imports(py_version) abort
           \ '        exc_msg = "%s: %s" % (exc.__class__.__name__, exc)',
           \ '    vim.command(''let s:init_outcome = "could not import jedi_vim: {0}"''.format(exc_msg))',
           \ 'else:',
-          \ '    vim.command(''let s:init_outcome = 1'')']
+          \ '    if jedi_vim.jedi is None:',
+          \ '        vim.command(''let s:init_outcome = "could not import jedi: {0}"''.format(jedi_vim.jedi_import_error))',
+          \ '    else:',
+          \ '        vim.command(''let s:init_outcome = 1'')']
     try
         exe 'PythonJedi exec('''.escape(join(init_lines, '\n'), "'").''')'
     catch

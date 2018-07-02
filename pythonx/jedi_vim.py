@@ -118,7 +118,6 @@ except ImportError:
     f_code = tb.tb_frame.f_code
     exc_location = '%s:%d' % (f_code.co_filename, f_code.co_firstlineno)
     jedi_import_error = '%s (in %s)' % (exc, exc_location)
-    no_jedi_warning(jedi_import_error)
 else:
     try:
         version = jedi.__version__
