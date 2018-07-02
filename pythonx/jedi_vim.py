@@ -110,10 +110,15 @@ sys.path.insert(0, parso_path)
 
 try:
     import jedi
-except ImportError as e:
-    no_jedi_warning(str(e))
+except ImportError:
     jedi = None
-    jedi_import_error = str(e)
+    _, exc, tb = sys.exc_info()
+    while tb.tb_next:
+        tb = tb.tb_next
+    f_code = tb.tb_frame.f_code
+    exc_location = '%s:%d' % (f_code.co_filename, f_code.co_firstlineno)
+    jedi_import_error = '%s (in %s)' % (exc, exc_location)
+    no_jedi_warning(jedi_import_error)
 else:
     try:
         version = jedi.__version__
