@@ -41,8 +41,8 @@ def display_debug_info():
     try:
         import jedi_vim
     except Exception:
-        echo_error('ERROR: jedi_vim is not available: {0}'.format(
-            format_exc_info(sys.exc_info())))
+        echo_error('ERROR: could not import jedi_vim: {0}'.format(
+            format_exc_info()))
         return
 
     if jedi_vim.jedi is None:
