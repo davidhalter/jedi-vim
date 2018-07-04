@@ -91,7 +91,7 @@ endfunction
 
 
 function! jedi#reinit_python() abort
-    unlet! s:_init_python
+    let s:_init_python = -1
     call jedi#init_python()
 endfunction
 
