@@ -186,7 +186,9 @@ function! jedi#debug_info() abort
     echo ' - jedi-vim git version: '
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
     echo ' - jedi git submodule status: '
-    echon substitute(system('git -C '.s:script_path.' submodule status'), '\v\n$', '', '')
+    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/jedi'), '\v\n$', '', '')
+    echo ' - parso git submodule status: '
+    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/parso'), '\v\n$', '', '')
     echo "\n"
     echo '##### Settings'
     echo '```'
