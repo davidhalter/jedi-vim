@@ -48,7 +48,21 @@ endif
 " Pyimport command
 command! -nargs=1 -complete=custom,jedi#py_import_completions Pyimport :call jedi#py_import(<q-args>)
 
-command! -nargs=0 -bar JediDebugInfo call jedi#debug_info()
+function! s:jedi_debug_info()
+    " Ensure the autoload file has been loaded (and ignore any errors, which
+    " will be displayed with the debug info).
+    let unset = {}
+    let saved_squelch_py_warning = get(g:, 'jedi#squelch_py_warning', unset)
+    let g:jedi#squelch_py_warning = 1
+    call jedi#init_python()
+    if saved_squelch_py_warning is unset
+        unlet g:jedi#squelch_py_warning
+    else
+        let g:jedi#squelch_py_warning = saved_squelch_py_warning
+    endif
+    call jedi#debug_info()
+endfunction
+command! -nargs=0 -bar JediDebugInfo call s:jedi_debug_info()
 command! -nargs=0 -bang JediClearCache call jedi#clear_cache(<bang>0)
 
 " vim: set et ts=4:
