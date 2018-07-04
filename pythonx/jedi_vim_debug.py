@@ -65,8 +65,13 @@ def display_debug_info():
             except AttributeError:
                 sys_path = script_evaluator.sys_path
         else:
-            echo(' - environment: {0}'.format(environment))
-            sys_path = environment.get_sys_path()
+            echo(' - environment: `{0}`'.format(environment))
+            try:
+                sys_path = environment.get_sys_path()
+            except Exception:
+                echo_error('ERROR: failed to get sys path from environment: {0}'.format(
+                    format_exc_info()))
+                return
 
         echo(' - sys_path:')
         for p in sys_path:
