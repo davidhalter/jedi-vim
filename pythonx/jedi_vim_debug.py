@@ -1,57 +1,78 @@
 """Used in jedi-vim's jedi#debug_info()"""
+import sys
+
 import vim
+from jedi_vim import PythonToVimStr
 
 
 def echo(msg):
-    vim.command('echo {0}'.format(msg))
+    vim.command('echo %r' % PythonToVimStr(msg))
+
+
+def echo_error(msg):
+    vim.command('echohl ErrorMsg')
+    echo(msg)
+    vim.command('echohl None')
+
+
+def format_exc_info(exc_info=None, tb_indent=2):
+    import traceback
+
+    if exc_info is None:
+        exc_info = sys.exc_info()
+
+    exc_msg = traceback.format_exception_only(exc_info[0], exc_info[1])
+    lines = ''.join(exc_msg).rstrip('\n').split('\n')
+
+    lines.append('Traceback (most recent call last):')
+    tb = traceback.format_tb(exc_info[2])
+    lines.extend(''.join(tb).rstrip('\n').split('\n'))
+
+    indent = ' ' * tb_indent
+    return '{0}'.format(('\n' + indent).join(lines))
 
 
 def display_debug_info():
-    echo("printf(' - global sys.version: `%s`', {0!r})".format(
+    echo(' - global sys.version: `{0}`'.format(
         ', '.join([x.strip()
-                   for x in __import__('sys').version.split('\n')])))
-    echo("printf(' - global site module: `%s`', {0!r})".format(
-        __import__('site').__file__))
+                   for x in sys.version.split('\n')])))
+    echo(' - global site module: `{0}`'.format(__import__('site').__file__))
 
     try:
         import jedi_vim
-    except Exception as e:
-        echo("printf('ERROR: jedi_vim is not available: %s: %s', "
-             "{0!r}, {1!r})".format(e.__class__.__name__, str(e)))
+    except Exception:
+        echo_error('ERROR: could not import jedi_vim: {0}'.format(
+            format_exc_info()))
         return
 
-    try:
-        if jedi_vim.jedi is None:
-            echo("'ERROR: could not import the \"jedi\" Python module.'")
-            echo("printf('       The error was: %s', {0!r})".format(
-                getattr(jedi_vim, "jedi_import_error", "UNKNOWN")))
+    if jedi_vim.jedi is None:
+        if hasattr(jedi_vim, 'jedi_import_error'):
+            error_msg = format_exc_info(jedi_vim.jedi_import_error)
         else:
-            echo("printf('Jedi path: `%s`', {0!r})".format(
-                jedi_vim.jedi.__file__))
-            echo("printf(' - version: %s', {0!r})".format(
-                jedi_vim.jedi.__version__))
+            error_msg = 'unknown error'
+        echo_error('ERROR: could not import the "jedi" Python module: {0}'.format(
+            error_msg))
+    else:
+        echo('Jedi path: `{0}`'.format(jedi_vim.jedi.__file__))
+        echo(' - version: {0}'.format(jedi_vim.jedi.__version__))
 
+        try:
+            environment = jedi_vim.get_environment(use_cache=False)
+        except AttributeError:
+            script_evaluator = jedi_vim.jedi.Script('')._evaluator
             try:
-                environment = jedi_vim.get_environment(use_cache=False)
+                sys_path = script_evaluator.project.sys_path
             except AttributeError:
-                script_evaluator = jedi_vim.jedi.Script('')._evaluator
-                try:
-                    sys_path = script_evaluator.project.sys_path
-                except AttributeError:
-                    sys_path = script_evaluator.sys_path
-            else:
-                echo("printf(' - environment: %s', {0!r})".format(
-                    str(environment)))
+                sys_path = script_evaluator.sys_path
+        else:
+            echo(' - environment: `{0}`'.format(environment))
+            try:
                 sys_path = environment.get_sys_path()
+            except Exception:
+                echo_error('ERROR: failed to get sys path from environment: {0}'.format(
+                    format_exc_info()))
+                return
 
-            echo("' - sys_path:'")
-            for p in sys_path:
-                echo("printf('    - `%s`', {0!r})".format(p))
-    except Exception as e:
-        vim.command('echohl ErrorMsg')
-        echo("printf('There was an error accessing jedi_vim.jedi: %s', {0!r})".format(
-            str(e)))
-        import traceback
-        for l in traceback.format_exc().splitlines():
-            echo("printf('%s', {0!r})".format(l))
-        vim.command('echohl None')
+        echo(' - sys_path:')
+        for p in sys_path:
+            echo('    - `{0}`'.format(p))

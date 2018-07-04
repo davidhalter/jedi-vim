@@ -91,7 +91,7 @@ endfunction
 
 
 function! jedi#reinit_python() abort
-    unlet! s:_init_python
+    let s:_init_python = -1
     call jedi#init_python()
 endfunction
 
@@ -99,13 +99,29 @@ endfunction
 let s:_init_python = -1
 function! jedi#init_python() abort
     if s:_init_python == -1
+        let s:_init_python = 0
         try
             let s:_init_python = s:init_python()
-        catch
-            let s:_init_python = 0
+            let s:_init_python = 1
+        catch /^jedi/
+            " Only catch errors from jedi-vim itself here, so that for
+            " unexpected Python exceptions the traceback will be shown
+            " (e.g. with NameError in jedi#setup_python_imports's code).
             if !exists('g:jedi#squelch_py_warning')
-                echoerr 'Error: jedi-vim failed to initialize Python: '
-                            \ .v:exception.' (in '.v:throwpoint.')'
+                let error_lines = split(v:exception, '\n')
+                let msg = 'Error: jedi-vim failed to initialize Python: '
+                            \ .error_lines[0].' (in '.v:throwpoint.')'
+                if len(error_lines) > 1
+                    echohl ErrorMsg
+                    echom 'jedi-vim error: '.error_lines[0]
+                    for line in error_lines[1:]
+                        echom line
+                    endfor
+                    echohl None
+                    let msg .= '. See :messages for more information.'
+                endif
+                redraw  " Redraw to only have the main message by default.
+                echoerr msg
             endif
         endtry
     endif
@@ -127,42 +143,27 @@ function! jedi#setup_python_imports(py_version) abort
 
     execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
 
-    let s:init_outcome = 0
+    let g:_jedi_init_error = 0
     let init_lines = [
           \ 'import vim',
           \ 'try:',
           \ '    import jedi_vim',
+          \ '    if hasattr(jedi_vim, "jedi_import_error"):',
+          \ '        from jedi_vim_debug import format_exc_info',
+          \ '        vim.vars["_jedi_init_error"] = format_exc_info(jedi_vim.jedi_import_error)',
           \ 'except Exception as exc:',
-          \ '    if isinstance(exc, SyntaxError):',
-          \ '        exc_msg = repr(exc)',
-          \ '    else:',
-          \ '        exc_msg = "%s: %s" % (exc.__class__.__name__, exc)',
-          \ '    vim.command(''let s:init_outcome = "could not import jedi_vim: {0}"''.format(exc_msg))',
-          \ 'else:',
-          \ '    vim.command(''let s:init_outcome = 1'')']
-    try
-        exe 'PythonJedi exec('''.escape(join(init_lines, '\n'), "'").''')'
-    catch
-        throw printf('jedi#setup_python_imports: failed to run Python for initialization: %s.', v:exception)
-    endtry
-    if s:init_outcome is 0
-        throw 'jedi#setup_python_imports: failed to run Python for initialization.'
-    elseif s:init_outcome isnot 1
-        throw printf('jedi#setup_python_imports: %s.', s:init_outcome)
+          \ '    from jedi_vim_debug import format_exc_info',
+          \ '    vim.vars["_jedi_init_error"] = format_exc_info()',
+          \ ]
+    exe 'PythonJedi exec('''.escape(join(init_lines, '\n'), "'").''')'
+    if g:_jedi_init_error isnot 0
+        throw printf('jedi#setup_python_imports: %s', g:_jedi_init_error)
     endif
     return 1
 endfunction
 
 
 function! jedi#debug_info() abort
-    if s:python_version ==# 'null'
-        try
-            call s:init_python()
-        catch
-            echohl WarningMsg | echom v:exception | echohl None
-            return
-        endtry
-    endif
     if &verbose
       if &filetype !=# 'python'
         echohl WarningMsg | echo 'You should run this in a buffer with filetype "python".' | echohl None
@@ -187,7 +188,9 @@ function! jedi#debug_info() abort
     echo ' - jedi-vim git version: '
     echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
     echo ' - jedi git submodule status: '
-    echon substitute(system('git -C '.s:script_path.' submodule status'), '\v\n$', '', '')
+    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/jedi'), '\v\n$', '', '')
+    echo ' - parso git submodule status: '
+    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/parso'), '\v\n$', '', '')
     echo "\n"
     echo '##### Settings'
     echo '```'

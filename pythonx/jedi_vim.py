@@ -110,10 +110,9 @@ sys.path.insert(0, parso_path)
 
 try:
     import jedi
-except ImportError as e:
-    no_jedi_warning(str(e))
+except ImportError:
     jedi = None
-    jedi_import_error = str(e)
+    jedi_import_error = sys.exc_info()
 else:
     try:
         version = jedi.__version__
