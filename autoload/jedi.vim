@@ -99,10 +99,14 @@ endfunction
 let s:_init_python = -1
 function! jedi#init_python() abort
     if s:_init_python == -1
+        let s:_init_python = 0
         try
             let s:_init_python = s:init_python()
-        catch
-            let s:_init_python = 0
+            let s:_init_python = 1
+        catch /^jedi/
+            " Only catch errors from jedi-vim itself here, so that for
+            " unexpected Python exceptions the traceback will be shown
+            " (e.g. with NameError in jedi#setup_python_imports's code).
             if !exists('g:jedi#squelch_py_warning')
                 let error_lines = split(v:exception, '\n')
                 let msg = 'Error: jedi-vim failed to initialize Python: '
@@ -139,23 +143,21 @@ function! jedi#setup_python_imports(py_version) abort
 
     execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
 
-    let g:_jedi_init_outcome = 0
+    let g:_jedi_init_error = 0
     let init_lines = [
           \ 'import vim',
           \ 'try:',
           \ '    import jedi_vim',
           \ '    if hasattr(jedi_vim, "jedi_import_error"):',
           \ '        from jedi_vim_debug import format_exc_info',
-          \ '        vim.vars["_jedi_init_outcome"] = format_exc_info(jedi_vim.jedi_import_error)',
-          \ '    else:',
-          \ '        vim.vars["_jedi_init_outcome"] = 1',
+          \ '        vim.vars["_jedi_init_error"] = format_exc_info(jedi_vim.jedi_import_error)',
           \ 'except Exception as exc:',
           \ '    from jedi_vim_debug import format_exc_info',
-          \ '    vim.vars["_jedi_init_outcome"] = format_exc_info()',
+          \ '    vim.vars["_jedi_init_error"] = format_exc_info()',
           \ ]
     exe 'PythonJedi exec('''.escape(join(init_lines, '\n'), "'").''')'
-    if g:_jedi_init_outcome isnot 1
-        throw printf('jedi#setup_python_imports: %s', g:_jedi_init_outcome)
+    if g:_jedi_init_error isnot 0
+        throw printf('jedi#setup_python_imports: %s', g:_jedi_init_error)
     endif
     return 1
 endfunction
