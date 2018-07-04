@@ -49,5 +49,6 @@ if g:jedi#auto_initialization
     endif
     augroup jedi_usages
         autocmd TextChanged <buffer> call jedi#remove_usages()
+        autocmd InsertEnter <buffer> call jedi#remove_usages()
     augroup END
 endif
