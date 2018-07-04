@@ -57,14 +57,35 @@ endfor
 " ------------------------------------------------------------------------
 let s:script_path = fnameescape(expand('<sfile>:p:h:h'))
 
+" Initialize Python (PythonJedi command).
 function! s:init_python() abort
-    if has('python3')
-        call jedi#setup_python_imports(3)
-    elseif has('python')
-        call jedi#setup_python_imports(2)
+    " Use g:jedi#force_py_version for loading Jedi, or fall back to using
+    " `has()` - preferring Python 3.
+    let loader_version = get(g:, 'jedi#loader_py_version', g:jedi#force_py_version)
+    if loader_version ==# 'auto'
+        if has('python3')
+            let loader_version = 3
+        elseif has('python2')
+            let loader_version = 2
+        else
+            throw 'jedi-vim requires Vim with support for Python 2 or 3.'
+        endif
     else
-        throw 'jedi-vim requires Vim with support for Python 2 or 3.'
+        if loader_version =~# '^3'
+            let loader_version = 3
+        elseif loader_version =~# '^2'
+            let loader_version = 2
+        else
+            if !exists('g:jedi#squelch_py_warning')
+                echohl WarningMsg
+                echom printf("jedi-vim: could not determine Python loader version from 'g:jedi#loader_py_version/g:jedi#force_py_version' (%s), using 3.",
+                            \ loader_version)
+                echohl None
+            endif
+            let loader_version = 3
+        endif
     endif
+    call jedi#setup_python_imports(loader_version)
     return 1
 endfunction
 
