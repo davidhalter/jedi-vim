@@ -340,6 +340,14 @@ def goto(mode="goto"):
     return definitions
 
 
+def relpath(path):
+    """Make path relative to cwd if it is below."""
+    abspath = os.path.abspath(path)
+    if abspath.startswith(os.getcwd()):
+        return os.path.relpath(path)
+    return path
+
+
 def show_goto_multi_results(definitions):
     """Create a quickfix list for multiple definitions."""
     lst = []
@@ -352,7 +360,8 @@ def show_goto_multi_results(definitions):
             lst.append(dict(text=PythonToVimStr(d.description)))
         else:
             text = '[%s] %s' % (d.description, d.get_line_code().strip())
-            lst.append(dict(filename=PythonToVimStr(d.module_path),
+            filename = relpath(d.module_path)
+            lst.append(dict(filename=PythonToVimStr(filename),
                             lnum=d.line, col=d.column + 1,
                             text=PythonToVimStr(text)))
     vim_eval('setqflist(%s)' % repr(lst))
