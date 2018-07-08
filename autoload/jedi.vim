@@ -65,7 +65,7 @@ function! s:init_python() abort
     if loader_version ==# 'auto'
         if has('python3')
             let loader_version = 3
-        elseif has('python2')
+        elseif has('python')
             let loader_version = 2
         else
             throw 'jedi-vim requires Vim with support for Python 2 or 3.'
