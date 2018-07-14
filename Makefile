@@ -4,7 +4,7 @@ test:
 build:
 	mkdir $@
 build/vint: | build
-	virtualenv $@
+	python3 -m venv $@
 	$@/bin/pip install vim-vint
 check: LINT_FILES:=after autoload ftplugin plugin
 check: build/vint
