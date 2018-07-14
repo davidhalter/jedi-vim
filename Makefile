@@ -4,8 +4,8 @@ test:
 build:
 	mkdir $@
 build/vint: | build
-	virtualenv $@
-	$@/bin/pip install vim-vint
+	virtualenv -p python3.6 $@
+	$@/bin/pip install vim-vint==0.3.19
 check: LINT_FILES:=after autoload ftplugin plugin
 check: build/vint
 	build/vint/bin/vint $(LINT_FILES)
