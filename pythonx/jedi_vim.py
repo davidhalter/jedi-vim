@@ -491,6 +491,10 @@ def show_call_signatures(signatures=()):
         # Descriptions are usually looking like `param name`, remove the param.
         params = [p.description.replace('\n', '').replace('param ', '', 1)
                   for p in signature.params]
+        if params == ['']:
+            # This is the case with `Exception(` for example.
+            # It makes no sense to display `()` then.
+            return
         try:
             # *_*PLACEHOLDER*_* makes something fat. See after/syntax file.
             params[signature.index] = '*_*%s*_*' % params[signature.index]
