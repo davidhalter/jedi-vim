@@ -12,4 +12,4 @@ install:
     fi
 script:
   - vim --version
-  - make "$ENV"
+  - make --keep-going "$ENV"
