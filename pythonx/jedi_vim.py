@@ -475,6 +475,7 @@ def show_call_signatures(signatures=()):
     if int(vim_eval("g:jedi#show_call_signatures")) == 2:
         return cmdline_call_signatures(signatures)
 
+    seen_sigs = []
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
         # signatures are listed above each other
@@ -496,6 +497,11 @@ def show_call_signatures(signatures=()):
             params[signature.index] = '*_*%s*_*' % params[signature.index]
         except (IndexError, TypeError):
             pass
+
+        # Skip duplicates.
+        if params in seen_sigs:
+            continue
+        seen_sigs.append(params)
 
         # This stuff is reaaaaally a hack! I cannot stress enough, that
         # this is a stupid solution. But there is really no other yet.
