@@ -348,6 +348,19 @@ def relpath(path):
     return path
 
 
+def annotate_description(d):
+    code = d.get_line_code().strip()
+    if d.type == 'statement':
+        return code
+    if d.type == 'function':
+        if code.startswith('def'):
+            return code
+        typ = 'def'
+    else:
+        typ = d.type
+    return '[%s] %s' % (typ, code)
+
+
 def show_goto_multi_results(definitions):
     """Create a quickfix list for multiple definitions."""
     lst = []
@@ -359,9 +372,8 @@ def show_goto_multi_results(definitions):
             # well.
             lst.append(dict(text=PythonToVimStr(d.description)))
         else:
-            text = '[%s] %s' % (d.description, d.get_line_code().strip())
-            filename = relpath(d.module_path)
-            lst.append(dict(filename=PythonToVimStr(filename),
+            text = annotate_description(d)
+            lst.append(dict(filename=PythonToVimStr(relpath(d.module_path)),
                             lnum=d.line, col=d.column + 1,
                             text=PythonToVimStr(text)))
     vim_eval('setqflist(%s)' % repr(lst))
