@@ -862,7 +862,7 @@ def show_call_signatures(signatures=()):
         params = [p.description.replace('\n', '').replace('param ', '', 1)
                   for p in signature.params]
         try:
-            # *_*PLACEHOLDER*_* makes something fat. See after/syntax file.
+            # *_*PLACEHOLDER*_* makes something fat via jediFatSymbol.
             params[signature.index] = '*_*%s*_*' % params[signature.index]
         except (IndexError, TypeError):
             pass
