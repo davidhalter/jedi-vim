@@ -26,6 +26,9 @@ if is_py3:
 else:
     ELLIPSIS = u"…"
 
+_show_call_signatures_mode = None
+"""Current mode for call signatures (1: concealing, 2: command line)"""
+
 
 try:
     # Somehow sys.prefix is set in combination with VIM and virtualenvs.
@@ -337,8 +340,8 @@ def completions():
 
     # Clear call signatures in the buffer so they aren't seen by the completer.
     # Call signatures in the command line can stay.
-    if int(vim_eval("g:jedi#show_call_signatures")) == 1:
-        restore_signatures = clear_call_signatures(True)
+    if _show_call_signatures_mode == 1:
+        restore_signatures = clear_call_signatures(temporary=True)
 
     base = vim.eval('a:base')
     source = ''
@@ -799,8 +802,7 @@ def show_documentation():
 
 @catch_and_print_exceptions
 def clear_call_signatures(temporary=False):
-    # Check if using command line call signatures
-    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
+    if _show_call_signatures_mode == 2:
         vim_command('echo ""')
         return
 
@@ -826,7 +828,17 @@ def clear_call_signatures(temporary=False):
 
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
-def show_call_signatures(signatures=()):
+def show_call_signatures(signatures=(), mode=None):
+    """Show call signatures and remember current mode.
+
+    Passing in the mode from Vim avoids to call back into it several times.
+    """
+    global _show_call_signatures_mode
+    if mode is None and _show_call_signatures_mode is None:
+        print('jedi-vim: called show_call_signatures without mode')
+        return
+    _show_call_signatures_mode = mode
+
     # We need to clear the signatures before we calculate them again. The
     # reason for this is that call signatures are unfortunately written to the
     # buffer.
@@ -837,7 +849,7 @@ def show_call_signatures(signatures=()):
     if not signatures:
         return
 
-    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
+    if mode == 2:
         return cmdline_call_signatures(signatures)
 
     seen_sigs = []

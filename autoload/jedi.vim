@@ -570,7 +570,8 @@ function! jedi#show_call_signatures() abort
     let s:show_call_signatures_last = [line, col, curline]
 
     if reload_signatures
-        python3 jedi_vim.show_call_signatures()
+        exe printf('python3 jedi_vim.show_call_signatures((), %d)',
+              \ g:jedi#show_call_signatures)
     endif
 endfunction
 
