@@ -293,16 +293,44 @@ function! jedi#goto_stubs() abort
 endfunction
 
 function! jedi#usages() abort
-    call jedi#remove_usages()
     PythonJedi jedi_vim.usages()
 endfunction
 
-function! jedi#remove_usages() abort
-    for match in getmatches()
-        if stridx(match['group'], 'jediUsage') == 0
-            call matchdelete(match['id'])
-        endif
-    endfor
+" Hide usages in the current window.
+function! jedi#hide_usages_in_win() abort
+    if has_key(w:, '_jedi_usages_matchids')
+        for matchid in w:_jedi_usages_matchids
+            call matchdelete(matchid)
+        endfor
+        unlet w:_jedi_usages_matchids
+    endif
+    " Remove the autocommands that might have triggered this function.
+    augroup jedi_usages
+        autocmd! * <buffer>
+    augroup END
+endfunction
+
+function! jedi#show_usages_in_win() abort
+    PythonJedi jedi_vim.highlight_usages_for_win()
+    if !exists('#jedi_usages#TextChanged')
+        augroup jedi_usages
+        " Unset highlights on any changes to this buffer.
+        autocmd TextChanged <buffer> call jedi#clear_usages()
+        " Hide usages when the buffer is removed from the window, or when
+        " entering insert mode (but keep them for later).
+        autocmd BufWinLeave,InsertEnter <buffer> call jedi#hide_usages_in_win()
+        augroup END
+    endif
+endfunction
+
+" Remove/unset global usages.
+function! jedi#clear_usages() abort
+    call jedi#hide_usages_in_win()
+    PythonJedi jedi_vim._current_highlights = None
+
+    if exists('#jedi_usage#BufWinEnter')
+      augroup! jedi_usages BufWinEnter
+    endif
 endfunction
 
 function! jedi#rename(...) abort
@@ -393,19 +421,47 @@ endfunction
 " ------------------------------------------------------------------------
 
 function! jedi#add_goto_window(len) abort
-    set lazyredraw
-    cclose
     let height = min([a:len, g:jedi#quickfix_window_height])
-    execute 'belowright copen '.height
-    set nolazyredraw
+    " " Q: why the cclose?  To get the height always?
+    " " Should save/restore lazyredraw otherwise.
+    " let save_lazyredraw = &lazyredraw
+    " set lazyredraw
+    " try
+    "     execute 'belowright cwindow '.height
+    " finally
+    "     let &lazyredraw = save_lazyredraw
+    " endtry
+
+    " Using :cwindow allows to stay in the current window in case it is opened
+    " already.
+    execute 'belowright cwindow '.height
+
     if g:jedi#use_tabs_not_buffers == 1
         noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
     endif
+
+    function! s:on_closed_qf() abort
+      " Remove global usages when the quickfix buffer is removed from the
+      " window, e.g. with :cclose.
+      PythonJedi jedi_vim.highlight_usages(None)
+    endfunction
+
     augroup jedi_goto_window
-      au!
-      au WinLeave <buffer> q  " automatically leave, if an option is chosen
+      " pretty annoying
+      " au WinLeave <buffer> q  " automatically leave, if an option is chosen
+
+      autocmd BufWinLeave <buffer> call s:on_closed_qf()
     augroup END
-    redraw!
+
+    " Setup global autocommand to display any usages for a window.
+    " Gets removed when closing the quickfix window that displays them, or
+    " when clearing them (e.g. on TextChanged).
+    augroup jedi_usages
+      autocmd! BufWinEnter * call jedi#show_usages_in_win()
+    augroup END
+
+    " Preview
+    exe "nnoremap <buffer> p \<CR>:PythonJedi jedi_vim.highlight_usages_for_win()\<CR>\<C-w>p"
 endfunction
 
 

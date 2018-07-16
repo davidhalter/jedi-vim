@@ -401,17 +401,52 @@ def usages(visuals=True):
     return definitions
 
 
+_current_highlights = None
+"""Current (definitions, length) to use for highlighting."""
+
+
 def highlight_usages(definitions, length=None):
+    """Set definitions to be highlighted, and highlight the current window."""
+    global _current_highlights
+    _current_highlights = (definitions, length)
+    if definitions:
+        highlight_usages_for_win()
+
+
+def highlight_usages_for_win():
+    """Highlight usages in the current window.
+
+    It stores the matchids in a window-local variable.
+
+    (matchaddpos() only works for the current window.)
+    """
+    global _current_highlights
+
+    if _current_highlights is None:
+        print('jedi-vim: called highlight_usages_for_win without highlights!')
+        return
+
+    if '_jedi_usages_matchids' in vim.current.window.vars:
+        for matchid in vim.current.window.vars['_jedi_usages_matchids']:
+            expr = 'matchdelete(%d)' % int(matchid)
+            vim.eval(expr)
+
+    (definitions, length) = _current_highlights
+
+    buffer_path = vim.current.buffer.name
+    matchids = []
     for definition in definitions:
-        # Only color the current module/buffer.
-        if (definition.module_path or '') == vim.current.buffer.name:
-            # mathaddpos needs a list of positions where a position is a list
-            # of (line, column, length).
-            # The column starts with 1 and not 0.
+        if (definition.module_path or '') == buffer_path:
             positions = [
-                [definition.line, definition.column + 1, length or len(definition.name)]
+                [definition.line,
+                 definition.column + 1,
+                 length or len(definition.name)]
             ]
-            vim_eval("matchaddpos('jediUsage', %s)" % repr(positions))
+            expr = "matchaddpos('jediUsage', %s)" % repr(positions)
+            matchids.append(vim_eval(expr))
+
+    if matchids:
+        vim.current.window.vars['_jedi_usages_matchids'] = matchids
 
 
 @_check_jedi_availability(show_error=True)
