@@ -827,9 +827,6 @@ def clear_call_signatures(temporary=False):
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
 def show_call_signatures(signatures=()):
-    if int(vim_eval("has('conceal') && g:jedi#show_call_signatures")) == 0:
-        return
-
     # We need to clear the signatures before we calculate them again. The
     # reason for this is that call signatures are unfortunately written to the
     # buffer.
