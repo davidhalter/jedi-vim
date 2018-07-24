@@ -401,7 +401,7 @@ def usages(visuals=True):
     return definitions
 
 
-_current_highlights = None
+_current_highlights = (None, None)
 """Current (definitions, length) to use for highlighting."""
 
 
@@ -421,13 +421,13 @@ def highlight_usages_for_win():
     (matchaddpos() only works for the current window.)
     """
     global _current_highlights
-
-    if _current_highlights is None:
+    if _current_highlights[0] is None:
         print('jedi-vim: called highlight_usages_for_win without highlights!')
         return
 
-    if '_jedi_usages_matchids' in vim.current.window.vars:
-        for matchid in vim.current.window.vars['_jedi_usages_matchids']:
+    cur_matchids = vim.current.window.vars.get('_jedi_usages_matchids')
+    if cur_matchids:
+        for matchid in cur_matchids:
             expr = 'matchdelete(%d)' % int(matchid)
             vim.eval(expr)
 
@@ -445,8 +445,9 @@ def highlight_usages_for_win():
             expr = "matchaddpos('jediUsage', %s)" % repr(positions)
             matchids.append(vim_eval(expr))
 
-    if matchids:
-        vim.current.window.vars['_jedi_usages_matchids'] = matchids
+    # Always set it (uses an empty list for "unset", which is not possible
+    # using del).
+    vim.current.window.vars['_jedi_usages_matchids'] = matchids
 
 
 @_check_jedi_availability(show_error=True)
