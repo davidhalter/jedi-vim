@@ -342,6 +342,8 @@ def completions():
     # Call signatures in the command line can stay.
     if _show_call_signatures_mode == 1:
         restore_signatures = clear_call_signatures(temporary=True)
+    else:
+        restore_signatures = None
 
     base = vim.eval('a:base')
     source = ''
@@ -384,7 +386,7 @@ def completions():
         completions = []
 
     if restore_signatures:
-        show_call_signatures()
+        show_call_signatures(restore_signatures)
     vim.command('return ' + strout)
 
 
