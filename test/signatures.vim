@@ -13,11 +13,8 @@ describe 'signatures'
     it 'simple'
         normal odef xyz(number): return
         normal o
-        normal oxyz( 
-        normal G$
-        " equals doautocmd CursorMovedI
-        Python jedi_vim.show_call_signatures()
-
+        normal oxyz()
+        doautocmd CursorHoldI
         Expect getline(3) == '?!?jedi=0, ?!?   (*_*number*_*) ?!?jedi?!?'
 
         doautocmd InsertLeave
@@ -43,13 +40,13 @@ describe 'signatures'
     it 'simple after CursorHoldI with only parenthesis'
         noautocmd normal o
         doautocmd CursorHoldI
-        noautocmd normal istr( 
+        noautocmd normal istr()
         doautocmd CursorHoldI
         Expect getline(1) == '?!?jedi=0, ?!?   (*_*object*_*) ?!?jedi?!?'
     end
 
     it 'no signature'
-        normal ostr 
+        exe 'normal ostr '
         Python jedi_vim.show_call_signatures()
         Expect getline(1, '$') == ['', 'str ']
     end
@@ -57,7 +54,7 @@ describe 'signatures'
     it 'signatures disabled'
         let g:jedi#show_call_signatures = 0
 
-        normal ostr( 
+        exe 'normal ostr( '
         Python jedi_vim.show_call_signatures()
         Expect getline(1, '$') == ['', 'str( ']
 
@@ -68,19 +65,19 @@ describe 'signatures'
         let g:jedi#show_call_signatures = 2
         call jedi#configure_call_signatures()
 
-        normal ostr( 
+        exe 'normal ostr( '
         redir => msg
         Python jedi_vim.show_call_signatures()
         redir END
         Expect msg == "\nstr(object)"
 
         redir => msg
-        doautocmd InsertLeave 
+        doautocmd InsertLeave
         redir END
         Expect msg == "\n"
 
         normal Sdef foo(a, b): pass
-        normal ofoo(a, b, c, 
+        exe 'normal ofoo(a, b, c, '
         redir => msg
         Python jedi_vim.show_call_signatures()
         redir END
@@ -104,13 +101,13 @@ describe 'signatures'
         execute "normal o".funcname."( "
         Expect Signature() == "\n".funcname."(arg1, …)"
 
-        normal sarg1, 
+        exe 'normal sarg1, '
         Expect Signature() == "\n".funcname."(…, arg2, …)"
 
-        normal sarg2, arg3, 
+        exe 'normal sarg2, arg3, '
         Expect Signature() == "\n".funcname."(…, a, b, c)"
 
-        normal sa, b, 
+        exe 'normal sa, b, '
         Expect Signature() == "\n".funcname."(…, c)"
 
         g/^/d
@@ -124,7 +121,7 @@ describe 'signatures'
         let g:jedi#show_call_signatures = 2
         call jedi#configure_call_signatures()
 
-        normal ostr 
+        exe 'normal ostr '
         redir => msg
         Python jedi_vim.show_call_signatures()
         redir END
