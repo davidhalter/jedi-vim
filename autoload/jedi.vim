@@ -611,6 +611,8 @@ endfunction
 
 
 let s:prev_show_call_signatures = 0
+" a:1 (optional): new setting
+" a:2 (optional): new mode
 function! jedi#configure_call_signatures(...) abort
     if a:0
         let old = g:jedi#show_call_signatures
