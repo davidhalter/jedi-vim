@@ -170,7 +170,19 @@ function! jedi#debug_info() abort
       endif
     endif
     echo '#### Jedi-vim debug information'
-    echo 'Using Python version:' s:python_version
+    echo "\n"
+    echo '##### jedi-vim version'
+    echo "\n"
+    echo ' - jedi-vim git version: '
+    echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
+    echo ' - jedi git submodule status: '
+    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/jedi'), '\v\n$', '', '')
+    echo ' - parso git submodule status: '
+    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/parso'), '\v\n$', '', '')
+    echo "\n"
+    echo '##### Global Python'
+    echo "\n"
+    echo 'Using Python version '.s:python_version.' to access Jedi.'
     let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
     let s:pythonjedi_called = 0
     PythonJedi import vim; vim.command('let s:pythonjedi_called = 1')
@@ -185,14 +197,9 @@ function! jedi#debug_info() abort
       PythonJedi from jedi_vim_debug import display_debug_info
       PythonJedi display_debug_info()
     endif
-    echo ' - jedi-vim git version: '
-    echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
-    echo ' - jedi git submodule status: '
-    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/jedi'), '\v\n$', '', '')
-    echo ' - parso git submodule status: '
-    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/parso'), '\v\n$', '', '')
     echo "\n"
     echo '##### Settings'
+    echo "\n"
     echo '```'
     let jedi_settings = items(filter(copy(g:), "v:key =~# '\\v^jedi#'"))
     let has_nondefault_settings = 0

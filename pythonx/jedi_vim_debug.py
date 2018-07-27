@@ -53,7 +53,7 @@ def display_debug_info():
         echo_error('ERROR: could not import the "jedi" Python module: {0}'.format(
             error_msg))
     else:
-        echo('Jedi path: `{0}`'.format(jedi_vim.jedi.__file__))
+        echo('\n##### Jedi\n\n - path: `{0}`'.format(jedi_vim.jedi.__file__))
         echo(' - version: {0}'.format(jedi_vim.jedi.__version__))
 
         try:
@@ -65,7 +65,8 @@ def display_debug_info():
             except AttributeError:
                 sys_path = script_evaluator.sys_path
         else:
-            echo(' - environment: `{0}`'.format(environment))
+            echo('\n##### Jedi environment: {0}\n\n'.format(environment))
+            echo(' - executable: {0}'.format(environment.executable))
             try:
                 sys_path = environment.get_sys_path()
             except Exception:
@@ -76,3 +77,11 @@ def display_debug_info():
         echo(' - sys_path:')
         for p in sys_path:
             echo('    - `{0}`'.format(p))
+
+        if environment:
+            echo('\n##### Known environments\n\n')
+            for environment in jedi_vim.get_known_environments():
+                echo(' - {0} ({1})\n'.format(
+                    environment,
+                    environment.executable,
+                ))
