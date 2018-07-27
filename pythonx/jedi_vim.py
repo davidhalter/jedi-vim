@@ -195,7 +195,7 @@ def get_environment(use_cache=True):
 
 def get_known_environments():
     """Get known Jedi environments."""
-    envs = list(jedi.api.environment.find_virtualenvs(paths=[], safe=False))
+    envs = list(jedi.api.environment.find_virtualenvs())
     envs.extend(jedi.api.environment.find_system_environments())
     return envs
 
