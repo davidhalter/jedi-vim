@@ -193,6 +193,13 @@ def get_environment(use_cache=True):
     return environment
 
 
+def get_known_environments():
+    """Get known Jedi environments."""
+    envs = list(jedi.api.environment.find_virtualenvs())
+    envs.extend(jedi.api.environment.find_system_environments())
+    return envs
+
+
 @catch_and_print_exceptions
 def get_script(source=None, column=None):
     jedi.settings.additional_dynamic_modules = [
