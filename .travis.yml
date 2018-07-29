@@ -6,6 +6,10 @@ env:
     - ENV=test
     - ENV=check
     - ENV=test_coverage
+matrix:
+  include:
+    - env: ENV=test_coverage
+      python: 2.7
 install:
   - |
     if [ "$ENV" = "test" ]; then
@@ -25,4 +29,4 @@ script:
 
 after_success:
   - coverage xml
-  - bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy -X fix -X search -X xcode -f coverage.xml
+  - bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy -X fix -X search -X xcode -f coverage.xml -F py${TRAVIS_PYTHON_VERSION//./}
