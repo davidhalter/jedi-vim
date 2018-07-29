@@ -3,13 +3,13 @@ language: python
 python: 3.6
 env:
   matrix:
-    - ENV=test
+    - ENV=test_coverage
     - ENV=check
     - ENV=test_nvim
 install:
   - |
-    if [ "$ENV" = "test" ]; then
-      python3.6 -m pip install pytest
+    if [ "$ENV" = "test_coverage" ]; then
+      python3.6 -m pip install pytest pytest-cov
     fi
   - |
     # https://github.com/neovim/bot-ci#generated-builds
@@ -22,3 +22,7 @@ install:
     fi
 script:
   - make --keep-going "$ENV"
+
+after_script:
+  - coverage xml
+  - bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy -X fix -X search -X xcode -f coverage.xml
