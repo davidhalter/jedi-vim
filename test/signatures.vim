@@ -94,7 +94,7 @@ describe 'signatures'
             return msg
         endfunction
 
-        let funcname = repeat('a', &columns - 30)
+        let funcname = repeat('a', &columns - (30 + (&ruler ? 18 : 0)))
         put = 'def '.funcname.'(arg1, arg2, arg3, a, b, c):'
         put = '    pass'
         execute "normal o".funcname."( "
