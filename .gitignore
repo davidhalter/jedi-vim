@@ -5,3 +5,4 @@
 doc/tags
 .pytest-cache
 build
+.coverage*

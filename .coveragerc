@@ -1,0 +1,6 @@
+[run]
+branch = 1
+source = .
+
+[report]
+include = pythonx/jedi_*.py,test/*
