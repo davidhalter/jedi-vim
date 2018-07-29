@@ -1,6 +1,9 @@
 import os
 import subprocess
-import urllib.request
+try:
+    from urllib.request import urlretrieve
+except ImportError:
+    from urllib import urlretrieve
 import zipfile
 
 import pytest
@@ -47,7 +50,7 @@ def pytest_configure(config):
         os.mkdir(CACHE_FOLDER)
 
     if not os.path.exists(VSPEC_FOLDER):
-        name, hdrs = urllib.request.urlretrieve(VSPEC_URL)
+        name, hdrs = urlretrieve(VSPEC_URL)
         z = zipfile.ZipFile(name)
         for n in z.namelist():
             dest = os.path.join(CACHE_FOLDER, n)
