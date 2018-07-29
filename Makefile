@@ -1,5 +1,5 @@
 test:
-	pytest test_*.py
+	pytest
 
 build:
 	mkdir $@
