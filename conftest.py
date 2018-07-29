@@ -5,9 +5,9 @@ import zipfile
 
 import pytest
 
-VSPEC_URL = 'https://github.com/kana/vim-vspec/archive/1.4.1.zip'
+VSPEC_URL = 'https://github.com/kana/vim-vspec/archive/1.8.1.zip'
 CACHE_FOLDER = 'build'
-VSPEC_FOLDER = os.path.join(CACHE_FOLDER, 'vim-vspec-1.4.1')
+VSPEC_FOLDER = os.path.join(CACHE_FOLDER, 'vim-vspec-1.8.1')
 VSPEC_RUNNER = os.path.join(VSPEC_FOLDER, 'bin/vspec')
 TEST_DIR = 'test'
 

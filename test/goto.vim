@@ -4,7 +4,7 @@ source test/_utils.vim
 
 describe 'goto simple'
     before
-        new  " open a new split
+        new
         set filetype=python
         put =[
         \   'def a(): pass',
@@ -27,18 +27,18 @@ describe 'goto simple'
     end
 
     it 'goto assignments'
-        silent normal \g
+        normal \g
         Expect line('.') == 2
         Expect col('.') == 1
 
         " cursor before `=` means that it stays there.
-        silent normal \g
+        normal \g
         Expect line('.') == 2
         Expect col('.') == 1
 
         " going to the last line changes it.
         normal! $
-        silent normal \g
+        normal \g
         Expect line('.') == 1
         Expect col('.') == 5
     end
@@ -52,47 +52,48 @@ describe 'goto with tabs'
     end
 
     after
-        bd!
-        bd!
+        try | %bwipeout! | catch | endtry
     end
 
     it 'follow import'
         put = ['import subprocess', 'subprocess']
-        silent normal G\g
+        normal G\g
         Expect getline('.') == 'import subprocess'
         Expect line('.') == 2
         Expect col('.') == 8
 
-        silent normal G\d
+        normal G\d
         Expect CurrentBufferIsModule('subprocess') == 1
         Expect line('.') == 1
         Expect col('.') == 1
         Expect tabpagenr('$') == 2
         Expect winnr('$') == 1
-        tabprevious
+        bwipe
+
+        Expect tabpagenr('$') == 1
         Expect bufname('%') == ''
     end
 
-    it 'multi definitions'
-        " This used to behave differently. Now we don't have any real multi
-        " definitions.
-
-        " put = ['import tokenize']
-        " silent normal G$\d
-        " Expect CurrentBufferIsModule('tokenize') == 1
-        " Expect CurrentBufferIsModule('token') == 0
-        " execute "normal \<CR>"
-        " Expect tabpagenr('$') == 2
-        " Expect winnr('$') == 1
-        " Expect CurrentBufferIsModule('token') == 1
-
-        " bd
-        " silent normal G$\d
-        " execute "normal j\<CR>"
-        " Expect tabpagenr('$') == 2
-        " Expect winnr('$') == 1
-        " Expect CurrentBufferIsModule('tokenize') == 1
-    end
+    " it 'multi definitions'
+    "     " This used to behave differently. Now we don't have any real multi
+    "     " definitions.
+    "
+    "     " put = ['import tokenize']
+    "     " normal G$\d
+    "     " Expect CurrentBufferIsModule('tokenize') == 1
+    "     " Expect CurrentBufferIsModule('token') == 0
+    "     " execute "normal \<CR>"
+    "     " Expect tabpagenr('$') == 2
+    "     " Expect winnr('$') == 1
+    "     " Expect CurrentBufferIsModule('token') == 1
+    "
+    "     " bd
+    "     " normal G$\d
+    "     " execute "normal j\<CR>"
+    "     " Expect tabpagenr('$') == 2
+    "     " Expect winnr('$') == 1
+    "     " Expect CurrentBufferIsModule('tokenize') == 1
+    " end
 end
 
 
@@ -103,8 +104,7 @@ describe 'goto with buffers'
     end
 
     after
-        bd!
-        bd!
+        try | %bwipeout! | catch | endtry
         set nohidden
     end
 
@@ -125,47 +125,47 @@ describe 'goto with buffers'
         Expect col('.') == 1
     end
 
-    it 'multi definitions'
-        " set hidden
-        " put = ['import tokenize']
-        " silent normal G$\d
-        " Expect CurrentBufferIsModule('tokenize') == 0
-        " Expect CurrentBufferIsModule('token') == 0
-        " execute "normal \<CR>"
-        " Expect tabpagenr('$') == 1
-        " Expect winnr('$') == 1
-        " Expect CurrentBufferIsModule('token') == 1
-
-        " bd
-        " silent normal G$\d
-        " execute "normal j\<CR>"
-        " Expect tabpagenr('$') == 1
-        " Expect winnr('$') == 1
-        " Expect CurrentBufferIsModule('tokenize') == 1
-    end
+    " it 'multi definitions'
+    "     " set hidden
+    "     " put = ['import tokenize']
+    "     " normal G$\d
+    "     " Expect CurrentBufferIsModule('tokenize') == 0
+    "     " Expect CurrentBufferIsModule('token') == 0
+    "     " execute "normal \<CR>"
+    "     " Expect tabpagenr('$') == 1
+    "     " Expect winnr('$') == 1
+    "     " Expect CurrentBufferIsModule('token') == 1
+    "
+    "     " bd
+    "     " normal G$\d
+    "     " execute "normal j\<CR>"
+    "     " Expect tabpagenr('$') == 1
+    "     " Expect winnr('$') == 1
+    "     " Expect CurrentBufferIsModule('tokenize') == 1
+    " end
 end
 
 
 
 describe 'goto with splits'
     before
+        enew!
         set filetype=python
         let g:jedi#use_splits_not_buffers = 'left'
     end
 
     after
-        bd!
-        bd!
+        try | %bwipeout! | catch | endtry
     end
 
     it 'follow import'
         put = ['import subprocess', 'subprocess']
-        silent normal G\g
+        normal G\g
         Expect getline('.') == 'import subprocess'
         Expect line('.') == 2
         Expect col('.') == 8
 
-        silent normal G\d
+        normal G\d
         Expect CurrentBufferIsModule('subprocess') == 1
         Expect line('.') == 1
         Expect col('.') == 1
@@ -179,6 +179,7 @@ end
 
 describe 'goto wildignore'
     before
+        enew!
         set filetype=python
         set wildignore=*,with\ spaces,*.pyc
         set hidden
@@ -189,12 +190,11 @@ describe 'goto wildignore'
 
         put = ['from subprocess import Popen', 'Popen']
         Expect CurrentBufferIsModule('subprocess') == 0
-        silent normal G
+        normal G
     end
 
     after
-        bd!
-        bd!
+        try | %bwipeout! | catch | endtry
         set wildignore&vim
     end
 

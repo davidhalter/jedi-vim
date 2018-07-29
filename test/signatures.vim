@@ -2,12 +2,12 @@ source plugin/jedi.vim
 
 describe 'signatures'
     before
+        enew
         set filetype=python
     end
 
     after
-        bd!
-        bd!
+        try | %bwipeout! | catch | endtry
     end
 
     it 'simple'
@@ -34,7 +34,6 @@ describe 'signatures'
         autocmd jedi_call_signatures * <buffer>
         redir END
         Expect autocmds =~# 'jedi_call_signatures'
-        bd!
     end
 
     it 'simple after CursorHoldI with only parenthesis'
