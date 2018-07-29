@@ -1,6 +1,9 @@
 test:
 	pytest test_*.py
 
+test_nvim:
+	VSPEC_VIM=nvim pytest test_*.py
+
 build:
 	mkdir $@
 
