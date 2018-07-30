@@ -7,8 +7,7 @@ describe 'pyimport'
     end
 
     after
-        bd!
-        bd!
+        try | %bwipeout! | catch | endtry
     end
 
     it 'open_tab'

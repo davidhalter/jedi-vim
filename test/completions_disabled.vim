@@ -4,12 +4,11 @@ source plugin/jedi.vim
 
 describe 'completions_disabled'
     before
-        new
         set filetype=python
     end
 
     after
-        bd!
+        try | %bwipeout! | catch | endtry
     end
 
     it 'typing'

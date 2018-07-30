@@ -6,8 +6,7 @@ describe 'documentation docstrings'
     end
 
     after
-        bd!
-        bd!
+        try | %bwipeout! | catch | endtry
     end
 
     it 'simple'

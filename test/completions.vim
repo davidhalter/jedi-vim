@@ -63,9 +63,6 @@ describe 'completions'
         Expect getline('.') == 'raise BaseException'
         set completeopt +=longest
     end
-
-    it 'dot_open'
-    end
 end
 
 " vim: et:ts=4:sw=4
