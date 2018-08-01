@@ -96,6 +96,30 @@ function! jedi#reinit_python() abort
 endfunction
 
 
+" This is meant to be called with `:unsilent` (for &shortmess+=F).
+function! s:display_exception() abort
+    let error_lines = split(v:exception, '\n')
+    let msg = 'Error: jedi-vim failed to initialize Python: '
+                \ .error_lines[0].' (in '.v:throwpoint.')'
+    if len(error_lines) > 1
+        echohl ErrorMsg
+        echom 'jedi-vim error: '.error_lines[0]
+        for line in error_lines[1:]
+            echom line
+        endfor
+        echohl None
+        let help_cmd = ':JediDebugInfo'
+        if exists(':checkhealth') == 2
+            let help_cmd .= ' / :checkhealth'
+        endif
+        let msg .= printf('. See :messages and/or %s for more information.',
+              \ help_cmd)
+    endif
+    redraw  " Redraw to only have the main message by default.
+    echoerr msg
+endfunction
+
+
 let s:_init_python = -1
 function! jedi#init_python() abort
     if s:_init_python == -1
@@ -108,20 +132,7 @@ function! jedi#init_python() abort
             " unexpected Python exceptions the traceback will be shown
             " (e.g. with NameError in jedi#setup_python_imports's code).
             if !exists('g:jedi#squelch_py_warning')
-                let error_lines = split(v:exception, '\n')
-                let msg = 'Error: jedi-vim failed to initialize Python: '
-                            \ .error_lines[0].' (in '.v:throwpoint.')'
-                if len(error_lines) > 1
-                    echohl ErrorMsg
-                    echom 'jedi-vim error: '.error_lines[0]
-                    for line in error_lines[1:]
-                        echom line
-                    endfor
-                    echohl None
-                    let msg .= '. See :messages for more information.'
-                endif
-                redraw  " Redraw to only have the main message by default.
-                echoerr msg
+                unsilent call s:display_exception()
             endif
         endtry
     endif
@@ -189,8 +200,8 @@ function! jedi#debug_info() abort
     if !s:pythonjedi_called
       echohl WarningMsg
       echom 'PythonJedi failed to run, likely a Python config issue.'
-      if exists(':CheckHealth') == 2
-        echom 'Try :CheckHealth for more information.'
+      if exists(':checkhealth') == 2
+        echom 'Try :checkhealth for more information.'
       endif
       echohl None
     else
