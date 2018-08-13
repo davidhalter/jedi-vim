@@ -164,12 +164,14 @@ def get_environment(use_cache=True):
     global current_environment
 
     vim_force_python_version = vim_eval("g:jedi#force_py_version")
-    if use_cache and vim_force_python_version == current_environment[0]:
+    virtual_env = os.environ.get('VIRTUAL_ENV')
+    cache_key = (vim_force_python_version, virtual_env)
+    if use_cache and cache_key == current_environment[0]:
         return current_environment[1]
 
     environment = None
     if vim_force_python_version == "auto":
-        environment = jedi.api.environment.get_cached_default_environment()
+        environment = jedi.api.environment.get_default_environment()
     else:
         force_python_version = vim_force_python_version
         if '0000' in force_python_version or '9999' in force_python_version:
@@ -189,7 +191,7 @@ def get_environment(use_cache=True):
                 "force_python_version=%s is not supported: %s - using %s." % (
                     vim_force_python_version, str(exc), str(environment)))
 
-    current_environment = (vim_force_python_version, environment)
+    current_environment = (cache_key, environment)
     return environment
 
 
