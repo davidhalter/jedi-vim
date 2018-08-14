@@ -315,6 +315,9 @@ def goto(mode="goto"):
             else:
                 echo_highlight("Builtin modules cannot be displayed (%s)."
                                % d.desc_with_module)
+        elif d.line is None and d.column is None:
+            echo_highlight("Cannot display (%s): no line/column."
+                           % d.desc_with_module)
         else:
             using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
             if (d.module_path or '') != vim.current.buffer.name:
