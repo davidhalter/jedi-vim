@@ -1,5 +1,7 @@
 [run]
 branch = 1
+# Used by/for neovim-python-client.
+concurrency = greenlet
 
 [report]
 include = pythonx/jedi_*.py,test/*
