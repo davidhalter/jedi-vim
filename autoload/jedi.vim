@@ -293,44 +293,85 @@ function! jedi#goto_stubs() abort
 endfunction
 
 function! jedi#usages() abort
+    if exists('#jedi_usages#BufWinEnter')
+        call jedi#clear_usages()
+    endif
     PythonJedi jedi_vim.usages()
 endfunction
 
 " Hide usages in the current window.
+" Only handles the current window due to matchdelete() restrictions.
 function! jedi#hide_usages_in_win() abort
-    if has_key(w:, '_jedi_usages_matchids')
-        for matchid in w:_jedi_usages_matchids
-            call matchdelete(matchid)
-        endfor
-        unlet w:_jedi_usages_matchids
-    endif
+    let winnr = winnr()
+    let matchids = getwinvar(winnr, '_jedi_usages_vim_matchids', [])
+
+    for matchid in matchids[1:]
+        call matchdelete(matchid)
+    endfor
+    call setwinvar(winnr, '_jedi_usages_vim_matchids', [])
+
     " Remove the autocommands that might have triggered this function.
     augroup jedi_usages
-        autocmd! * <buffer>
+        exe 'autocmd! * <buffer='.winbufnr(winnr).'>'
     augroup END
+    unlet! b:_jedi_usages_needs_clear
 endfunction
 
+" Show usages for current window (Vim only).
 function! jedi#show_usages_in_win() abort
-    PythonJedi jedi_vim.highlight_usages_for_win()
-    if !exists('#jedi_usages#TextChanged')
+    PythonJedi jedi_vim.highlight_usages_for_vim_win()
+
+    if !exists('#jedi_usages#TextChanged#<buffer>')
         augroup jedi_usages
-        " Unset highlights on any changes to this buffer.
-        autocmd TextChanged <buffer> call jedi#clear_usages()
-        " Hide usages when the buffer is removed from the window, or when
-        " entering insert mode (but keep them for later).
-        autocmd BufWinLeave,InsertEnter <buffer> call jedi#hide_usages_in_win()
+          " Unset highlights on any changes to this buffer.
+          " NOTE: Neovim's API handles movement of highlights, but would only
+          " need to clear highlights that are changed inline.
+          autocmd TextChanged <buffer> call jedi#clear_buffer_usages()
+
+          " Hide usages when the buffer is removed from the window, or when
+          " entering insert mode (but keep them for later).
+          autocmd BufWinLeave,InsertEnter <buffer> call jedi#hide_usages_in_win()
         augroup END
+    endif
+endfunction
+
+" Remove usages for the current buffer (and all its windows).
+function! jedi#clear_buffer_usages() abort
+    let bufnr = bufnr('%')
+    let nvim_src_ids = getbufvar(bufnr, '_jedi_usages_src_ids', [])
+    if !empty(nvim_src_ids)
+        for src_id in nvim_src_ids
+            " TODO: could only clear highlights below/after changed line?!
+            call nvim_buf_clear_highlight(bufnr, src_id, 0, -1)
+        endfor
+    else
+        call jedi#hide_usages_in_win()
     endif
 endfunction
 
 " Remove/unset global usages.
 function! jedi#clear_usages() abort
-    call jedi#hide_usages_in_win()
-    PythonJedi jedi_vim._current_highlights = None
 
-    if exists('#jedi_usage#BufWinEnter')
-      augroup! jedi_usages BufWinEnter
+    augroup jedi_usages
+        autocmd! BufWinEnter
+        autocmd! WinEnter
+    augroup END
+
+    " Vim: clear current window, autocommands will clean others on demand.
+    if !has('nvim')
+        call jedi#hide_usages_in_win()
+
+        " Setup autocommands to clear remaining highlights on WinEnter.
+        augroup jedi_usages
+        for b in range(1, bufnr('$'))
+            if getbufvar(b, '_jedi_usages_needs_clear')
+                exe 'autocmd WinEnter <buffer='.b.'> call jedi#hide_usages_in_win()'
+            endif
+        endfor
+        augroup END
     endif
+
+    PythonJedi jedi_vim.clear_usages()
 endfunction
 
 function! jedi#rename(...) abort
@@ -420,48 +461,61 @@ endfunction
 " helper functions
 " ------------------------------------------------------------------------
 
-function! jedi#add_goto_window(len) abort
+" a:mode: 'goto' or 'usages'
+function! jedi#add_goto_window(mode, len, ...) abort
+    let select_entry = a:0 ? a:1 : 0
     let height = min([a:len, g:jedi#quickfix_window_height])
-    " " Q: why the cclose?  To get the height always?
-    " " Should save/restore lazyredraw otherwise.
-    " let save_lazyredraw = &lazyredraw
-    " set lazyredraw
-    " try
-    "     execute 'belowright cwindow '.height
-    " finally
-    "     let &lazyredraw = save_lazyredraw
-    " endtry
 
     " Using :cwindow allows to stay in the current window in case it is opened
     " already.
     execute 'belowright cwindow '.height
 
-    if g:jedi#use_tabs_not_buffers == 1
-        noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
+    if &filetype ==# 'qf'
+        " Setup quickfix window, but only if it was opened / initially.
+        if g:jedi#use_tabs_not_buffers == 1
+            noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
+        endif
+
+        augroup jedi_goto_window
+            if a:mode ==# 'goto'
+                autocmd WinLeave <buffer> q  " automatically leave, if an option is chosen
+            else
+                autocmd BufWinLeave <buffer> call jedi#clear_usages()
+            endif
+        augroup END
+
+        " Preview
+        " exe "nnoremap <buffer> p \<CR>:PythonJedi jedi_vim.highlight_usages_for_vim_win()\<CR>\<C-w>p"
+
+        if select_entry > 1
+            exe select_entry.'cc'
+        endif
+    elseif !has('nvim') && a:mode ==# 'usages'
+        " Init current window.
+        call jedi#show_usages_in_win()
     endif
 
-    function! s:on_closed_qf() abort
-      " Remove global usages when the quickfix buffer is removed from the
-      " window, e.g. with :cclose.
-      PythonJedi jedi_vim.highlight_usages(None)
-    endfunction
+    if a:mode ==# 'usages'
+        if has('nvim')
+            augroup jedi_usages
+              autocmd! BufWinEnter * call s:usages_for_buffer_nvim()
+            augroup END
+        else
+            " Setup global autocommand to display any usages for a window.
+            " Gets removed when closing the quickfix window that displays them, or
+            " when clearing them (e.g. on TextChanged).
+            augroup jedi_usages
+              autocmd! BufWinEnter,WinEnter * call jedi#show_usages_in_win()
+            augroup END
+        endif
+    endif
+endfunction
 
-    augroup jedi_goto_window
-      " pretty annoying
-      " au WinLeave <buffer> q  " automatically leave, if an option is chosen
-
-      autocmd BufWinLeave <buffer> call s:on_closed_qf()
-    augroup END
-
-    " Setup global autocommand to display any usages for a window.
-    " Gets removed when closing the quickfix window that displays them, or
-    " when clearing them (e.g. on TextChanged).
-    augroup jedi_usages
-      autocmd! BufWinEnter * call jedi#show_usages_in_win()
-    augroup END
-
-    " Preview
-    exe "nnoremap <buffer> p \<CR>:PythonJedi jedi_vim.highlight_usages_for_win()\<CR>\<C-w>p"
+" Highlight usages for a buffer if not done so yet (Neovim only).
+function! s:usages_for_buffer_nvim() abort
+    if !exists('b:_jedi_usages_src_ids')
+        PythonJedi jedi_vim.highlight_usages_for_buf()
+    endif
 endfunction
 
 

@@ -345,7 +345,7 @@ def goto(mode="goto"):
                                     repr(PythonToVimStr(old_wildignore)))
             vim.current.window.cursor = d.line, d.column
     else:
-        show_goto_multi_results(definitions)
+        show_goto_multi_results(definitions, 'goto')
     return definitions
 
 
@@ -370,9 +370,11 @@ def annotate_description(d):
     return '[%s] %s' % (typ, code)
 
 
-def show_goto_multi_results(definitions):
+def show_goto_multi_results(definitions, mode):
     """Create a quickfix list for multiple definitions."""
     lst = []
+    (row, col) = vim.current.window.cursor
+    current_idx = None
     for d in definitions:
         if d.column is None:
             # Typically a namespace, in the future maybe other things as
@@ -383,8 +385,19 @@ def show_goto_multi_results(definitions):
             lst.append(dict(filename=PythonToVimStr(relpath(d.module_path)),
                             lnum=d.line, col=d.column + 1,
                             text=PythonToVimStr(text)))
+
+            # Select current/nearest entry via :cc later.
+            if d.line == row and d.column <= col:
+                if (current_idx is None
+                        or (abs(lst[current_idx].column - col)
+                            > abs(d.column - col))):
+                    current_idx = len(lst)
+
     vim_eval('setqflist(%s)' % repr(lst))
-    vim_eval('jedi#add_goto_window(' + str(len(lst)) + ')')
+    if current_idx is not None:
+        vim_eval('jedi#add_goto_window(%r, %d, %d)' % (mode, len(lst), current_idx))
+    else:
+        vim_eval('jedi#add_goto_window(%r, %d)' % (mode, len(lst),))
 
 
 @catch_and_print_exceptions
@@ -397,7 +410,7 @@ def usages(visuals=True):
 
     if visuals:
         highlight_usages(definitions)
-        show_goto_multi_results(definitions)
+        show_goto_multi_results(definitions, 'usages')
     return definitions
 
 
@@ -405,15 +418,101 @@ _current_highlights = (None, None)
 """Current (definitions, length) to use for highlighting."""
 
 
-def highlight_usages(definitions, length=None):
-    """Set definitions to be highlighted, and highlight the current window."""
+try:
+    import neovim  # noqa: F401
+    HAS_NVIM = True
+except ImportError:
+    HAS_NVIM = False
+
+
+def clear_usages():
+    """Clear existing highlights."""
     global _current_highlights
-    _current_highlights = (definitions, length)
+    if _current_highlights[0] is None:
+        return
+    _current_highlights = (None, None)
+
+    if HAS_NVIM:
+        for buf in vim.buffers:
+            src_ids = buf.vars.get('_jedi_usages_src_ids')
+            if src_ids is not None:
+                for src_id in src_ids:
+                    buf.clear_highlight(src_id)
+    else:
+        # Unset current window only.
+        highlight_usages_for_vim_win()
+
+
+def highlight_usages(definitions, length=None):
+    """Set definitions to be highlighted.
+
+    With Neovim it will use the nvim_buf_add_highlight API to highlight all
+    buffers already.
+
+    With Vim only the current window is highlighted via matchaddpos, and
+    autocommands are setup to highlight other windows on demand."""
+
+    global _current_highlights
     if definitions:
-        highlight_usages_for_win()
+        assert not _current_highlights[0]
+    _current_highlights = (definitions, length)
+
+    if HAS_NVIM:
+        bufs = {x.name: x for x in vim.buffers}
+        buf_src_ids = {}
+        for definition in definitions:
+            try:
+                buf = bufs[definition.module_path]
+            except KeyError:
+                continue
+
+            length = length or len(definition.name)
+            src_id = _nvim_highlight_definition(buf, definition, length)
+            buf_src_ids.setdefault(buf, []).append(src_id)
+
+        for buf, src_ids in buf_src_ids.items():
+            buf.vars['_jedi_usages_src_ids'] = src_ids
+    else:
+        highlight_usages_for_vim_win()
 
 
-def highlight_usages_for_win():
+def highlight_usages_for_buf():
+    global _current_highlights
+    (definitions, length) = _current_highlights
+
+    assert HAS_NVIM
+
+    buf = vim.current.buffer
+    bufname = buf.name
+
+    src_ids = []
+    for definition in definitions:
+        if definition.module_path == bufname:
+            length = length or len(definition.name)
+            src_id = _nvim_highlight_definition(buf, definition, length)
+            if src_id:
+                src_ids.append(src_id)
+    buf.vars['_jedi_usages_src_ids'] = src_ids
+
+
+def _nvim_highlight_definition(buf, definition, length):
+    lnum = definition.line-1
+    start_col = definition.column
+
+    # Skip highlighting of module definitions that point to the start
+    # of the file.
+    if definition.type == 'module' and lnum == 0 and start_col == 0:
+        return
+    # TODO: validate that definition.name is at this position?
+    # Would skip the module definitions from above already.
+
+    end_col = definition.column + length
+    src_id = buf.add_highlight('jediUsage', lnum, start_col, end_col,
+                               src_id=0)
+    return src_id
+
+
+def highlight_usages_for_vim_win():
     """Highlight usages in the current window.
 
     It stores the matchids in a window-local variable.
@@ -421,33 +520,43 @@ def highlight_usages_for_win():
     (matchaddpos() only works for the current window.)
     """
     global _current_highlights
-    if _current_highlights[0] is None:
-        print('jedi-vim: called highlight_usages_for_win without highlights!')
-        return
+    (definitions, length) = _current_highlights
 
-    cur_matchids = vim.current.window.vars.get('_jedi_usages_matchids')
+    win = vim.current.window
+
+    cur_matchids = win.vars.get('_jedi_usages_vim_matchids')
     if cur_matchids:
-        for matchid in cur_matchids:
+        if cur_matchids[0] == vim.current.buffer.number:
+            return
+
+        # Need to clear non-matching highlights.
+        for matchid in cur_matchids[1:]:
             expr = 'matchdelete(%d)' % int(matchid)
             vim.eval(expr)
 
-    (definitions, length) = _current_highlights
-
-    buffer_path = vim.current.buffer.name
     matchids = []
-    for definition in definitions:
-        if (definition.module_path or '') == buffer_path:
-            positions = [
-                [definition.line,
-                 definition.column + 1,
-                 length or len(definition.name)]
-            ]
-            expr = "matchaddpos('jediUsage', %s)" % repr(positions)
-            matchids.append(vim_eval(expr))
+    if definitions:
+        buffer_path = vim.current.buffer.name
+        for definition in definitions:
+            if (definition.module_path or '') == buffer_path:
+                positions = [
+                    [definition.line,
+                     definition.column + 1,
+                     length or len(definition.name)]
+                ]
+                expr = "matchaddpos('jediUsage', %s)" % repr(positions)
+                matchids.append(int(vim_eval(expr)))
 
-    # Always set it (uses an empty list for "unset", which is not possible
-    # using del).
-    vim.current.window.vars['_jedi_usages_matchids'] = matchids
+    if matchids:
+        vim.current.window.vars['_jedi_usages_vim_matchids'] = [
+            vim.current.buffer.number] + matchids
+    elif cur_matchids is not None:
+        # Always set it (uses an empty list for "unset", which is not possible
+        # using del).
+        vim.current.window.vars['_jedi_usages_vim_matchids'] = []
+
+    # Remember if clearing is needed for later buffer autocommands.
+    vim.current.buffer.vars['_jedi_usages_needs_clear'] = bool(matchids)
 
 
 @_check_jedi_availability(show_error=True)
