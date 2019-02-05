@@ -17,7 +17,8 @@ build/venv: | build
 	find build/venv -ls
 
 build/venv/bin/vint: | build/venv
-	$|/bin/python -m pip install -q vim-vint==0.3.19
+	$|/bin/python -m pip install --verbose vim-vint==0.3.19
+	find / -name vint -ls
 
 build/venv/bin/flake8: | build/venv
 	$|/bin/python -m pip install -q flake8==3.5.0
