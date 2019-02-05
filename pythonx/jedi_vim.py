@@ -713,16 +713,10 @@ def do_rename(replace, orig=None):
 
         buffers.add(vim.current.buffer.name)
 
-        # Save view.
-        saved_view = vim_eval('string(winsaveview())')
-
         # Replace original word.
-        vim.current.window.cursor = (r.line, r.column)
-        vim_command('normal! c{0:d}l{1}'.format(len(orig), replace))
-
-        # Restore view.
-        vim_command('call winrestview(%s)' % saved_view)
-        highlight_usages([r], length=len(replace))
+        r_line = vim.current.buffer[r.line - 1]
+        vim.current.buffer[r.line - 1] = (r_line[:r.column] + replace +
+                                          r_line[r.column + len(orig):])
 
     # Restore previous tab and window.
     vim_command('tabnext {0:d}'.format(saved_tab))
