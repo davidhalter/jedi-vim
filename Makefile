@@ -11,7 +11,7 @@ build:
 	mkdir $@
 
 build/venv: | build
-	virtualenv -p python3.6 $@
+	python -m venv $@
 
 build/venv/bin/vint: | build/venv
 	$|/bin/pip install -q vim-vint==0.3.19
