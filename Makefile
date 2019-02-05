@@ -12,17 +12,15 @@ build:
 
 build/venv: | build
 	python -m venv $@
+	# Required on Travis CI.
+	$@/bin/python -m ensurepip
 	find build/venv -ls
 
-# Required on Travis.
-build/venv/bin/pip: | build/venv
-	$|/bin/python -m ensurepip
+build/venv/bin/vint: | build/venv
+	$|/bin/python -m pip install -q vim-vint==0.3.19
 
-build/venv/bin/vint: | build/venv/bin/pip
-	$| install -q vim-vint==0.3.19
-
-build/venv/bin/flake8: | build/venv/bin/pip
-	$| install -q flake8==3.5.0
+build/venv/bin/flake8: | build/venv
+	$|/bin/python -m pip install -q flake8==3.5.0
 
 vint: build/venv/bin/vint
 	build/venv/bin/vint after autoload ftplugin plugin
