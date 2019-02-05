@@ -1,6 +1,6 @@
-sudo: false
+dist: xenial
 language: python
-python: 3.6
+python: 3.7
 env:
   matrix:
     - ENV=test
@@ -13,20 +13,22 @@ matrix:
 install:
   - |
     if [ "$ENV" = "test" ]; then
-      python3.6 -m pip install pytest
-    fi
-  - |
-    # https://github.com/neovim/bot-ci#generated-builds
-    if [ "$ENV" = "test_coverage" ]; then
-      eval "$(curl -Ss https://raw.githubusercontent.com/neovim/bot-ci/master/scripts/travis-setup.sh) nightly-x64"
-      pip --version
-      pip install neovim pytest-cov
+      pip install pytest
+    elif [ "$ENV" = "test_coverage" ]; then
+      sudo add-apt-repository ppa:neovim-ppa/stable -y
+      sudo apt-get update -q
+      sudo apt-get install neovim -y
+
+      pip install pynvim pytest-cov
     else
       vim --version
     fi
 script:
-  - make --keep-going "$ENV"
+  - make --keep-going "$ENV" BUILD_VIRTUAL_ENV=$VIRTUAL_ENV
 
 after_success:
-  - coverage xml
-  - bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy -X fix -X search -X xcode -f coverage.xml -F py${TRAVIS_PYTHON_VERSION//./}
+  - |
+    if [ "$ENV" = "test_coverage" ]; then
+      coverage xml
+      bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy -X fix -X search -X xcode -f coverage.xml -F py${TRAVIS_PYTHON_VERSION//./}
+    fi
