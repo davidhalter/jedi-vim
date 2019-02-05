@@ -18,8 +18,10 @@ install:
   - |
     # https://github.com/neovim/bot-ci#generated-builds
     if [ "$ENV" = "test_coverage" ]; then
-      eval "$(curl -Ss https://raw.githubusercontent.com/neovim/bot-ci/master/scripts/travis-setup.sh) nightly-x64"
-      pip --version
+      sudo add-apt-repository ppa:neovim-ppa/stable -y
+      sudo apt-get update -q
+      sudo apt-get install neovim -y
+
       pip install pynvim pytest-cov
     else
       vim --version
