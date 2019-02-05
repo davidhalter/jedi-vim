@@ -11,7 +11,7 @@ build:
 	mkdir $@
 
 build/venv: | build
-	env -u VIRTUAL_ENV python -m venv $@
+	env -u VIRTUAL_ENV python -m venv --copies $@
 	# Required on Travis CI.
 	env -u VIRTUAL_ENV $@/bin/python -m ensurepip
 	find build/venv -ls
