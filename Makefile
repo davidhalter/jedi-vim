@@ -17,6 +17,7 @@ build/venv: | build
 	find build/venv -ls
 	cat build/venv/pyvenv.cfg
 	file build/venv/bin/python
+	$@/bin/python -m pip --version
 
 build/venv/bin/vint: | build/venv
 	$|/bin/python -m pip install vim-vint==0.3.19
