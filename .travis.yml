@@ -8,10 +8,7 @@ install:
   - |
     if [ "$ENV" = "test" ]; then
       pip install pytest
-    fi
-  - |
-    # https://github.com/neovim/bot-ci#generated-builds
-    if [ "$ENV" = "test_coverage" ]; then
+    elif [ "$ENV" = "test_coverage" ]; then
       sudo add-apt-repository ppa:neovim-ppa/stable -y
       sudo apt-get update -q
       sudo apt-get install neovim -y
