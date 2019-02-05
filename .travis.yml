@@ -21,5 +21,8 @@ script:
   - make --keep-going "$ENV" BUILD_VIRTUAL_ENV=$VIRTUAL_ENV
 
 after_success:
-  - coverage xml
-  - bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy -X fix -X search -X xcode -f coverage.xml -F py${TRAVIS_PYTHON_VERSION//./}
+  - |
+    if [ "$ENV" = "test_coverage" ]; then
+      coverage xml
+      bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy -X fix -X search -X xcode -f coverage.xml -F py${TRAVIS_PYTHON_VERSION//./}
+    fi
