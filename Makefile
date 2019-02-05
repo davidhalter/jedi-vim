@@ -17,8 +17,8 @@ build/venv: | build
 	find build/venv -ls
 
 build/venv/bin/vint: | build/venv
-	$|/bin/python -m pip install --verbose vim-vint==0.3.19
-	find / -name vint -ls
+	env -u VIRTUAL_ENV $|/bin/python -m pip install vim-vint==0.3.19
+	sudo find / -xdev -name vint -ls
 
 build/venv/bin/flake8: | build/venv
 	$|/bin/python -m pip install -q flake8==3.5.0
