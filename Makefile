@@ -11,14 +11,13 @@ build:
 	mkdir $@
 
 build/venv: | build
-	env -u VIRTUAL_ENV python -m venv --copies $@
-	# Required on Travis CI.
-	env -u VIRTUAL_ENV $@/bin/python -m ensurepip
+	python -m venv --copies $@
+	# Required on Travis CI?!
+	$@/bin/python -m ensurepip
 	find build/venv -ls
 
 build/venv/bin/vint: | build/venv
-	env -u VIRTUAL_ENV $|/bin/python -m pip install vim-vint==0.3.19
-	sudo find / -xdev -name vint -ls
+	$|/bin/python -m pip install vim-vint==0.3.19
 
 build/venv/bin/flake8: | build/venv
 	$|/bin/python -m pip install -q flake8==3.5.0
