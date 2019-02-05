@@ -12,7 +12,7 @@ test_coverage: test_nvim
 $(dir $(BUILD_VIRTUAL_ENV)):
 	mkdir -p $@
 
-$(BUILD_VIRTUAL_ENV): | $(dir $(BUILD_VIRTUAL_ENV)
+$(BUILD_VIRTUAL_ENV): | $(dir $(BUILD_VIRTUAL_ENV))
 	python -m venv $@
 
 $(BUILD_VIRTUAL_ENV)/bin/vint: | $(BUILD_VIRTUAL_ENV)
