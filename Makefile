@@ -13,7 +13,7 @@ build:
 build/venv: | build
 	python -m venv $@
 	# Required on Travis CI.
-	$@/bin/python -m ensurepip
+	env -u VIRTUAL_ENV $@/bin/python -m ensurepip
 	find build/venv -ls
 
 build/venv/bin/vint: | build/venv
