@@ -12,6 +12,7 @@ build:
 
 build/venv: | build
 	python -m venv $@
+	find build/venv -ls
 
 build/venv/bin/vint: | build/venv
 	$|/bin/pip install -q vim-vint==0.3.19
