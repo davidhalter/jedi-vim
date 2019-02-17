@@ -420,8 +420,6 @@ def show_documentation():
     script = get_script()
     try:
         definitions = script.goto_definitions()
-    except jedi.NotFoundError:
-        definitions = []
     except Exception:
         # print to stdout, will be in :messages
         definitions = []
