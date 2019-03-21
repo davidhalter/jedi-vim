@@ -112,6 +112,8 @@ It is also available on
 vim-python-jedi.
 On Fedora Linux, it is available as
 `vim-jedi <https://apps.fedoraproject.org/packages/vim-jedi>`__.
+On FreeBSD, it is available as 
+`devel/py-jedi <https://www.freshports.org/devel/py-jedi/>`_.
 
 Please note that this version might be quite old compared to using jedi-vim
 from Git.
