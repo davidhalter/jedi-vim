@@ -377,7 +377,9 @@ function! jedi#show_documentation() abort
 
     " quit comands
     nnoremap <buffer> q ZQ
-    execute 'nnoremap <buffer> '.g:jedi#documentation_command.' ZQ'
+    if len(g:jedi#documentation_command)
+      execute 'nnoremap <buffer> '.g:jedi#documentation_command.' ZQ'
+    endif
 endfunction
 
 " ------------------------------------------------------------------------
