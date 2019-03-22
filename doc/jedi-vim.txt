@@ -60,7 +60,7 @@ Jedi-vim is a Vim binding to the awesome Python autocompletion library
 - Infers function arguments from Sphinx/Epydoc strings
 - Doesn't execute Python code
 - Supports Virtualenv
-- Supports Python 2.5+ and 3.2+
+- Supports Python 2.7 and 3.4+
 
 By leveraging this library, jedi-vim adds the following capabilities to Vim:
 
@@ -492,7 +492,7 @@ can be found.
 
 This variable can be changed during runtime.
 
-Options: 2, 2.7, 3, 3.3, 3.4, ...
+Options: 2, 2.7, 3, 3.5, 3.6, ...
 Default: "auto"
 ------------------------------------------------------------------------------
 6.13. `g:jedi#smart_auto_mappings`                  *g:jedi#smart_auto_mappings*
