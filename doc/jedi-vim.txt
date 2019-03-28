@@ -498,14 +498,14 @@ Default: "auto"
 6.13. `g:jedi#smart_auto_mappings`                  *g:jedi#smart_auto_mappings*
 
 When you start typing `from module.name<space>` jedi-vim automatically
-adds the "import" statement and displays the autocomplete popup.
+can add the "import" statement and trigger the autocompletion popup.
 
-This option can be disabled in the .vimrc:
+You can enable this using: >
 
-`let g:jedi#smart_auto_mappings = 0`
-
+    let g:jedi#smart_auto_mappings = 1
+<
 Options: 0 or 1
-Default: 1 (enabled by default)
+Default: 0 (disabled by default)
 
 ------------------------------------------------------------------------------
 6.14. `g:jedi#use_tag_stack`                    *g:jedi#use_tag_stack*
