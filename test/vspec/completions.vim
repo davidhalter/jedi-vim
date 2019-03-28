@@ -27,15 +27,9 @@ describe 'completions'
         set completeopt-=longest
     end
 
-    it 'smart import'
+    it 'no smart import by default'
         exec "normal ifrom os "
-        Expect getline('.') == 'from os import '
-    end
-
-    it 'no smart import after space'
-        exec "normal! ifrom os "
-        exec "normal  a "
-        Expect getline('.') == 'from os  '
+        Expect getline('.') == 'from os '
     end
 
     it 'import'
@@ -106,6 +100,31 @@ describe 'completions'
             Expect getline('.') == 'raise ImportWarning'
         endif
         set completeopt-=longest
+    end
+end
+
+describe 'smart completions'
+    before
+        new
+        let g:jedi#smart_auto_mappings = 1
+        set filetype=python
+    end
+
+    after
+        " default
+        let g:jedi#smart_auto_mappings = 0
+        bd!
+    end
+
+    it 'smart import'
+        exec "normal ifrom os "
+        Expect getline('.') == 'from os import '
+    end
+
+    it 'no smart import after space'
+        exec "normal! ifrom os "
+        exec "normal  a "
+        Expect getline('.') == 'from os  '
     end
 end
 
