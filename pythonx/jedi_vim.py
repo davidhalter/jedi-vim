@@ -166,7 +166,7 @@ def get_environment(use_cache=True):
     vim_virtualenv_path = vim_eval("g:jedi#virtualenv_path")
     vim_force_python_version = vim_eval("g:jedi#force_py_version")
 
-    if use_cache and vim_force_python_version == current_environment[0] and vim_virtualenv_path == current_environment[0]:
+    if use_cache and vim_force_python_version == current_environment[0] or vim_virtualenv_path == current_environment[0]:
         return current_environment[1]
 
     if vim_virtualenv_path:
