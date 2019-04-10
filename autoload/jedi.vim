@@ -34,6 +34,7 @@ let s:default_settings = {
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
     \ 'force_py_version': "'auto'",
+    \ 'virtualenv_path': "''",
     \ 'smart_auto_mappings': 0,
     \ 'use_tag_stack': 1
 \ }

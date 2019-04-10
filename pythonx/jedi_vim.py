@@ -163,9 +163,22 @@ current_environment = (None, None)
 def get_environment(use_cache=True):
     global current_environment
 
+    vim_virtualenv_path = vim_eval("g:jedi#virtualenv_path")
     vim_force_python_version = vim_eval("g:jedi#force_py_version")
-    if use_cache and vim_force_python_version == current_environment[0]:
+
+    if use_cache and vim_force_python_version == current_environment[0] and vim_virtualenv_path == current_environment[0]:
         return current_environment[1]
+
+    if vim_virtualenv_path:
+        try:
+            environment = jedi.api.environment.create_environment(vim_virtualenv_path)
+        except jedi.InvalidPythonEnvironment as exc:
+            environment = jedi.api.environment.get_cached_default_environment()
+            echo_highlight(
+                "virutalenv_path=%s is invalid python environment." % (
+                    vim_virtualenv_path))
+        current_environment = (vim_virtualenv_path, environment)
+        return environment
 
     environment = None
     if vim_force_python_version == "auto":
