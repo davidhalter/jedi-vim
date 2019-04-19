@@ -333,9 +333,10 @@ function! jedi#py_import_completions(argl, cmdl, pos) abort
 endfun
 
 function! jedi#clear_cache(bang) abort
-    PythonJedi jedi_vim.jedi.cache.clear_time_caches(True)
     if a:bang
-        PythonJedi jedi_vim.jedi.parser.utils.ParserPickling.clear_cache()
+        PythonJedi jedi_vim.jedi.cache.clear_time_caches(True)
+    else
+        PythonJedi jedi_vim.jedi.cache.clear_time_caches(False)
     endif
 endfunction
 
