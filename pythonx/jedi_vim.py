@@ -304,6 +304,8 @@ def goto(mode="goto"):
         definitions = script.goto_definitions()
     elif mode == "assignment":
         definitions = script.goto_assignments()
+    elif mode == "stubs":
+        definitions = script.goto_assignments(follow_imports=True, only_stubs=True)
 
     if not definitions:
         echo_highlight("Couldn't find any definitions for this.")
