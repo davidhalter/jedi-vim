@@ -56,10 +56,10 @@ def test_integration(install_vspec, path):
         if (line.startswith(b'not ok') or
                 line.startswith(b'Error') or
                 line.startswith(b'Bail out!')):
-            pytest.fail("{0} failed:\n{1}".format(
+            pytest.fail(u"{0} failed:\n{1}".format(
                 path, output.decode('utf-8')), pytrace=False)
         if not had_ok and line.startswith(b'ok'):
             had_ok = True
     if not had_ok:
-        pytest.fail("{0} failed: no 'ok' found:\n{1}".format(
+        pytest.fail(u"{0} failed: no 'ok' found:\n{1}".format(
             path, output.decode('utf-8')), pytrace=False)
