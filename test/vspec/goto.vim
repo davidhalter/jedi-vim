@@ -2,7 +2,7 @@ let mapleader = '\'
 source plugin/jedi.vim
 source test/_utils.vim
 
-describe 'goto simple'
+describe 'goto simple:'
     before
         new
         set filetype=python
@@ -45,7 +45,7 @@ describe 'goto simple'
 end
 
 
-describe 'goto with tabs'
+describe 'goto with tabs:'
     before
         set filetype=python
         let g:jedi#use_tabs_not_buffers = 1

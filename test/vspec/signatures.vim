@@ -41,7 +41,7 @@ describe 'signatures'
         doautocmd CursorHoldI
         noautocmd normal istr()
         doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?   (*_*object*_*) ?!?jedi?!?'
+        Expect getline(1) == '?!?jedi=0, ?!?   (*_*o: bytes*_*, encoding: str = ..., errors: str = ...) ?!?jedi?!?'
     end
 
     it 'no signature'
@@ -68,7 +68,7 @@ describe 'signatures'
         redir => msg
         Python jedi_vim.show_call_signatures()
         redir END
-        Expect msg == "\nstr(object)"
+        Expect msg == "\nstr((o: bytes, o: object = ...), …)"
 
         redir => msg
         doautocmd InsertLeave
