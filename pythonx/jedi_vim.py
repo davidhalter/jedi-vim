@@ -304,12 +304,14 @@ def goto(mode="goto"):
         definitions = script.goto_definitions()
     elif mode == "assignment":
         definitions = script.goto_assignments()
+    elif mode == "stubs":
+        definitions = script.goto_assignments(follow_imports=True, only_stubs=True)
 
     if not definitions:
         echo_highlight("Couldn't find any definitions for this.")
     elif len(definitions) == 1 and mode != "related_name":
         d = list(definitions)[0]
-        if d.in_builtin_module():
+        if d.column is None:
             if d.is_keyword:
                 echo_highlight("Cannot get the definition of Python keywords.")
             else:
@@ -372,9 +374,7 @@ def show_goto_multi_results(definitions):
     """Create a quickfix list for multiple definitions."""
     lst = []
     for d in definitions:
-        if d.in_builtin_module():
-            lst.append(dict(text=PythonToVimStr('Builtin ' + d.description)))
-        elif d.module_path is None:
+        if d.column is None:
             # Typically a namespace, in the future maybe other things as
             # well.
             lst.append(dict(text=PythonToVimStr(d.description)))
@@ -740,7 +740,7 @@ def py_import():
     except IndexError:
         echo_highlight('Cannot find %s in sys.path!' % import_path)
     else:
-        if completion.in_builtin_module():
+        if completion.column is None:  # Python modules always have a line number.
             echo_highlight('%s is a builtin module.' % import_path)
         else:
             cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])

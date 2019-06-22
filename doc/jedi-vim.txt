@@ -78,15 +78,6 @@ By leveraging this library, jedi-vim adds the following capabilities to Vim:
 
 First of all, jedi-vim requires Vim to be compiled with the `+python` option.
 
-The jedi library has to be installed for jedi-vim to work properly.  You can
-install it first, by using e.g. your distribution's package manager, or by
-using pip: >
-
-    pip install jedi
-
-However, you can also install it as a git submodule if you don't want to use
-jedi for anything but this plugin. How to do this is detailed below.
-
 It is best if you have VIM >= 7.3, compiled with the `+conceal` option. With
 older versions, you will probably not see the parameter recommendation list
 for functions after typing the open bracket. Some platforms (including OS X
@@ -107,11 +98,7 @@ feature (such as MacVim on OS X, which also contains a console binary).
 ------------------------------------------------------------------------------
 2.1. Installing manually                *jedi-vim-installation-manually*
 
-1a. Get the latest repository from Github: >
-
-    git clone http://github.com/davidhalter/jedi-vim path/to/bundles/jedi-vim
-
-1b. If you want to install jedi as a submodule instead, issue this command: >
+1. If you want to install jedi as a submodule instead, issue this command: >
 
     git clone --recursive http://github.com/davidhalter/jedi-vim
 
@@ -161,8 +148,8 @@ repositories. On Arch Linux, install vim-jedi. On Debian (8+) or Ubuntu
 ==============================================================================
 3. Supported Python features            *jedi-vim-support*
 
-The Jedi library does all the hard work behind the scenes. It supports
-completion of a large number of Python features, among them:
+The Jedi library does all the hard work behind the scenes. It understands most
+Python features, among them:
 
 - Builtins
 - Multiple `return`s or `yield`s
@@ -185,10 +172,12 @@ completion of a large number of Python features, among them:
 - Simple/usual `sys.path` modifications
 - `isinstance` checks for `if`/`while`/`assert` case, that doesn’t work with
   Jedi
+- Stubs
 - And more...
 
 Note: This list is not necessarily up to date. For a complete list of
-features, please refer to the Jedi documentation at http://jedi.jedidjah.ch.
+features, please refer to the Jedi documentation at
+http://jedi.readthedocs.io.
 
 ==============================================================================
 4. Usage                                *jedi-vim-usage*

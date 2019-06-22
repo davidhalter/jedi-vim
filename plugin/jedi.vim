@@ -15,6 +15,11 @@ if get(g:, 'jedi#auto_vim_configuration', 1)
     " jedi-vim really needs, otherwise jedi-vim cannot start.
     filetype plugin on
 
+    augroup jedi_pyi
+      au!
+      autocmd BufNewFile,BufRead *.pyi  set filetype=python
+    augroup END
+
     " Change completeopt, but only if it was not set already.
     " This gets done on VimEnter, since otherwise Vim fails to restore the
     " screen.  Neovim is not affected, this is likely caused by using

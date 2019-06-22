@@ -16,6 +16,9 @@ if g:jedi#auto_initialization
     if len(g:jedi#goto_definitions_command)
         execute 'nnoremap <buffer> '.g:jedi#goto_definitions_command.' :call jedi#goto_definitions()<CR>'
     endif
+    if len(g:jedi#goto_stubs_command)
+        execute 'nnoremap <buffer> '.g:jedi#goto_stubs_command.' :call jedi#goto_stubs()<CR>'
+    endif
     if len(g:jedi#usages_command)
         execute 'nnoremap <buffer> '.g:jedi#usages_command.' :call jedi#usages()<CR>'
     endif

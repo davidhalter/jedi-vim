@@ -19,6 +19,7 @@ let s:default_settings = {
     \ 'goto_command': "'<leader>d'",
     \ 'goto_assignments_command': "'<leader>g'",
     \ 'goto_definitions_command': "''",
+    \ 'goto_stubs_command': "'<leader>s'",
     \ 'completions_command': "'<C-Space>'",
     \ 'call_signatures_command': "'<leader>n'",
     \ 'usages_command': "'<leader>n'",
@@ -285,6 +286,10 @@ endfunction
 
 function! jedi#goto_definitions() abort
     PythonJedi jedi_vim.goto(mode="definition")
+endfunction
+
+function! jedi#goto_stubs() abort
+    PythonJedi jedi_vim.goto(mode="stubs")
 endfunction
 
 function! jedi#usages() abort

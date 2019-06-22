@@ -39,9 +39,9 @@ describe 'signatures'
     it 'simple after CursorHoldI with only parenthesis'
         noautocmd normal o
         doautocmd CursorHoldI
-        noautocmd normal istr()
+        noautocmd normal istaticmethod()
         doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?   (*_*object*_*) ?!?jedi?!?'
+        Expect getline(1) == '?!?jedi=0, ?!?            (*_*f: Callable*_*) ?!?jedi?!?'
     end
 
     it 'no signature'
@@ -64,11 +64,11 @@ describe 'signatures'
         let g:jedi#show_call_signatures = 2
         call jedi#configure_call_signatures()
 
-        exe 'normal ostr( '
+        exe 'normal ostaticmethod( '
         redir => msg
         Python jedi_vim.show_call_signatures()
         redir END
-        Expect msg == "\nstr(object)"
+        Expect msg == "\nstaticmethod(f: Callable)"
 
         redir => msg
         doautocmd InsertLeave
