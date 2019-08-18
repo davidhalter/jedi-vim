@@ -16,10 +16,10 @@ $(BUILD_VIRTUAL_ENV): | $(dir $(BUILD_VIRTUAL_ENV))
 	python -m venv $@
 
 $(BUILD_VIRTUAL_ENV)/bin/vint: | $(BUILD_VIRTUAL_ENV)
-	$|/bin/python -m pip install vim-vint==0.3.19
+	$|/bin/python -m pip install vim-vint==0.3.21
 
 $(BUILD_VIRTUAL_ENV)/bin/flake8: | $(BUILD_VIRTUAL_ENV)
-	$|/bin/python -m pip install -q flake8==3.5.0
+	$|/bin/python -m pip install -q flake8==3.7.8
 
 vint: $(BUILD_VIRTUAL_ENV)/bin/vint
 	$(BUILD_VIRTUAL_ENV)/bin/vint after autoload ftplugin plugin

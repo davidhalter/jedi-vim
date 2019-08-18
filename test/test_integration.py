@@ -9,7 +9,7 @@ import zipfile
 
 import pytest
 
-vspec_version = '1.8.1'
+vspec_version = '1.9.0'
 
 VSPEC_URL = 'https://github.com/kana/vim-vspec/archive/%s.zip' % vspec_version
 root = os.path.dirname(os.path.dirname(__file__))
