@@ -386,7 +386,7 @@ def completions():
         completions = []
 
     if restore_signatures:
-        show_call_signatures(restore_signatures)
+        show_call_signatures()
     vim.command('return ' + strout)
 
 
