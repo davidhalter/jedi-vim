@@ -7,29 +7,35 @@ endif
 
 if g:jedi#auto_initialization
     " goto / get_definition / usages
-    if len(g:jedi#goto_command)
-        execute 'nnoremap <buffer> '.g:jedi#goto_command.' :call jedi#goto()<CR>'
+    if !exists("g:jedi#disable_default_mappings")
+      let g:jedi#disable_default_mappings = 0
     endif
-    if len(g:jedi#goto_assignments_command)
-        execute 'nnoremap <buffer> '.g:jedi#goto_assignments_command.' :call jedi#goto_assignments()<CR>'
-    endif
-    if len(g:jedi#goto_definitions_command)
-        execute 'nnoremap <buffer> '.g:jedi#goto_definitions_command.' :call jedi#goto_definitions()<CR>'
-    endif
-    if len(g:jedi#goto_stubs_command)
-        execute 'nnoremap <buffer> '.g:jedi#goto_stubs_command.' :call jedi#goto_stubs()<CR>'
-    endif
-    if len(g:jedi#usages_command)
-        execute 'nnoremap <buffer> '.g:jedi#usages_command.' :call jedi#usages()<CR>'
-    endif
-    " rename
-    if len(g:jedi#rename_command)
-        execute 'nnoremap <buffer> '.g:jedi#rename_command.' :call jedi#rename()<CR>'
-        execute 'vnoremap <buffer> '.g:jedi#rename_command.' :call jedi#rename_visual()<CR>'
-    endif
-    " documentation/pydoc
-    if len(g:jedi#documentation_command)
-        execute 'nnoremap <silent> <buffer>'.g:jedi#documentation_command.' :call jedi#show_documentation()<CR>'
+    if g:jedi#disable_default_mappings != 1
+      " skip the key bindings
+      if len(g:jedi#goto_command)
+          execute 'nnoremap <buffer> '.g:jedi#goto_command.' :call jedi#goto()<CR>'
+      endif
+      if len(g:jedi#goto_assignments_command)
+          execute 'nnoremap <buffer> '.g:jedi#goto_assignments_command.' :call jedi#goto_assignments()<CR>'
+      endif
+      if len(g:jedi#goto_definitions_command)
+          execute 'nnoremap <buffer> '.g:jedi#goto_definitions_command.' :call jedi#goto_definitions()<CR>'
+      endif
+      if len(g:jedi#goto_stubs_command)
+          execute 'nnoremap <buffer> '.g:jedi#goto_stubs_command.' :call jedi#goto_stubs()<CR>'
+      endif
+      if len(g:jedi#usages_command)
+          execute 'nnoremap <buffer> '.g:jedi#usages_command.' :call jedi#usages()<CR>'
+      endif
+      " rename
+      if len(g:jedi#rename_command)
+          execute 'nnoremap <buffer> '.g:jedi#rename_command.' :call jedi#rename()<CR>'
+          execute 'vnoremap <buffer> '.g:jedi#rename_command.' :call jedi#rename_visual()<CR>'
+      endif
+      " documentation/pydoc
+      if len(g:jedi#documentation_command)
+          execute 'nnoremap <silent> <buffer>'.g:jedi#documentation_command.' :call jedi#show_documentation()<CR>'
+      endif
     endif
 
     if g:jedi#show_call_signatures > 0 && has('conceal')

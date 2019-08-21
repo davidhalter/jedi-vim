@@ -203,6 +203,9 @@ example, to set the keybinding for starting omnicompletion to <C-N> instead of
 
     let g:jedi#completions_command = "<C-N>"
 
+Note: If you have |g:jedi#disable_default_mappings| set to 1, you can disable
+all the default keybindings.
+
 Note: If you have |g:jedi#auto_initialization| set to 0, you have to create
 a mapping yourself by calling a function: >
 
