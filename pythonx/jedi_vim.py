@@ -26,6 +26,9 @@ if is_py3:
 else:
     ELLIPSIS = u"…"
 
+IS_NVIM = hasattr(vim, 'from_nvim')
+
+
 _show_call_signatures_mode = None
 """Current mode for call signatures (1: concealing, 2: command line)"""
 
@@ -808,6 +811,22 @@ def clear_call_signatures(temporary=False):
         vim_command('echo ""')
         return
 
+    if _show_call_signatures_mode == 3:
+        if IS_NVIM:
+            win = vim.current.buffer.vars.get('_jedi_signature_window')
+            if win:
+                vim.api.win_close(win, True)
+                del vim.current.buffer.vars['_jedi_signature_window']
+        else:
+            try:
+                winid = vim.current.buffer.vars['_jedi_signature_winid']
+            except KeyError:
+                pass
+            else:
+                popup_hide = vim.Function("popup_hide")
+                popup_hide(winid)
+        return
+
     r = False
     orig_lines = vim.current.buffer.vars.get('_jedi_callsig_orig', {})
     if orig_lines:
@@ -853,8 +872,16 @@ def show_call_signatures(signatures=(), mode=None):
     if mode == 2:
         return cmdline_call_signatures(signatures)
 
-    seen_sigs = []
+    if mode == 3:
+        return call_signatures_floatwin(signatures)
+
+    return call_signatures_inline(signatures)
+
+
+@catch_and_print_exceptions
+def call_signatures_inline(signatures):
     set_lines = []
+    seen_sigs = []
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
         # signatures are listed above each other
@@ -928,6 +955,181 @@ def show_call_signatures(signatures=(), mode=None):
     vim.current.buffer.vars['_jedi_callsig_orig'] = orig_lines
     if not orig_modified:
         vim_command('set nomodified')
+
+
+@catch_and_print_exceptions
+def call_signatures_floatwin(signatures):
+    """Display signatures using Neovim's floating / Vim's popup window."""
+    seen_sigs = []
+    sig_bracket_start_col = None
+    sig_bracket_start_row = None
+    lines = []
+    max_visible_sig_width = 0
+
+    # Build text lines from signatures.
+    # This has quite some common code copied from call_signatures_inline still.
+    # TODO: refactor?
+    for i, signature in enumerate(signatures):
+        row, column = signature.bracket_start
+        if sig_bracket_start_col:
+            assert row == sig_bracket_start_row
+            assert column == sig_bracket_start_col
+        sig_bracket_start_row = row
+        sig_bracket_start_col = column
+
+        # Descriptions are usually looking like `param name`, remove the param.
+        # Also replace leading params with ellipsis (for shortness).
+        params = [p.description.replace('\n', '').replace('param ', '', 1)
+                  if idx >= signature.index
+                  else "…"
+                  for idx, p in enumerate(signature.params)]
+
+        # Get (visible) width without any added concealed text.
+        w = len("(%s) " % ', '.join(params))
+        if w > max_visible_sig_width:
+            max_visible_sig_width = w
+        try:
+            # *_*PLACEHOLDER*_* makes something fat via jediFatSymbol.
+            params[signature.index] = '*_*%s*_*' % params[signature.index]
+        except (IndexError, TypeError):
+            pass
+
+        # Skip duplicates.
+        if params in seen_sigs:
+            continue
+        seen_sigs.append(params)
+
+        text = "(%s) " % ', '.join(params)
+
+        # Need to decode it with utf8, because vim returns always a python 2
+        # string even if it is unicode.
+        e = vim_eval('g:jedi#call_signature_escape')
+        if hasattr(e, 'decode'):
+            e = e.decode('UTF-8')
+        # replace line before with cursor
+        regex = "xjedi=x{}xjedix".replace('x', e)
+        text = regex.format(text)
+        lines.append(text)
+
+    cur_cursor = vim.current.window.cursor
+    cur_row = cur_cursor[0]
+    sig_row_offset = sig_bracket_start_row - cur_row
+    if sig_row_offset == 0:
+        # Display above when on current line.
+        sig_row_offset = -1
+    else:
+        # Display above when anything after signatures parenthesis (for
+        # multiline statements.
+        sig_buffer_line = vim.current.buffer[sig_bracket_start_row-1]
+        if len(sig_buffer_line) > sig_bracket_start_col + 1:
+            sig_row_offset -= 1
+    cur_col = cur_cursor[1]
+    floatwin_col_offset = sig_bracket_start_col - cur_col
+
+    height = len(lines)
+
+    # Display below when at the top of the window.
+    # It limits "height" to the available room, preferring "below" for
+    # when there is more room.
+    winline = int(vim.funcs.winline())
+    space_above = winline - 1
+    floatwin_row_offset = None
+    if height > space_above:
+        space_below = vim.funcs.winheight(0) - winline
+        if space_below > space_above:
+            floatwin_row_offset = 1
+            height = min(space_below, height)
+    if floatwin_row_offset is None:
+        height = min(space_above, height)
+        floatwin_row_offset = sig_row_offset - height + 1
+
+    if IS_NVIM:
+        buf = vim.current.buffer.vars.get('_jedi_signature_buffer')
+        if not buf:
+            buf = vim.api.create_buf(False, True)
+            vim.current.buffer.vars['_jedi_signature_buffer'] = buf
+
+        vim.api.buf_set_lines(buf, 0, -1, True, lines)
+
+        # Use maximum width to not have Nvim move it left.
+        # https://github.com/neovim/neovim/issues/10811
+        win_screen_col_start = vim.funcs.getwininfo(vim.funcs.win_getid())[0]["wincol"]
+        win_screen_col_cur = win_screen_col_start + vim.funcs.wincol()
+        start_wincol = win_screen_col_cur + floatwin_col_offset
+        max_width = vim.options["columns"] - start_wincol + 1
+        width = min([max_visible_sig_width, max_width])
+
+        opts = {
+            'relative': 'cursor',
+            'width': width,
+            'height': height,
+            'col': floatwin_col_offset,
+            'row': floatwin_row_offset,
+            'anchor': 'NW',
+            'style': 'minimal',
+        }
+        win = vim.api.open_win(buf, 0, opts)
+        vim.api.buf_set_option(buf, 'syntax', 'jedi_signature')
+
+        vim.current.buffer.vars['_jedi_signature_window'] = win
+
+    else:
+        # Display below when at the top of the window.
+        winline = int(vim.eval("winline()"))
+        if height > winline - 1:
+            line = "cursor+1"
+        else:
+            line = "cursor-%d" % height
+
+        col = ("%s" if floatwin_col_offset < 0 else "+%d") % floatwin_col_offset
+        popup_opts = vim.Dictionary(**{
+            "line": line,
+            "col": "cursor%s" % col,
+            "pos": "topleft",
+            "wrap": 0,
+            "fixed": 1,
+            "flip": 1,
+            "minwidth": max_visible_sig_width,
+            "maxwidth": max_visible_sig_width,
+            # "close": "button",
+            # "border": [1, 1, 1, 1],
+        })
+
+        try:
+            winid = vim.current.buffer.vars['_jedi_signature_winid']
+        except KeyError:
+            popup_create = vim.Function("popup_create")
+            winid = popup_create(lines, popup_opts)
+            buf = int(vim.eval("winbufnr(%d)" % winid))
+
+            # Does too much.
+            # vim.eval("win_execute(%d, 'set filetype=jedi_signature')" % winid)
+
+            vim.eval("win_execute(%d, 'set syntax=jedi_signature')" % winid)
+
+            # vim.eval("setbufvar(%d, '&filetype', 'jedi_signature')" % buf)
+            # # vim.eval("win_execute(%d, 'doautocmd FileType')" % winid)
+            # vim.eval("setwinvar(%d, '&concealcursor', 'nvic')" % (winid,))
+            # vim.eval("setwinvar(%d, '&conceallevel', 2)" % (winid,))
+
+            vim.current.buffer.vars['_jedi_signature_winid'] = winid
+        else:
+            popup_settext = vim.Function("popup_settext")
+            popup_settext(winid, lines)
+            popup_move = vim.Function("popup_move")
+            popup_move(winid, popup_opts)
+            popup_show = vim.Function("popup_show")
+            popup_show(winid)
+
+        # buf = int(vim.eval('winbufnr(%d)' % winid))
+        # Does not trigger syntax loading?
+        # vim.buffers[buf].options["filetype"] = "jedi_signature"
+
+        # print(vim.windows[winid].options)
+        # vim.[winid].options.filetype = "jedi_signature"
+
+        # winid = vim.eval("popup_create(['l1', 'l2'], {'line': 'cursor-1', 'col': 'cursor-2'})")
+        print(winid)
 
 
 @catch_and_print_exceptions
