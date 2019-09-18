@@ -33,6 +33,7 @@ def format_exc_info(exc_info=None, tb_indent=2):
 
 
 def display_debug_info():
+    echo(' - global sys.executable: `{0}`'.format(sys.executable))
     echo(' - global sys.version: `{0}`'.format(
         ', '.join([x.strip()
                    for x in sys.version.split('\n')])))
