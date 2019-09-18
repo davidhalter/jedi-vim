@@ -985,7 +985,7 @@ def call_signatures_floatwin(signatures):
                   for idx, p in enumerate(signature.params)]
 
         # Get (visible) width without any added concealed text.
-        w = len("(%s) " % ', '.join(params))
+        w = len("(%s)" % ', '.join(params))
         if w > max_visible_sig_width:
             max_visible_sig_width = w
         try:
@@ -999,7 +999,7 @@ def call_signatures_floatwin(signatures):
             continue
         seen_sigs.append(params)
 
-        text = "(%s) " % ', '.join(params)
+        text = "(%s)" % ', '.join(params)
 
         # Need to decode it with utf8, because vim returns always a python 2
         # string even if it is unicode.
