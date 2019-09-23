@@ -301,9 +301,10 @@ function! jedi#usages() abort
     PythonJedi jedi_vim.usages()
 endfunction
 
+if !s:supports_buffer_usages
 " Hide usages in the current window.
 " Only handles the current window due to matchdelete() restrictions.
-function! jedi#hide_usages_in_win() abort
+function! jedi#_hide_usages_in_win() abort
     let winnr = winnr()
     let matchids = getwinvar(winnr, '_jedi_usages_vim_matchids', [])
 
@@ -319,8 +320,8 @@ function! jedi#hide_usages_in_win() abort
     unlet! b:_jedi_usages_needs_clear
 endfunction
 
-" Show usages for current window (Vim only).
-function! jedi#show_usages_in_win() abort
+" Show usages for current window (Vim without textprops only).
+function! jedi#_show_usages_in_win() abort
     PythonJedi jedi_vim.highlight_usages_for_vim_win()
 
     if !exists('#jedi_usages#TextChanged#<buffer>')
@@ -328,17 +329,17 @@ function! jedi#show_usages_in_win() abort
           " Unset highlights on any changes to this buffer.
           " NOTE: Neovim's API handles movement of highlights, but would only
           " need to clear highlights that are changed inline.
-          autocmd TextChanged <buffer> call jedi#clear_buffer_usages()
+          autocmd TextChanged <buffer> call jedi#_clear_buffer_usages()
 
           " Hide usages when the buffer is removed from the window, or when
           " entering insert mode (but keep them for later).
-          autocmd BufWinLeave,InsertEnter <buffer> call jedi#hide_usages_in_win()
+          autocmd BufWinLeave,InsertEnter <buffer> call jedi#_hide_usages_in_win()
         augroup END
     endif
 endfunction
 
 " Remove usages for the current buffer (and all its windows).
-function! jedi#clear_buffer_usages() abort
+function! jedi#_clear_buffer_usages() abort
     let bufnr = bufnr('%')
     let nvim_src_ids = getbufvar(bufnr, '_jedi_usages_src_ids', [])
     if !empty(nvim_src_ids)
@@ -347,13 +348,13 @@ function! jedi#clear_buffer_usages() abort
             call nvim_buf_clear_highlight(bufnr, src_id, 0, -1)
         endfor
     else
-        call jedi#hide_usages_in_win()
+        call jedi#_hide_usages_in_win()
     endif
 endfunction
+endif
 
 " Remove/unset global usages.
 function! jedi#clear_usages() abort
-
     augroup jedi_usages
         autocmd! BufWinEnter
         autocmd! WinEnter
@@ -362,13 +363,13 @@ function! jedi#clear_usages() abort
     if !s:supports_buffer_usages
         " Vim without textprops: clear current window,
         " autocommands will clean others on demand.
-        call jedi#hide_usages_in_win()
+        call jedi#_hide_usages_in_win()
 
         " Setup autocommands to clear remaining highlights on WinEnter.
         augroup jedi_usages
         for b in range(1, bufnr('$'))
             if getbufvar(b, '_jedi_usages_needs_clear')
-                exe 'autocmd WinEnter <buffer='.b.'> call jedi#hide_usages_in_win()'
+                exe 'autocmd WinEnter <buffer='.b.'> call jedi#_hide_usages_in_win()'
             endif
         endfor
         augroup END
@@ -494,31 +495,30 @@ function! jedi#add_goto_window(for_usages, len, ...) abort
         endif
     elseif a:for_usages && !s:supports_buffer_usages
         " Init current window.
-        call jedi#show_usages_in_win()
+        call jedi#_show_usages_in_win()
     endif
 
-    if a:for_usages
+    if a:for_usages && !has('nvim')
         if s:supports_buffer_usages
+            " Setup autocommand for pending highlights with Vim's textprops.
+            " (cannot be added to unlisted buffers)
             augroup jedi_usages
-              autocmd! BufWinEnter * call s:usages_for_new_buffers()
+              autocmd! BufWinEnter * call s:usages_for_pending_buffers()
             augroup END
         else
             " Setup global autocommand to display any usages for a window.
             " Gets removed when closing the quickfix window that displays them, or
             " when clearing them (e.g. on TextChanged).
             augroup jedi_usages
-              autocmd! BufWinEnter,WinEnter * call jedi#show_usages_in_win()
+              autocmd! BufWinEnter,WinEnter * call jedi#_show_usages_in_win()
             augroup END
         endif
     endif
 endfunction
 
 " Highlight usages for a buffer if not done so yet (Neovim only).
-function! s:usages_for_new_buffers() abort
-    if has('nvim') && exists('b:_jedi_usages_src_ids')
-        echom 'jedi-vim: unexpected call to s:usages_for_new_buffers'
-    endif
-    PythonJedi jedi_vim.highlight_usages_for_buf()
+function! s:usages_for_pending_buffers() abort
+    PythonJedi jedi_vim._handle_pending_usages_for_buf()
 endfunction
 
 
