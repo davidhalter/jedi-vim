@@ -52,6 +52,8 @@ for [s:key, s:val] in items(s:default_settings)
     endif
 endfor
 
+let s:supports_buffer_usages = has('nvim') || exists('*prop_add')
+
 
 " ------------------------------------------------------------------------
 " Python initialization
@@ -357,8 +359,9 @@ function! jedi#clear_usages() abort
         autocmd! WinEnter
     augroup END
 
-    " Vim: clear current window, autocommands will clean others on demand.
-    if !has('nvim')
+    if !s:supports_buffer_usages
+        " Vim without textprops: clear current window,
+        " autocommands will clean others on demand.
         call jedi#hide_usages_in_win()
 
         " Setup autocommands to clear remaining highlights on WinEnter.
@@ -489,15 +492,15 @@ function! jedi#add_goto_window(for_usages, len, ...) abort
         if select_entry > 1
             exe select_entry.'cc'
         endif
-    elseif !has('nvim') && a:for_usages
+    elseif a:for_usages && !s:supports_buffer_usages
         " Init current window.
         call jedi#show_usages_in_win()
     endif
 
     if a:for_usages
-        if has('nvim')
+        if s:supports_buffer_usages
             augroup jedi_usages
-              autocmd! BufWinEnter * call s:usages_for_buffer_nvim()
+              autocmd! BufWinEnter * call s:usages_for_new_buffers()
             augroup END
         else
             " Setup global autocommand to display any usages for a window.
@@ -511,10 +514,11 @@ function! jedi#add_goto_window(for_usages, len, ...) abort
 endfunction
 
 " Highlight usages for a buffer if not done so yet (Neovim only).
-function! s:usages_for_buffer_nvim() abort
-    if !exists('b:_jedi_usages_src_ids')
-        PythonJedi jedi_vim.highlight_usages_for_buf()
+function! s:usages_for_new_buffers() abort
+    if has('nvim') && exists('b:_jedi_usages_src_ids')
+        echom 'jedi-vim: unexpected call to s:usages_for_new_buffers'
     endif
+    PythonJedi jedi_vim.highlight_usages_for_buf()
 endfunction
 
 
