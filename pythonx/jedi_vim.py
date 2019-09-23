@@ -414,19 +414,29 @@ def usages(visuals=True):
     return definitions
 
 
-_current_highlights = (None, None)
-"""Current (definitions, length) to use for highlighting."""
+_current_highlights = None
+"""Current definitions to use for highlighting."""
 
 
 IS_NVIM = hasattr(vim, 'from_nvim')
+if IS_NVIM:
+    vim_prop_add = None
+else:
+    vim_prop_type_added = False
+    try:
+        vim_prop_add = vim.Function("prop_add")
+    except ValueError:
+        vim_prop_add = None
+    else:
+        vim_prop_remove = vim.Function("prop_remove")
 
 
 def clear_usages():
     """Clear existing highlights."""
     global _current_highlights
-    if _current_highlights[0] is None:
+    if _current_highlights is None:
         return
-    _current_highlights = (None, None)
+    _current_highlights = None
 
     if IS_NVIM:
         for buf in vim.buffers:
@@ -434,76 +444,96 @@ def clear_usages():
             if src_ids is not None:
                 for src_id in src_ids:
                     buf.clear_highlight(src_id)
+    elif vim_prop_add:
+        vim_prop_remove({'type': 'jediUsage'})
     else:
         # Unset current window only.
         highlight_usages_for_vim_win()
 
 
-def highlight_usages(definitions, length=None):
+def highlight_usages(definitions):
     """Set definitions to be highlighted.
 
     With Neovim it will use the nvim_buf_add_highlight API to highlight all
     buffers already.
 
-    With Vim only the current window is highlighted via matchaddpos, and
-    autocommands are setup to highlight other windows on demand."""
+    With Vim without support for text-properties only the current window is
+    highlighted via matchaddpos, and autocommands are setup to highlight other
+    windows on demand.  Otherwise Vim's text-properties are used.
+    """
 
     global _current_highlights
     if definitions:
-        assert not _current_highlights[0]
-    _current_highlights = (definitions, length)
+        assert not _current_highlights
+    _current_highlights = definitions
 
-    if IS_NVIM:
+    if IS_NVIM or vim_prop_add:
         bufs = {x.name: x for x in vim.buffers}
-        buf_src_ids = {}
+        defs_with_bufs = []
         for definition in definitions:
             try:
                 buf = bufs[definition.module_path]
             except KeyError:
                 continue
+            defs_with_bufs.append(definition)
 
-            length = length or len(definition.name)
-            src_id = _nvim_highlight_definition(buf, definition, length)
-            buf_src_ids.setdefault(buf, []).append(src_id)
+        if IS_NVIM:
+            buf_src_ids = {}
+            for definition in defs_with_bufs:
+                src_id = _add_highlight_definition(buf, definition)
+                buf_src_ids.setdefault(buf, []).append(src_id)
 
-        for buf, src_ids in buf_src_ids.items():
-            buf.vars['_jedi_usages_src_ids'] = src_ids
+            for buf, src_ids in buf_src_ids.items():
+                buf.vars['_jedi_usages_src_ids'] = src_ids
+        else:
+            for definition in defs_with_bufs:
+                _add_highlight_definition(buf, definition)
     else:
         highlight_usages_for_vim_win()
 
 
 def highlight_usages_for_buf():
     global _current_highlights
-    (definitions, length) = _current_highlights
-
-    assert IS_NVIM
+    definitions = _current_highlights
 
     buf = vim.current.buffer
     bufname = buf.name
 
-    src_ids = []
-    for definition in definitions:
-        if definition.module_path == bufname:
-            length = length or len(definition.name)
-            src_id = _nvim_highlight_definition(buf, definition, length)
+    buf_defs = [x for x in definitions if x.module_path == bufname]
+    if IS_NVIM:
+        assert not buf.vars.get('_jedi_usages_src_ids')
+        src_ids = []
+        for definition in buf_defs:
+            src_id = _add_highlight_definition(buf, definition)
             if src_id:
                 src_ids.append(src_id)
-    buf.vars['_jedi_usages_src_ids'] = src_ids
+        buf.vars['_jedi_usages_src_ids'] = src_ids
+    else:
+        _add_highlight_definition(buf, definition)
 
 
-def _nvim_highlight_definition(buf, definition, length):
-    lnum = definition.line-1
+def _add_highlight_definition(buf, definition):
+    lnum = definition.line
     start_col = definition.column
 
     # Skip highlighting of module definitions that point to the start
     # of the file.
-    if definition.type == 'module' and lnum == 0 and start_col == 0:
+    if definition.type == 'module' and lnum == 1 and start_col == 0:
         return
     # TODO: validate that definition.name is at this position?
     # Would skip the module definitions from above already.
 
+    length = len(definition.name)
+    if vim_prop_add:
+        if not vim_prop_type_added:
+            # XXX: needs jediUsage highlight (via after/syntax/python.vim).
+            vim.eval("prop_type_add('jediUsage', {'highlight': 'jediUsage'})")
+        vim_prop_add(lnum, start_col+1, {'type': 'jediUsage', 'length': length})
+        return
+
+    assert IS_NVIM
     end_col = definition.column + length
-    src_id = buf.add_highlight('jediUsage', lnum, start_col, end_col,
+    src_id = buf.add_highlight('jediUsage', lnum-1, start_col, end_col,
                                src_id=0)
     return src_id
 
@@ -516,7 +546,7 @@ def highlight_usages_for_vim_win():
     (matchaddpos() only works for the current window.)
     """
     global _current_highlights
-    (definitions, length) = _current_highlights
+    definitions = _current_highlights
 
     win = vim.current.window
 
@@ -538,7 +568,7 @@ def highlight_usages_for_vim_win():
                 positions = [
                     [definition.line,
                      definition.column + 1,
-                     length or len(definition.name)]
+                     len(definition.name)]
                 ]
                 expr = "matchaddpos('jediUsage', %s)" % repr(positions)
                 matchids.append(int(vim_eval(expr)))
