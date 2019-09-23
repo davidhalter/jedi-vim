@@ -461,8 +461,7 @@ endfunction
 " helper functions
 " ------------------------------------------------------------------------
 
-" a:mode: 'goto' or 'usages'
-function! jedi#add_goto_window(mode, len, ...) abort
+function! jedi#add_goto_window(for_usages, len, ...) abort
     let select_entry = a:0 ? a:1 : 0
     let height = min([a:len, g:jedi#quickfix_window_height])
 
@@ -477,10 +476,10 @@ function! jedi#add_goto_window(mode, len, ...) abort
         endif
 
         augroup jedi_goto_window
-            if a:mode ==# 'goto'
-                autocmd WinLeave <buffer> q  " automatically leave, if an option is chosen
-            else
+            if a:for_usages
                 autocmd BufWinLeave <buffer> call jedi#clear_usages()
+            else
+                autocmd WinLeave <buffer> q  " automatically leave, if an option is chosen
             endif
         augroup END
 
@@ -490,12 +489,12 @@ function! jedi#add_goto_window(mode, len, ...) abort
         if select_entry > 1
             exe select_entry.'cc'
         endif
-    elseif !has('nvim') && a:mode ==# 'usages'
+    elseif !has('nvim') && a:for_usages
         " Init current window.
         call jedi#show_usages_in_win()
     endif
 
-    if a:mode ==# 'usages'
+    if a:for_usages
         if has('nvim')
             augroup jedi_usages
               autocmd! BufWinEnter * call s:usages_for_buffer_nvim()
