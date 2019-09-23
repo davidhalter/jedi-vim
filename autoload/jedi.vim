@@ -181,16 +181,17 @@ function! jedi#debug_info() abort
         echohl WarningMsg | echo 'You should run this in a buffer with filetype "python".' | echohl None
       endif
     endif
+    let spath = shellescape(s:script_path)
     echo '#### Jedi-vim debug information'
     echo "\n"
     echo '##### jedi-vim version'
     echo "\n"
     echo ' - jedi-vim git version: '
-    echon substitute(system('git -C '.s:script_path.' describe --tags --always --dirty'), '\v\n$', '', '')
+    echon substitute(system('git -C '.spath.' describe --tags --always --dirty'), '\v\n$', '', '')
     echo ' - jedi git submodule status: '
-    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/jedi'), '\v\n$', '', '')
+    echon substitute(system('git -C '.spath.' submodule status pythonx/jedi'), '\v\n$', '', '')
     echo ' - parso git submodule status: '
-    echon substitute(system('git -C '.s:script_path.' submodule status pythonx/parso'), '\v\n$', '', '')
+    echon substitute(system('git -C '.spath.' submodule status pythonx/parso'), '\v\n$', '', '')
     echo "\n"
     echo '##### Global Python'
     echo "\n"
