@@ -134,6 +134,44 @@ finally:
     sys.path.remove(parso_path)
 
 
+class VimCompat:
+    _eval_cache = {}
+    _func_cache = {}
+
+    @classmethod
+    def has(cls, what):
+        try:
+            return cls._eval_cache[what]
+        except KeyError:
+            ret = cls._eval_cache[what] = cls.call('has', what)
+            return ret
+
+    @classmethod
+    def call(cls, func, *args):
+        try:
+            f = cls._func_cache[func]
+        except KeyError:
+            if IS_NVIM:
+                f = cls._func_cache[func] = getattr(vim.funcs, func)
+            else:
+                f = cls._func_cache[func] = vim.Function(func)
+        print(f, args)
+        return f(*args)
+
+    @classmethod
+    def setqflist(cls, items, title):
+        if cls.has('patch-7.4.2200'):  # can set qf title.
+            if cls.has('patch-8.0.0657'):  # can set items via "what".
+                what = {'title': title, 'items': items}
+                cls.call('setqflist', [], ' ', what)
+            else:
+                # Can set title, but needs two calls.
+                cls.call('setqflist', items)
+                cls.call('setqflist', items, 'a', {'title': title})
+        else:
+            cls.call('setqflist', items)
+
+
 def catch_and_print_exceptions(func):
     def wrapper(*args, **kwargs):
         try:
@@ -370,7 +408,7 @@ def annotate_description(d):
     return '[%s] %s' % (typ, code)
 
 
-def show_goto_multi_results(definitions, for_usages):
+def show_goto_multi_results(definitions, mode):
     """Create a quickfix list for multiple definitions."""
     lst = []
     (row, col) = vim.current.window.cursor
@@ -393,11 +431,21 @@ def show_goto_multi_results(definitions, for_usages):
                             > abs(d.column - col))):
                     current_idx = len(lst)
 
-    vim_eval('setqflist(%s)' % repr(lst))
+    # Build qflist title.
+    qftitle = mode
     if current_idx is not None:
-        vim_eval('jedi#add_goto_window(%d, %d, %d)' % (for_usages, len(lst), current_idx))
+        current = lst[current_idx]
+        qftitle += ": " + str(current['text'])
+        select_entry = current_idx
     else:
-        vim_eval('jedi#add_goto_window(%d, %d)' % (for_usages, len(lst),))
+        select_entry = 0
+
+    VimCompat.setqflist(lst, title=qftitle)
+
+    for_usages = mode == "usages"
+    vim_eval('jedi#add_goto_window(%d, %d, %d)' % (
+        for_usages, len(lst), select_entry,
+    ))
 
 
 @catch_and_print_exceptions
@@ -409,7 +457,7 @@ def usages(visuals=True):
         return definitions
 
     if visuals:
-        show_goto_multi_results(definitions, True)
+        show_goto_multi_results(definitions, "usages")
         highlight_usages(definitions)
     return definitions
 
