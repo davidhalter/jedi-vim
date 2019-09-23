@@ -418,11 +418,7 @@ _current_highlights = (None, None)
 """Current (definitions, length) to use for highlighting."""
 
 
-try:
-    import neovim  # noqa: F401
-    HAS_NVIM = True
-except ImportError:
-    HAS_NVIM = False
+IS_NVIM = hasattr(vim, 'from_nvim')
 
 
 def clear_usages():
@@ -432,7 +428,7 @@ def clear_usages():
         return
     _current_highlights = (None, None)
 
-    if HAS_NVIM:
+    if IS_NVIM:
         for buf in vim.buffers:
             src_ids = buf.vars.get('_jedi_usages_src_ids')
             if src_ids is not None:
@@ -457,7 +453,7 @@ def highlight_usages(definitions, length=None):
         assert not _current_highlights[0]
     _current_highlights = (definitions, length)
 
-    if HAS_NVIM:
+    if IS_NVIM:
         bufs = {x.name: x for x in vim.buffers}
         buf_src_ids = {}
         for definition in definitions:
@@ -480,7 +476,7 @@ def highlight_usages_for_buf():
     global _current_highlights
     (definitions, length) = _current_highlights
 
-    assert HAS_NVIM
+    assert IS_NVIM
 
     buf = vim.current.buffer
     bufname = buf.name
