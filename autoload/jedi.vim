@@ -470,7 +470,7 @@ function! jedi#add_goto_window(for_usages, len, ...) abort
     execute 'belowright cwindow '.height
 
     if &filetype ==# 'qf'
-        " Setup quickfix window, but only if it was opened / initially.
+        " Setup quickfix window (initially, when opened via ":cwindow" above).
         if g:jedi#use_tabs_not_buffers == 1
             noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
         endif
