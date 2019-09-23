@@ -409,8 +409,8 @@ def usages(visuals=True):
         return definitions
 
     if visuals:
-        highlight_usages(definitions)
         show_goto_multi_results(definitions, True)
+        highlight_usages(definitions)
     return definitions
 
 
