@@ -414,7 +414,7 @@ def usages(visuals=True):
     return definitions
 
 
-_current_highlights = None
+_current_definitions = None
 """Current definitions to use for highlighting."""
 
 
@@ -433,10 +433,10 @@ else:
 
 def clear_usages():
     """Clear existing highlights."""
-    global _current_highlights
-    if _current_highlights is None:
+    global _current_definitions
+    if _current_definitions is None:
         return
-    _current_highlights = None
+    _current_definitions = None
 
     if IS_NVIM:
         for buf in vim.buffers:
@@ -462,10 +462,10 @@ def highlight_usages(definitions):
     windows on demand.  Otherwise Vim's text-properties are used.
     """
 
-    global _current_highlights
+    global _current_definitions
     if definitions:
-        assert not _current_highlights
-    _current_highlights = definitions
+        assert not _current_definitions
+    _current_definitions = definitions
 
     if IS_NVIM or vim_prop_add:
         bufs = {x.name: x for x in vim.buffers}
@@ -493,8 +493,8 @@ def highlight_usages(definitions):
 
 
 def highlight_usages_for_buf():
-    global _current_highlights
-    definitions = _current_highlights
+    global _current_definitions
+    definitions = _current_definitions
 
     buf = vim.current.buffer
     bufname = buf.name
@@ -545,8 +545,8 @@ def highlight_usages_for_vim_win():
 
     (matchaddpos() only works for the current window.)
     """
-    global _current_highlights
-    definitions = _current_highlights
+    global _current_definitions
+    definitions = _current_definitions
 
     win = vim.current.window
 
