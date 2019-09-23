@@ -345,7 +345,7 @@ def goto(mode="goto"):
                                     repr(PythonToVimStr(old_wildignore)))
             vim.current.window.cursor = d.line, d.column
     else:
-        show_goto_multi_results(definitions, 'goto')
+        show_goto_multi_results(definitions, False)
     return definitions
 
 
@@ -370,7 +370,7 @@ def annotate_description(d):
     return '[%s] %s' % (typ, code)
 
 
-def show_goto_multi_results(definitions, mode):
+def show_goto_multi_results(definitions, for_usages):
     """Create a quickfix list for multiple definitions."""
     lst = []
     (row, col) = vim.current.window.cursor
@@ -395,9 +395,9 @@ def show_goto_multi_results(definitions, mode):
 
     vim_eval('setqflist(%s)' % repr(lst))
     if current_idx is not None:
-        vim_eval('jedi#add_goto_window(%r, %d, %d)' % (mode, len(lst), current_idx))
+        vim_eval('jedi#add_goto_window(%d, %d, %d)' % (for_usages, len(lst), current_idx))
     else:
-        vim_eval('jedi#add_goto_window(%r, %d)' % (mode, len(lst),))
+        vim_eval('jedi#add_goto_window(%d, %d)' % (for_usages, len(lst),))
 
 
 @catch_and_print_exceptions
@@ -410,7 +410,7 @@ def usages(visuals=True):
 
     if visuals:
         highlight_usages(definitions)
-        show_goto_multi_results(definitions, 'usages')
+        show_goto_multi_results(definitions, True)
     return definitions
 
 
