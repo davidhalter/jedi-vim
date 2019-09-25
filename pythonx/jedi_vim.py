@@ -412,6 +412,7 @@ def show_goto_multi_results(definitions, mode):
     lst = []
     (row, col) = vim.current.window.cursor
     current_idx = None
+    current_def = None
     for d in definitions:
         if d.column is None:
             # Typically a namespace, in the future maybe other things as
@@ -429,12 +430,12 @@ def show_goto_multi_results(definitions, mode):
                         or (abs(lst[current_idx].column - col)
                             > abs(d.column - col))):
                     current_idx = len(lst)
+                    current_def = d
 
     # Build qflist title.
     qftitle = mode
-    if current_idx is not None:
-        current = lst[current_idx]
-        qftitle += ": " + str(current['text'])
+    if current_def is not None:
+        qftitle += ": " + current_def.full_name
         select_entry = current_idx
     else:
         select_entry = 0
