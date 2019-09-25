@@ -155,7 +155,6 @@ class VimCompat:
                 f = cls._func_cache[func] = getattr(vim.funcs, func)
             else:
                 f = cls._func_cache[func] = vim.Function(func)
-        print(f, args)
         return f(*args)
 
     @classmethod
