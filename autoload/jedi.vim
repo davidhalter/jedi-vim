@@ -465,8 +465,7 @@ endfunction
 " helper functions
 " ------------------------------------------------------------------------
 
-function! jedi#add_goto_window(for_usages, len, ...) abort
-    let select_entry = a:0 ? a:1 : 0
+function! jedi#add_goto_window(for_usages, len) abort
     let height = min([a:len, g:jedi#quickfix_window_height])
 
     " Using :cwindow allows to stay in the current window in case it is opened
@@ -493,10 +492,6 @@ function! jedi#add_goto_window(for_usages, len, ...) abort
 
         " Preview
         " exe "nnoremap <buffer> p \<CR>:PythonJedi jedi_vim.highlight_usages_for_vim_win()\<CR>\<C-w>p"
-
-        if select_entry > 1
-            exe select_entry.'cc'
-        endif
     elseif a:for_usages && !s:supports_buffer_usages
         " Init current window.
         call jedi#_show_usages_in_win()

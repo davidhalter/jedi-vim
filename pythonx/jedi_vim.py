@@ -443,9 +443,8 @@ def show_goto_multi_results(definitions, mode):
     VimCompat.setqflist(lst, title=qftitle)
 
     for_usages = mode == "usages"
-    vim_eval('jedi#add_goto_window(%d, %d, %d)' % (
-        for_usages, len(lst), select_entry,
-    ))
+    vim_eval('jedi#add_goto_window(%d, %d)' % (for_usages, len(lst)))
+    vim_command('%dcc' % select_entry)
 
 
 @catch_and_print_exceptions
