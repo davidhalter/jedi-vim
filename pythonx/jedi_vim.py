@@ -521,7 +521,9 @@ def highlight_usages(definitions):
     """
     global _current_definitions, _pending_definitions
     if definitions:
-        assert not _current_definitions
+        # TODO(blueyed): reuse / keep current qflist when it's the same again,
+        # but only with a different selected entry.
+        clear_usages()
     _current_definitions = definitions
     _pending_definitions = {}
 
