@@ -158,17 +158,32 @@ class VimCompat:
         return f(*args)
 
     @classmethod
-    def setqflist(cls, items, title):
+    def setqflist(cls, items, title, context):
         if cls.has('patch-7.4.2200'):  # can set qf title.
+            what = {'title': title}
+            if cls.has('patch-8.0.0590'):  # can set qf context
+                what['context'] = {'jedi_usages': context}
             if cls.has('patch-8.0.0657'):  # can set items via "what".
-                what = {'title': title, 'items': items}
+                what['items'] = items
                 cls.call('setqflist', [], ' ', what)
             else:
-                # Can set title, but needs two calls.
+                # Can set title (and maybe context), but needs two calls.
                 cls.call('setqflist', items)
-                cls.call('setqflist', items, 'a', {'title': title})
+                cls.call('setqflist', items, 'a', what)
         else:
             cls.call('setqflist', items)
+
+    @classmethod
+    def setqflist_title(cls, title):
+        if cls.has('patch-7.4.2200'):
+            cls.call('setqflist', [], 'a', {'title': title})
+
+    @classmethod
+    def can_update_current_qflist_for_context(cls, context):
+        if cls.has('patch-8.0.0590'):  # can set qf context
+            return cls.call('getqflist', {'context': 1})['context'] == {
+                'jedi_usages': context,
+            }
 
 
 def catch_and_print_exceptions(func):
@@ -408,7 +423,9 @@ def annotate_description(d):
 
 
 def show_goto_multi_results(definitions, mode):
-    """Create a quickfix list for multiple definitions."""
+    """Create (or reuse) a quickfix list for multiple definitions."""
+    global _current_definitions
+
     lst = []
     (row, col) = vim.current.window.cursor
     current_idx = None
@@ -433,18 +450,37 @@ def show_goto_multi_results(definitions, mode):
                     current_def = d
 
     # Build qflist title.
-    qftitle = mode
+    qf_title = mode
     if current_def is not None:
-        qftitle += ": " + current_def.full_name
+        qf_title += ": " + current_def.full_name
         select_entry = current_idx
     else:
         select_entry = 0
 
-    VimCompat.setqflist(lst, title=qftitle)
+    qf_context = id(definitions)
+    if (_current_definitions
+            and VimCompat.can_update_current_qflist_for_context(qf_context)):
+        # Same list, only adjust title/selected entry.
+        VimCompat.setqflist_title(qf_title)
+    else:
+        VimCompat.setqflist(lst, title=qf_title, context=qf_context)
+        for_usages = mode == "usages"
+        vim_eval('jedi#add_goto_window(%d, %d)' % (for_usages, len(lst)))
 
-    for_usages = mode == "usages"
-    vim_eval('jedi#add_goto_window(%d, %d)' % (for_usages, len(lst)))
     vim_command('%dcc' % select_entry)
+
+
+def _same_definitions(a, b):
+    """Compare without _inference_state.
+
+    Ref: https://github.com/davidhalter/jedi-vim/issues/952)
+    """
+    return all(
+        x._name.start_pos == y._name.start_pos
+        and x.module_path == y.module_path
+        and x.name == y.name
+        for x, y in zip(a, b)
+    )
 
 
 @catch_and_print_exceptions
@@ -456,8 +492,21 @@ def usages(visuals=True):
         return definitions
 
     if visuals:
+        global _current_definitions
+
+        if _current_definitions:
+            if _same_definitions(_current_definitions, definitions):
+                definitions = _current_definitions
+            else:
+                clear_usages()
+                assert not _current_definitions
+
         show_goto_multi_results(definitions, "usages")
-        highlight_usages(definitions)
+        if not _current_definitions:
+            _current_definitions = definitions
+            highlight_usages()
+        else:
+            assert definitions is _current_definitions  # updated above
     return definitions
 
 
@@ -487,6 +536,7 @@ def clear_usages():
     global _current_definitions
     if _current_definitions is None:
         return
+    _current_definitions = None
 
     if IS_NVIM:
         for buf in _placed_definitions_in_buffers:
@@ -503,13 +553,13 @@ def clear_usages():
             })
     else:
         # Unset current window only.
+        assert _current_definitions is None
         highlight_usages_for_vim_win()
 
     _placed_definitions_in_buffers.clear()
-    _current_definitions = None
 
 
-def highlight_usages(definitions):
+def highlight_usages():
     """Set definitions to be highlighted.
 
     With Neovim it will use the nvim_buf_add_highlight API to highlight all
@@ -520,9 +570,8 @@ def highlight_usages(definitions):
     windows on demand.  Otherwise Vim's text-properties are used.
     """
     global _current_definitions, _pending_definitions
-    if definitions:
-        assert not _current_definitions
-    _current_definitions = definitions
+
+    definitions = _current_definitions
     _pending_definitions = {}
 
     if IS_NVIM or vim_prop_add:
