@@ -471,10 +471,14 @@ function! jedi#add_goto_window(for_usages, len, ...) abort
 
     " Using :cwindow allows to stay in the current window in case it is opened
     " already.
+    let win_count = winnr('$')
     execute 'belowright cwindow '.height
+    let qfwin_was_opened = winnr('$') > win_count
 
-    if &filetype ==# 'qf'
-        " Setup quickfix window (initially, when opened via ":cwindow" above).
+    if qfwin_was_opened
+        if &filetype !=# 'qf'
+            echoerr 'jedi-vim: unexpected ft with current window, please report!'
+        endif
         if g:jedi#use_tabs_not_buffers == 1
             noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
         endif
