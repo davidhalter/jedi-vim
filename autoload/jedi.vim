@@ -198,7 +198,11 @@ function! jedi#debug_info() abort
     echo 'Using Python version '.s:python_version.' to access Jedi.'
     let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
     let s:pythonjedi_called = 0
-    PythonJedi import vim; vim.command('let s:pythonjedi_called = 1')
+    try
+      PythonJedi import vim; vim.command('let s:pythonjedi_called = 1')
+    catch
+      echo 'Error when trying to import vim: '.v:exception
+    endtry
     if !s:pythonjedi_called
       echohl WarningMsg
       echom 'PythonJedi failed to run, likely a Python config issue.'
@@ -207,8 +211,14 @@ function! jedi#debug_info() abort
       endif
       echohl None
     else
-      PythonJedi from jedi_vim_debug import display_debug_info
-      PythonJedi display_debug_info()
+      try
+        PythonJedi from jedi_vim_debug import display_debug_info
+        PythonJedi display_debug_info()
+      catch
+        echohl WarningMsg
+        echo 'Error when running display_debug_info: '.v:exception
+        echohl None
+      endtry
     endif
     echo "\n"
     echo '##### Settings'
