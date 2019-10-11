@@ -489,9 +489,6 @@ function! jedi#add_goto_window(for_usages, len) abort
                 autocmd WinLeave <buffer> q  " automatically leave, if an option is chosen
             endif
         augroup END
-
-        " Preview
-        " exe "nnoremap <buffer> p \<CR>:PythonJedi jedi_vim.highlight_usages_for_vim_win()\<CR>\<C-w>p"
     elseif a:for_usages && !s:supports_buffer_usages
         " Init current window.
         call jedi#_show_usages_in_win()
