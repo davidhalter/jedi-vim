@@ -305,16 +305,22 @@ def completions():
             completions = script.completions()
             signatures = script.call_signatures()
 
+            add_info = "preview" in vim.eval("&completeopt").split(",")
             out = []
             for c in completions:
                 d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
                          abbr=PythonToVimStr(c.name_with_symbols),
                          # stuff directly behind the completion
                          menu=PythonToVimStr(c.description),
-                         info=PythonToVimStr(c.docstring()),  # docstr
                          icase=1,  # case insensitive
                          dup=1  # allow duplicates (maybe later remove this)
                          )
+                if add_info:
+                    try:
+                        d["info"] = PythonToVimStr(c.docstring())
+                    except Exception:
+                        print("jedi-vim: error with docstring for %r: %s" % (
+                            c, traceback.format_exc()))
                 out.append(d)
 
             strout = str(out)
