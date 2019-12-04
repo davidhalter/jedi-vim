@@ -765,9 +765,12 @@ def show_call_signatures(signatures=()):
     if int(vim_eval("has('conceal') && g:jedi#show_call_signatures")) == 0:
         return
 
+    # We need to clear the signatures before we calculate them again. The
+    # reason for this is that call signatures are unfortunately written to the
+    # buffer.
+    clear_call_signatures()
     if signatures == ():
         signatures = get_script().call_signatures()
-    clear_call_signatures()
 
     if not signatures:
         return
