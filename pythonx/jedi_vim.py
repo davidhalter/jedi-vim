@@ -1028,20 +1028,32 @@ def call_signatures_floatwin(signatures):
 
     height = len(lines)
 
-    # Display below when at the top of the window.
-    # It limits "height" to the available room, preferring "below" for
+    # Display above/below when at the top/bottom of the window.
+    # It limits "height" to the available room, preferring the other for
     # when there is more room.
-    winline = int(vim.funcs.winline())
-    space_above = winline - 1
+    wline = VimCompat.call('screenrow')
     floatwin_row_offset = None
-    if height > space_above:
-        space_below = vim.funcs.winheight(0) - winline
-        if space_below > space_above:
-            floatwin_row_offset = 1
-            height = min(space_below, height)
-    if floatwin_row_offset is None:
-        height = min(space_above, height)
+
+    space_above = wline - 1
+    space_below = vim.options["lines"] - wline
+    # Do not display over statusline.  TODO: based on settings (cmdheight, ...)
+    space_below -= 2
+
+    prefer_below = True
+    put_below = True
+    if prefer_below:
+        if height > space_below and space_above > space_below:
+            put_below = False
+    else:
+        if height > space_above and space_below > space_above:
+            put_below = True
+
+    if put_below:
+        floatwin_row_offset = 1
+        height = min(space_below, height)
+    else:
         floatwin_row_offset = sig_row_offset - height + 1
+        height = min(space_above, height)
 
     if IS_NVIM:
         buf = vim.current.buffer.vars.get('_jedi_signature_buffer')
@@ -1074,16 +1086,11 @@ def call_signatures_floatwin(signatures):
         vim.current.buffer.vars['_jedi_signature_window'] = win
 
     else:
-        # Display below when at the top of the window.
-        winline = int(vim.eval("winline()"))
-        if height > winline - 1:
-            line = "cursor+1"
-        else:
-            line = "cursor-%d" % height
+        line = ("%d" if floatwin_row_offset < 0 else "+%d") % floatwin_row_offset
+        col = ("%d" if floatwin_col_offset < 0 else "+%d") % floatwin_col_offset
 
-        col = ("%s" if floatwin_col_offset < 0 else "+%d") % floatwin_col_offset
         popup_opts = vim.Dictionary(**{
-            "line": line,
+            "line": "cursor%s" % line,
             "col": "cursor%s" % col,
             "pos": "topleft",
             "wrap": 0,
@@ -1091,8 +1098,7 @@ def call_signatures_floatwin(signatures):
             "flip": 1,
             "minwidth": max_visible_sig_width,
             "maxwidth": max_visible_sig_width,
-            # "close": "button",
-            # "border": [1, 1, 1, 1],
+            "maxheight": height,
         })
 
         try:
@@ -1102,9 +1108,9 @@ def call_signatures_floatwin(signatures):
             winid = popup_create(lines, popup_opts)
             buf = int(vim.eval("winbufnr(%d)" % winid))
 
-            # Does too much.
-            # vim.eval("win_execute(%d, 'set filetype=jedi_signature')" % winid)
+            vim.command("call setwinvar(%d, '&wincolor', 'jediCallsigNormal')" % winid)
 
+            # Set syntax to apply concealing.
             vim.eval("win_execute(%d, 'set syntax=jedi_signature')" % winid)
 
             # vim.eval("setbufvar(%d, '&filetype', 'jedi_signature')" % buf)
@@ -1120,16 +1126,6 @@ def call_signatures_floatwin(signatures):
             popup_move(winid, popup_opts)
             popup_show = vim.Function("popup_show")
             popup_show(winid)
-
-        # buf = int(vim.eval('winbufnr(%d)' % winid))
-        # Does not trigger syntax loading?
-        # vim.buffers[buf].options["filetype"] = "jedi_signature"
-
-        # print(vim.windows[winid].options)
-        # vim.[winid].options.filetype = "jedi_signature"
-
-        # winid = vim.eval("popup_create(['l1', 'l2'], {'line': 'cursor-1', 'col': 'cursor-2'})")
-        print(winid)
 
 
 @catch_and_print_exceptions
