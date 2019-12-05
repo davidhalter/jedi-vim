@@ -53,9 +53,9 @@ describe 'signatures'
         doautocmd CursorHoldI
         Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*values: object, *_*sep: Text=...*_*'
         " Move left to "=" - hightlights first argument ("values").
-        " NOTE: it is arguable that maybe "sep=..." should be highlight still,
-        "       but this tests for the cache to be "busted", and that fresh
-        "       results are retrieved from Jedi.
+        " NOTE: it is arguable that maybe "sep=..." should be highlighted
+        "       still, but this tests for the cache to be "busted", and that
+        "       fresh results are retrieved from Jedi.
         noautocmd normal h
         doautocmd CursorHoldI
         Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*_**values: object*_*, sep: Text=...,'
