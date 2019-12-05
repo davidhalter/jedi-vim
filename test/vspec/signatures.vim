@@ -45,6 +45,9 @@ describe 'signatures'
     end
 
     it 'highlights correct argument'
+        if !has('python3')
+          SKIP 'py2: no signatures with print()'
+        endif
         noautocmd normal o
         doautocmd CursorHoldI
         noautocmd normal iprint(42, sep="X", )
