@@ -342,7 +342,6 @@ def completions():
         return
 
     # Clear call signatures in the buffer so they aren't seen by the completer.
-    # Call signatures in the command line can stay.
     if _show_call_signatures_mode == 1:
         restore_signatures = clear_call_signatures(temporary=True)
     else:
@@ -862,7 +861,8 @@ def show_call_signatures(signatures=(), mode=None):
     # We need to clear the signatures before we calculate them again. The
     # reason for this is that call signatures are unfortunately written to the
     # buffer.
-    clear_call_signatures()
+    if _show_call_signatures_mode != 2:
+        clear_call_signatures()
     if signatures == ():
         signatures = get_script().get_signatures(*get_pos())
 

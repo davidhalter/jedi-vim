@@ -81,7 +81,7 @@ describe 'signatures'
         redir => msg
         call jedi#show_call_signatures()
         redir END
-        Expect msg == "\nstaticmethod(f: Callable[..., Any])"
+        Expect msg == "staticmethod(f: Callable[..., Any])"
 
         redir => msg
         doautocmd InsertLeave
@@ -93,7 +93,7 @@ describe 'signatures'
         redir => msg
         call jedi#show_call_signatures()
         redir END
-        Expect msg == "\nfoo(a, b)"
+        Expect msg == "foo(a, b)"
     end
 
     it 'command line truncation'
@@ -111,22 +111,22 @@ describe 'signatures'
         put = 'def '.funcname.'(arg1, arg2, arg3, a, b, c):'
         put = '    pass'
         execute "normal o\<BS>".funcname."( "
-        Expect Signature() == "\n".funcname."(arg1, …)"
+        Expect Signature() == funcname."(arg1, …)"
 
         exe 'normal sarg1, '
-        Expect Signature() == "\n".funcname."(…, arg2, …)"
+        Expect Signature() == funcname."(…, arg2, …)"
 
         exe 'normal sarg2, arg3, '
-        Expect Signature() == "\n".funcname."(…, a, b, c)"
+        Expect Signature() == funcname."(…, a, b, c)"
 
         exe 'normal sa, b, '
-        Expect Signature() == "\n".funcname."(…, c)"
+        Expect Signature() == funcname."(…, c)"
 
         g/^/d
         put = 'def '.funcname.'('.repeat('b', 20).', arg2):'
         put = '    pass'
         execute "normal o\<BS>".funcname."( "
-        Expect Signature() == "\n".funcname."(…)"
+        Expect Signature() == funcname."(…)"
     end
 
     it 'command line no signature'
@@ -137,6 +137,6 @@ describe 'signatures'
         redir => msg
         call jedi#show_call_signatures()
         redir END
-        Expect msg == "\n"
+        Expect msg == ''
     end
 end
