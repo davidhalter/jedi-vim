@@ -30,7 +30,7 @@ IS_NVIM = hasattr(vim, 'from_nvim')
 
 
 _show_call_signatures_mode = None
-"""Current mode for call signatures (1: concealing, 2: command line)"""
+"""Current mode for call signatures (1: concealing, 2: command line, 3: floatwin)"""
 
 
 try:
