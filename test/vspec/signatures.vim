@@ -44,6 +44,23 @@ describe 'signatures'
         Expect getline(1) == '?!?jedi=0, ?!?            (*_*f: Callable*_*) ?!?jedi?!?'
     end
 
+    it 'highlights correct argument'
+        noautocmd normal o
+        doautocmd CursorHoldI
+        noautocmd normal iprint(42, sep="X", )
+        " Move to "=" - hightlights "sep=...".
+        noautocmd normal 5h
+        doautocmd CursorHoldI
+        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*values: object, *_*sep: Text=...*_*'
+        " Move left to "=" - hightlights first argument ("values").
+        " NOTE: it is arguable that maybe "sep=..." should be highlight still,
+        "       but this tests for the cache to be "busted", and that fresh
+        "       results are retrieved from Jedi.
+        noautocmd normal h
+        doautocmd CursorHoldI
+        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*_**values: object*_*, sep: Text=...,'
+    end
+
     it 'no signature'
         exe 'normal ostr '
         Python jedi_vim.show_call_signatures()
