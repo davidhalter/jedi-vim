@@ -1037,33 +1037,38 @@ def call_signatures_floatwin(signatures):
     space_above = wline - (cur_row - sig_bracket_start_row) - 1
     space_below = VimCompat.call("winheight", 0) - wline
 
-    # Check if there is only whitespace for where the signature would be put
-    # above, and prefer to putting it below otherwise (since often code is used
-    # rather from above than below (and should not be covered therefore)).
-    # TODO: might prefer above/below via setting in general, and/or for when
-    #       the signature/function definition spans multiple lines (but AFAICS
-    #       that info is not available (would need signature.bracket_end?)
-    prefer_below = False
-    for lnum_offset_above in range(1, height + 1):
-        lnum_above = sig_bracket_start_row - lnum_offset_above
-        if len(VimCompat.call('getline', lnum_above).rstrip()) > sig_bracket_start_col - 1:
-            prefer_below = True
-            break
-
-    put_below = prefer_below
-    if prefer_below:
-        if height > space_below and space_above > space_below:
-            put_below = False
+    if space_above <= 0 and space_below <= 0:
+        # No space above sig_bracket_start_row and cur_row, display it at the
+        # top of the window.
+        floatwin_row_offset = 1 - wline
     else:
-        if height > space_above and space_below > space_above:
-            put_below = True
+        # Check if there is only whitespace for where the signature would be put
+        # above, and prefer to putting it below otherwise (since often code is used
+        # rather from above than below (and should not be covered therefore)).
+        # TODO: might prefer above/below via setting in general, and/or for when
+        #       the signature/function definition spans multiple lines (but AFAICS
+        #       that info is not available (would need signature.bracket_end?)
+        prefer_below = False
+        for lnum_offset_above in range(1, height + 1):
+            lnum_above = sig_bracket_start_row - lnum_offset_above
+            if len(VimCompat.call('getline', lnum_above).rstrip()) > sig_bracket_start_col - 1:
+                prefer_below = True
+                break
 
-    if put_below:
-        floatwin_row_offset = 1
-        height = min(space_below, height)
-    else:
-        floatwin_row_offset = sig_row_offset - height + 1
-        height = min(space_above, height)
+        put_below = prefer_below
+        if prefer_below:
+            if height > space_below and space_above > space_below:
+                put_below = False
+        else:
+            if height > space_above and space_below > space_above:
+                put_below = True
+
+        if put_below:
+            floatwin_row_offset = 1
+            height = min(space_below, height)
+        else:
+            height = min(space_above, height)
+            floatwin_row_offset = sig_row_offset - height
 
     if IS_NVIM:
         buf = vim.current.buffer.vars.get('_jedi_signature_buffer')
