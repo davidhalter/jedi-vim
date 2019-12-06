@@ -1031,16 +1031,26 @@ def call_signatures_floatwin(signatures):
     # Display above/below when at the top/bottom of the window.
     # It limits "height" to the available room, preferring the other for
     # when there is more room.
-    wline = VimCompat.call('screenrow')
+    wline = VimCompat.call('winline')
     floatwin_row_offset = None
 
-    space_above = wline - 1
-    space_below = vim.options["lines"] - wline
-    # Do not display over statusline.  TODO: based on settings (cmdheight, ...)
-    space_below -= 2
+    space_above = wline - (cur_row - sig_bracket_start_row) - 1
+    space_below = VimCompat.call("winheight", 0) - wline
 
-    prefer_below = True
-    put_below = True
+    # Check if there is only whitespace for where the signature would be put
+    # above, and prefer to putting it below otherwise (since often code is used
+    # rather from above than below (and should not be covered therefore)).
+    # TODO: might prefer above/below via setting in general, and/or for when
+    #       the signature/function definition spans multiple lines (but AFAICS
+    #       that info is not available (would need signature.bracket_end?)
+    prefer_below = False
+    for lnum_offset_above in range(1, height + 1):
+        lnum_above = sig_bracket_start_row - lnum_offset_above
+        if len(VimCompat.call('getline', lnum_above).rstrip()) > sig_bracket_start_col - 1:
+            prefer_below = True
+            break
+
+    put_below = prefer_below
     if prefer_below:
         if height > space_below and space_above > space_below:
             put_below = False
