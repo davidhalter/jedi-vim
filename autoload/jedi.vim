@@ -581,15 +581,16 @@ function! jedi#show_call_signatures() abort
 
     " Caching.  On the same line only.
     if line == s:show_call_signatures_last[0]
-        " Check if the number of commas and parenthesis before or after the
+        " Check if the number of special signs before or after the
         " cursor has not changed since the last call, which means that the
         " argument position was not changed and we can skip repainting.
         let prevcol = s:show_call_signatures_last[1]
         let prevline = s:show_call_signatures_last[2]
-        if substitute(curline[:col-2], '[^,()]', '', 'g')
-                    \ == substitute(prevline[:prevcol-2], '[^,()]', '', 'g')
-                    \ && substitute(curline[(col-2):], '[^,()]', '', 'g')
-                    \ == substitute(prevline[(prevcol-2):], '[^,()]', '', 'g')
+        let no_special = '[^,()=]'
+        if substitute(curline[:col-2], no_special, '', 'g')
+                    \ == substitute(prevline[:prevcol-2], no_special, '', 'g')
+                    \ && substitute(curline[(col-2):], no_special, '', 'g')
+                    \ == substitute(prevline[(prevcol-2):], no_special, '', 'g')
             let reload_signatures = 0
         endif
     endif
