@@ -41,7 +41,7 @@ describe 'signatures'
         doautocmd CursorHoldI
         noautocmd normal istaticmethod()
         doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?            (*_*f: Callable*_*) ?!?jedi?!?'
+        Expect getline(1) == '?!?jedi=0, ?!?            (*_*f: Callable[..., Any]*_*) ?!?jedi?!?'
     end
 
     it 'highlights correct argument'
@@ -54,14 +54,14 @@ describe 'signatures'
         " Move to "=" - hightlights "sep=...".
         noautocmd normal 5h
         doautocmd CursorHoldI
-        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*values: object, *_*sep: Text=...*_*'
+        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*values: object, *_*sep: Optional[Text]=...*_*'
         " Move left to "=" - hightlights first argument ("values").
         " NOTE: it is arguable that maybe "sep=..." should be highlighted
         "       still, but this tests for the cache to be "busted", and that
         "       fresh results are retrieved from Jedi.
         noautocmd normal h
         doautocmd CursorHoldI
-        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*_**values: object*_*, sep: Text=...,'
+        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*_**values: object*_*, sep: Optional[Text]=...,'
     end
 
     it 'no signature'
@@ -88,7 +88,7 @@ describe 'signatures'
         redir => msg
         Python jedi_vim.show_call_signatures()
         redir END
-        Expect msg == "\nstaticmethod(f: Callable)"
+        Expect msg == "\nstaticmethod(f: Callable[..., Any])"
 
         redir => msg
         doautocmd InsertLeave
