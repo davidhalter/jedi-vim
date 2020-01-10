@@ -726,9 +726,17 @@ def show_documentation():
     if not definitions:
         echo_highlight('No documentation found for that.')
         vim.command('return')
-    else:
-        docs = ['Docstring for %s\n%s\n%s' % (d.desc_with_module, '=' * 40, d.docstring())
-                if d.docstring() else '|No Docstring for %s|' % d for d in definitions]
+        return
+
+    docs = []
+    for d in definitions:
+        doc = d.docstring()
+        if doc:
+            title = 'Docstring for %s' % d.desc_with_module
+            underline = '=' * len(title)
+            docs.append('%s\n%s\n%s' % (title, underline, doc))
+        else:
+            docs.append('|No Docstring for %s|' % d)
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
