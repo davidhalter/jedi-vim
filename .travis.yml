@@ -10,6 +10,8 @@ matrix:
   include:
     - env: ENV=test_coverage
       python: 2.7
+    - env: ENV=test_coverage
+      python: 3.8
 install:
   - |
     if [ "$ENV" = "test" ]; then
