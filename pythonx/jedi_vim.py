@@ -67,7 +67,9 @@ class VimError(Exception):
         self.executing = executing
 
     def __str__(self):
-        return self.message + '; created by: ' + repr(self.executing)
+        return "{}; created by {!r} (in {})".format(
+            self.message, self.executing, self.throwpoint
+        )
 
 
 def _catch_exception(string, is_eval):
