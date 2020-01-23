@@ -25,10 +25,11 @@ Contents                                *jedi-vim-contents*
     5.2. Go to definition               |g:jedi#goto_command|
     5.3. Go to assignment               |g:jedi#goto_assignments_command|
     5.4  Go to definition (deprecated)  |g:jedi#goto_definitions_command|
-    5.5. Show documentation             |g:jedi#documentation_command|
-    5.6. Rename variables               |g:jedi#rename_command|
-    5.7. Show name usages               |g:jedi#usages_command|
-    5.8. Open module by name            |:Pyimport|
+    5.5  Go to stub                     |g:jedi#goto_stubs_command|
+    5.6. Show documentation             |g:jedi#documentation_command|
+    5.7. Rename variables               |g:jedi#rename_command|
+    5.8. Show name usages               |g:jedi#usages_command|
+    5.9. Open module by name            |:Pyimport|
 6. Configuration                        |jedi-vim-configuration|
     6.1. auto_initialization            |g:jedi#auto_initialization|
     6.2. auto_vim_configuration         |g:jedi#auto_vim_configuration|
@@ -282,7 +283,14 @@ NOTE: Deprecated. Use |g:jedi#goto_command| / |jedi#goto()| instead, which
 currently uses this internally.
 
 ------------------------------------------------------------------------------
-5.5. `g:jedi#documentation_command`     *g:jedi#documentation_command*
+5.5. `g:jedi#goto_stubs_command`        *g:jedi#goto_stubs_command*
+Function: `jedi#goto_stubs()`
+Default: <leader>s                      Go to stub
+
+Finds the stub of the function/class under the cursor.
+
+------------------------------------------------------------------------------
+5.6. `g:jedi#documentation_command`     *g:jedi#documentation_command*
 Function: `jedi#show_documentation()`
 Default: <K>                            Show pydoc documentation
 
@@ -291,7 +299,7 @@ The documentation is opened in a horizontally split buffer. The height of this
 buffer is controlled by `g:jedi#max_doc_height` (set by default to 30).
 
 ------------------------------------------------------------------------------
-5.6. `g:jedi#rename_command`            *g:jedi#rename_command*
+5.7. `g:jedi#rename_command`            *g:jedi#rename_command*
 Function: `jedi#rename()`
 Default: <leader>r                      Rename variables
 
@@ -302,7 +310,7 @@ with the new one. The number of performed renames is displayed in the command
 line.
 
 ------------------------------------------------------------------------------
-5.7. `g:jedi#usages_command`            *g:jedi#usages_command*
+5.8. `g:jedi#usages_command`            *g:jedi#usages_command*
 Function: `jedi#usages()`
 Default: <leader>n                      Show usages of a name.
 
@@ -310,7 +318,7 @@ The quickfix window is populated with a list of all names which point to the
 definition of the name under the cursor.
 
 ------------------------------------------------------------------------------
-5.8. Open module by name                *:Pyimport*
+5.9. Open module by name                *:Pyimport*
 Function: `jedi#py_import(args)`
 Default: :Pyimport                      e.g. `:Pyimport os` shows os.py in VIM.
 
