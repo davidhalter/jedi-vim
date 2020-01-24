@@ -24,7 +24,7 @@ Contents                                *jedi-vim-contents*
     5.1. Start completion               |g:jedi#completions_command|
     5.2. Go to definition               |g:jedi#goto_command|
     5.3. Go to assignment               |g:jedi#goto_assignments_command|
-    5.4  Go to definition (deprecated)  |g:jedi#goto_definitions_command|
+    5.4  Go to stub                     |g:jedi#goto_stubs_command|
     5.5. Show documentation             |g:jedi#documentation_command|
     5.6. Rename variables               |g:jedi#rename_command|
     5.7. Show name usages               |g:jedi#usages_command|
@@ -274,12 +274,11 @@ This function finds the first definition of the function/class under the
 cursor. It produces an error if the definition is not in a Python file.
 
 ------------------------------------------------------------------------------
-5.4. `g:jedi#goto_definitions_command`  *g:jedi#goto_definitions_command*
-Function: `jedi#goto_definitions()`
-Default: -                              Go to original definition
+5.4. `g:jedi#goto_stubs_command`        *g:jedi#goto_stubs_command*
+Function: `jedi#goto_stubs()`
+Default: <leader>s                      Go to stub
 
-NOTE: Deprecated. Use |g:jedi#goto_command| / |jedi#goto()| instead, which
-currently uses this internally.
+Finds the stub of the function/class under the cursor.
 
 ------------------------------------------------------------------------------
 5.5. `g:jedi#documentation_command`     *g:jedi#documentation_command*
