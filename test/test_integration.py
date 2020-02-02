@@ -20,7 +20,7 @@ TEST_DIR = os.path.join(root, 'test', 'vspec')
 
 
 @pytest.fixture(scope='session')
-def install_vspec(request):
+def install_vspec():
     if not os.path.isdir(CACHE_FOLDER):
         os.mkdir(CACHE_FOLDER)
 

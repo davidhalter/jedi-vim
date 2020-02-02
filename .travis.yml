@@ -22,6 +22,8 @@ install:
       sudo apt-get install neovim -y
 
       pip install pynvim pytest-cov
+      pip list
+      nvim --version
     else
       vim --version
     fi
