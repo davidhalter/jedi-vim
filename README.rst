@@ -182,8 +182,10 @@ and usually saves one keypress.
 
 Jedi displays function call signatures in insert mode in real-time, highlighting
 the current argument. The call signatures can be displayed as a pop-up in the
-buffer (set to 1, the default), which has the advantage of being easier to refer
-to, or in Vim's command line aligned with the function call (set to 2), which
+buffer (set to 1 by default (with the conceal feature), 2 otherwise),
+which has the advantage of being easier to refer to (but is a hack with
+many drawbacks since it changes the buffer's contents),
+or in Vim's command line aligned with the function call (set to 2), which
 can improve the integrity of Vim's undo history.
 
 .. code-block:: vim
