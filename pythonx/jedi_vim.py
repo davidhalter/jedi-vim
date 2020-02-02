@@ -452,7 +452,7 @@ def show_goto_multi_results(definitions, mode):
             # Select current/nearest entry via :cc later.
             if d.line == row and d.column <= col:
                 if (current_idx is None
-                        or (abs(lst[current_idx].column - col)
+                        or (abs(lst[current_idx]["col"] - col)
                             > abs(d.column - col))):
                     current_idx = len(lst)
                     current_def = d
@@ -475,7 +475,7 @@ def show_goto_multi_results(definitions, mode):
         for_usages = mode == "usages"
         vim_eval('jedi#add_goto_window(%d, %d)' % (for_usages, len(lst)))
 
-    vim_command('%dcc' % select_entry)
+    vim_command('%d' % select_entry)
 
 
 def _same_definitions(a, b):
