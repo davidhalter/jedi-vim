@@ -32,7 +32,7 @@ if g:jedi#auto_initialization
         execute 'nnoremap <silent> <buffer>'.g:jedi#documentation_command.' :call jedi#show_documentation()<CR>'
     endif
 
-    if g:jedi#show_call_signatures > 0 && has('conceal')
+    if g:jedi#show_call_signatures > 0
         call jedi#configure_call_signatures()
     endif
 
