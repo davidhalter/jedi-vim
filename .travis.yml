@@ -30,7 +30,7 @@ install:
 script:
   - make --keep-going "$ENV" BUILD_VIRTUAL_ENV=$VIRTUAL_ENV
 
-after_success:
+after_script:
   - |
     if [ "$ENV" = "test_coverage" ]; then
       coverage xml
