@@ -979,7 +979,7 @@ def call_signatures_floatwin(signatures):
 
         # Descriptions are usually looking like `param name`, remove the param.
         # Also replace leading params with ellipsis (for shortness).
-        params = [p.description.replace('\n', '').replace('param ', '', 1)
+        params = [re.sub(r'\n\s+', '', p.description.replace('param ', '', 1))
                   if idx >= signature.index
                   else "…"
                   for idx, p in enumerate(signature.params)]
