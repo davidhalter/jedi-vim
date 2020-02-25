@@ -460,7 +460,10 @@ def show_goto_multi_results(definitions, mode):
     # Build qflist title.
     qf_title = mode
     if current_def is not None:
-        qf_title += ": " + current_def.full_name
+        if current_def.full_name:
+            qf_title += ": " + current_def.full_name
+        else:
+            qf_title += ": " + str(current_def)
         select_entry = current_idx
     else:
         select_entry = 0
