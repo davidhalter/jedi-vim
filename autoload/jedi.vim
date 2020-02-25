@@ -479,31 +479,23 @@ endfunction
 function! jedi#add_goto_window(for_usages, len) abort
     let height = min([a:len, g:jedi#quickfix_window_height])
 
-    " Using :cwindow allows to stay in the current window in case it is opened
-    " already.
-    let win_count = winnr('$')
-    execute 'belowright cwindow '.height
-    let qfwin_was_opened = winnr('$') > win_count
+    " Use :copen to go to the window always - the user should select an entry.
+    execute 'belowright copen '.height
 
-    if qfwin_was_opened
-        if &filetype !=# 'qf'
-            echoerr 'jedi-vim: unexpected ft with current window, please report!'
-        endif
-        if g:jedi#use_tabs_not_buffers == 1
-            noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
-        endif
-
-        augroup jedi_goto_window
-            if a:for_usages
-                autocmd BufWinLeave <buffer> call jedi#clear_usages()
-            else
-                autocmd WinLeave <buffer> q  " automatically leave, if an option is chosen
-            endif
-        augroup END
-    elseif a:for_usages && !s:supports_buffer_usages
-        " Init current window.
-        call jedi#_show_usages_in_win()
+    if &filetype !=# 'qf'
+        echoerr printf('jedi-vim: unexpected ft with current window (%s), please report!', &filetype)
     endif
+    if g:jedi#use_tabs_not_buffers == 1
+        noremap <buffer> <CR> :call jedi#goto_window_on_enter()<CR>
+    endif
+
+    augroup jedi_goto_window
+        if a:for_usages
+            autocmd BufWinLeave <buffer> call jedi#clear_usages()
+        else
+            autocmd WinLeave <buffer> q  " automatically leave, if an option is chosen
+        endif
+    augroup END
 
     if a:for_usages && !has('nvim')
         if s:supports_buffer_usages

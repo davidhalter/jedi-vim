@@ -470,12 +470,12 @@ def show_goto_multi_results(definitions, mode):
             and VimCompat.can_update_current_qflist_for_context(qf_context)):
         # Same list, only adjust title/selected entry.
         VimCompat.setqflist_title(qf_title)
+        vim_command('%dcc' % select_entry)
     else:
         VimCompat.setqflist(lst, title=qf_title, context=qf_context)
         for_usages = mode == "usages"
         vim_eval('jedi#add_goto_window(%d, %d)' % (for_usages, len(lst)))
-
-    vim_command('%d' % select_entry)
+        vim_command('%d' % select_entry)
 
 
 def _same_definitions(a, b):
