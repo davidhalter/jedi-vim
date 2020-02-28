@@ -160,14 +160,19 @@ function! jedi#setup_python_imports(py_version) abort
     let g:_jedi_init_error = 0
     let init_lines = [
           \ 'import vim',
+          \ 'def _jedi_handle_exc(exc_info):',
+          \ '    try:',
+          \ '        from jedi_vim_debug import format_exc_info',
+          \ '        vim.vars["_jedi_init_error"] = format_exc_info(exc_info)',
+          \ '    except Exception:',
+          \ '        import traceback',
+          \ '        vim.vars["_jedi_init_error"] = "\\n".join(traceback.format_exception(*exc_info))',
           \ 'try:',
           \ '    import jedi_vim',
           \ '    if hasattr(jedi_vim, "jedi_import_error"):',
-          \ '        from jedi_vim_debug import format_exc_info',
-          \ '        vim.vars["_jedi_init_error"] = format_exc_info(jedi_vim.jedi_import_error)',
+          \ '        _jedi_handle_exc(jedi_vim.jedi_import_error)',
           \ 'except Exception as exc:',
-          \ '    from jedi_vim_debug import format_exc_info',
-          \ '    vim.vars["_jedi_init_error"] = format_exc_info()',
+          \ '    _jedi_handle_exc(sys.exc_info())',
           \ ]
     exe 'PythonJedi exec('''.escape(join(init_lines, '\n'), "'").''')'
     if g:_jedi_init_error isnot 0
