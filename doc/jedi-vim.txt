@@ -170,7 +170,7 @@ Python features, among them:
 - Class decorators (py3k feature, are being ignored at the moment, but are
   parsed)
 - Simple/usual `sys.path` modifications
-- `isinstance` checks for `if`/`while`/`assert` case, that doesn’t work with
+- `isinstance` checks for `if`/`while`/`assert` case, that doesn't work with
   Jedi
 - Stubs
 - And more...
