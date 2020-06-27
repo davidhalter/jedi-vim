@@ -444,6 +444,7 @@ def show_goto_multi_results(definitions, mode):
             # well.
             lst.append(dict(text=PythonToVimStr(d.description)))
         else:
+            # EL: Error here
             text = annotate_description(d)
             lst.append(dict(filename=PythonToVimStr(relpath(d.module_path)),
                             lnum=d.line, col=d.column + 1,
@@ -1001,6 +1002,8 @@ def do_rename(replace, orig=None):
     # Save original window / tab.
     saved_tab = int(vim_eval('tabpagenr()'))
     saved_win = int(vim_eval('winnr()'))
+    saved_buffer = vim.current.buffer
+    saved_cursor = vim.current.window.cursor
 
     temp_rename = usages(visuals=False)
     # Sort the whole thing reverse (positions at the end of the line
@@ -1014,7 +1017,7 @@ def do_rename(replace, orig=None):
 
         if os.path.abspath(vim.current.buffer.name) != r.module_path:
             assert r.module_path is not None
-            result = new_buffer(r.module_path)
+            result = new_buffer(r.module_path, force_buffer=True)
             if not result:
                 echo_highlight('Failed to create buffer window for %s!' % (
                     r.module_path))
@@ -1027,11 +1030,15 @@ def do_rename(replace, orig=None):
         vim.current.buffer[r.line - 1] = (r_line[:r.column] + replace +
                                           r_line[r.column + len(orig):])
 
+    vim_command('w')
+    vim.current.buffer = saved_buffer
+    vim.current.window.cursor = saved_cursor
     # Restore previous tab and window.
     vim_command('tabnext {0:d}'.format(saved_tab))
     vim_command('{0:d}wincmd w'.format(saved_win))
 
     if len(buffers) > 1:
+        usages()
         echo_highlight('Jedi did {0:d} renames in {1:d} buffers!'.format(
             len(temp_rename), len(buffers)))
     else:
@@ -1074,11 +1081,11 @@ def py_import_completions():
 
 
 @catch_and_print_exceptions
-def new_buffer(path, options='', using_tagstack=False):
+def new_buffer(path, options='', using_tagstack=False, force_buffer=False):
     # options are what you can to edit the edit options
-    if int(vim_eval('g:jedi#use_tabs_not_buffers')) == 1:
+    if int(vim_eval('g:jedi#use_tabs_not_buffers')) == 1 and not force_buffer:
         _tabnew(path, options)
-    elif not vim_eval('g:jedi#use_splits_not_buffers') in [1, '1']:
+    elif not vim_eval('g:jedi#use_splits_not_buffers') in [1, '1'] and not force_buffer:
         user_split_option = vim_eval('g:jedi#use_splits_not_buffers')
         split_options = {
             'top': 'topleft split',
