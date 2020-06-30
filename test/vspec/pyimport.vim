@@ -26,10 +26,7 @@ describe 'pyimport'
 
         Expect jedi#py_import_completions('subproc', 0, 0) == 'subprocess'
         Expect jedi#py_import_completions('subprocess', 0, 0) == 'subprocess'
-        let g:comp = jedi#py_import_completions('zip', 0, 0)
-        " Sometimes zipapp is in there sometimes not, depends on Python
-        " version.
-        let g:comp = substitute(g:comp, '^zipapp\n', '', '')
-        Expect g:comp == "zipfile\nzipimport"
+        let g:comp = jedi#py_import_completions('sre_', 0, 0)
+        Expect g:comp == "sre_compile\nsre_constants\nsre_parse"
     end
 end
