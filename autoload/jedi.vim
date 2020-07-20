@@ -36,6 +36,8 @@ let s:default_settings = {
     \ 'quickfix_window_height': 10,
     \ 'force_py_version': "'auto'",
     \ 'smart_auto_mappings': 0,
+    \ 'use_environment': "'auto'",
+    \ 'environment_paths': '[]',
     \ 'use_tag_stack': 1
 \ }
 
@@ -294,6 +296,14 @@ call jedi#init_python()  " Might throw an error.
 " ------------------------------------------------------------------------
 " functions that call python code
 " ------------------------------------------------------------------------
+function! jedi#use_environment(...) abort
+  PythonJedi jedi_vim.set_environment(*vim.eval('a:000'))
+endfunction
+
+function! jedi#use_environment_for_buffer(env) abort
+  PythonJedi jedi_vim.set_environment(*vim.eval('[env, bufnr("%")]'))
+endfunction
+
 function! jedi#goto() abort
     PythonJedi jedi_vim.goto(mode="goto")
 endfunction
@@ -748,6 +758,13 @@ function! jedi#setup_completion() abort
         " A separate mapping for select mode: deletes and completes.
         execute 'snoremap <expr> <buffer> '.g:jedi#completions_command." '\<C-g>c'.jedi#complete_string(0)"
     endif
+endfunction
+
+" TODO: fallback to completing files (i.e. return known envs first, then
+" files?!).
+function! jedi#complete_environments(argl, cmdl, pos) abort
+    PythonJedi jedi_vim.complete_environments()
+EOF
 endfunction
 
 "PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)

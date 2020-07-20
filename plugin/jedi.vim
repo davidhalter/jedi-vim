@@ -68,6 +68,22 @@ function! s:jedi_debug_info()
     call jedi#debug_info()
 endfunction
 command! -nargs=0 -bar JediDebugInfo call s:jedi_debug_info()
+
+" Transfer bang into current buffer number.
+" TODO: use window instead!?
+function! s:use_environment(bang, env) abort
+  let bufnr = a:bang ? +bufnr('%') : 0
+  if a:env ==# 'auto'
+    let env = ''
+  elseif a:env[-4:] ==# ' (*)'
+    let env = a:env[:-5]
+  else
+    let env = a:env
+  endif
+  return jedi#use_environment(env, bufnr)
+endfunction
+command! -bang -nargs=? -complete=custom,jedi#complete_environments JediUseEnvironment :call s:use_environment(<bang>0, <q-args>)
+
 command! -nargs=0 -bang JediClearCache call jedi#clear_cache(<bang>0)
 
 " vim: set et ts=4:

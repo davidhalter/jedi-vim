@@ -211,47 +211,82 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
+# XXX: might use lru cache, given that you can configure it per buffer?!
 current_environment = (None, None)
+
+
+def set_environment(executable=None, bufnr=None):
+    global current_environment
+
+    # print(repr(executable), repr(bufnr))
+
+    if not executable:  # "unset"
+        executable = 'auto'
+        environment = None
+    else:
+        try:
+            # XXX: create_environment is not deterministic
+            #      (https://github.com/davidhalter/jedi/issues/1155)
+            # jedi.create_environment(executable, safe=False)
+            environment = jedi.api.environment.Environment(executable)
+        except jedi.InvalidPythonEnvironment as exc:
+            echo_highlight('executable=%s is not supported: %s.' % (
+                executable, str(exc)))
+            return
+    bufnr = int(bufnr)
+    if bufnr:
+        vim_command("call setbufvar(%d, 'jedi_use_environment', %r)" % (
+                    bufnr, executable))
+    else:
+        vim_command("let g:jedi#use_environment = %r" % executable)
+    current_environment = (executable, environment)
 
 
 def get_environment(use_cache=True):
     global current_environment
 
-    vim_force_python_version = vim_eval("g:jedi#force_py_version")
-    if use_cache and vim_force_python_version == current_environment[0]:
+    use_environment = vim_eval(
+        "get(b:, 'jedi_use_environment', get(g:, 'jedi#use_environment', ''))")
+    if use_cache and use_environment == current_environment[0]:
         return current_environment[1]
 
     environment = None
-    if vim_force_python_version == "auto":
+    if use_environment == "auto":
         environment = jedi.api.environment.get_cached_default_environment()
     else:
-        force_python_version = vim_force_python_version
-        if '0000' in force_python_version or '9999' in force_python_version:
-            # It's probably a float that wasn't shortened.
-            try:
-                force_python_version = "{:.1f}".format(float(force_python_version))
-            except ValueError:
-                pass
-        elif isinstance(force_python_version, float):
-            force_python_version = "{:.1f}".format(force_python_version)
-
         try:
-            environment = jedi.get_system_environment(force_python_version)
+            # XXX: create_environment is not deterministic
+            #      (https://github.com/davidhalter/jedi/issues/1155)
+            # jedi.create_environment(executable, safe=False)
+            environment = jedi.api.environment.Environment(use_environment)
         except jedi.InvalidPythonEnvironment as exc:
             environment = jedi.api.environment.get_cached_default_environment()
             echo_highlight(
-                "force_python_version=%s is not supported: %s - using %s." % (
-                    vim_force_python_version, str(exc), str(environment)))
+                'use_environment=%s is not supported: %s - using %s.' % (
+                    use_environment, str(exc), str(environment)))
 
-    current_environment = (vim_force_python_version, environment)
+    current_environment = (use_environment, environment)
     return environment
 
 
 def get_known_environments():
     """Get known Jedi environments."""
-    envs = list(jedi.api.environment.find_virtualenvs())
+    paths = vim_eval("g:jedi#environment_paths")
+    envs = list(jedi.api.environment.find_virtualenvs(paths=paths, safe=False))
     envs.extend(jedi.api.environment.find_system_environments())
     return envs
+
+
+def complete_environments():
+    envs = get_known_environments()
+    try:
+        current_executable = current_environment[1].executable
+    except AttributeError:
+        current_executable = None
+    vim.command("return '%s'" % '\n'.join(
+        ('%s (*)' if env.executable == current_executable else '%s') % (
+            env.executable
+        ) for env in envs))
 
 
 @catch_and_print_exceptions
