@@ -211,11 +211,8 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
+# Tuple of cache key / project
 _current_project_cache = None, None
-
-
-def _create_project_cache_key(project_path, environment_path):
-    return dict(project_path=project_path, environment_path=environment_path)
 
 
 def get_project():
@@ -223,7 +220,7 @@ def get_project():
 
     vim_environment_path = vim_eval("g:jedi#environment_path")
     vim_project_path = vim_eval("g:jedi#project_path")
-    cache_key = _create_project_cache_key(vim_project_path, vim_environment_path)
+    cache_key = dict(project_path=vim_project_path, environment_path=vim_environment_path)
 
     if cache_key == _current_project_cache[0]:
         return _current_project_cache[1]
