@@ -58,7 +58,8 @@ def display_debug_info():
         echo(' - version: {0}'.format(jedi_vim.jedi.__version__))
 
         try:
-            environment = jedi_vim.get_environment(use_cache=False)
+            project = jedi_vim.get_project()
+            environment = project.get_environment()
         except AttributeError:
             script_evaluator = jedi_vim.jedi.Script('')._evaluator
             try:

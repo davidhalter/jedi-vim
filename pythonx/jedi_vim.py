@@ -92,11 +92,6 @@ def vim_eval(string):
     return _catch_exception(string, is_eval=True)
 
 
-def get_project():
-    # TODO remove get_environment() in favor of this.
-    return jedi.get_default_project()
-
-
 def no_jedi_warning(error=None):
     vim.command('echohl WarningMsg')
     vim.command('echom "Please install Jedi if you want to use jedi-vim."')
@@ -216,40 +211,37 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
-current_environment = (None, None)
+_current_project_cache = None, None
 
 
-def get_environment(use_cache=True):
-    global current_environment
+def _create_project_cache_key(project_path, environment_path):
+    return dict(project_path=project_path, environment_path=environment_path)
 
-    vim_force_python_version = vim_eval("g:jedi#force_py_version")
-    if use_cache and vim_force_python_version == current_environment[0]:
-        return current_environment[1]
 
-    environment = None
-    if vim_force_python_version == "auto":
-        environment = jedi.api.environment.get_cached_default_environment()
+def get_project():
+    global _current_project_cache
+
+    vim_environment_path = vim_eval("g:jedi#environment_path")
+    vim_project_path = vim_eval("g:jedi#project_path")
+    cache_key = _create_project_cache_key(vim_project_path, vim_environment_path)
+
+    if cache_key == _current_project_cache[0]:
+        return _current_project_cache[1]
+
+    if vim_environment_path in ("auto", "", None):
+        environment_path = None
     else:
-        force_python_version = vim_force_python_version
-        if '0000' in force_python_version or '9999' in force_python_version:
-            # It's probably a float that wasn't shortened.
-            try:
-                force_python_version = "{:.1f}".format(float(force_python_version))
-            except ValueError:
-                pass
-        elif isinstance(force_python_version, float):
-            force_python_version = "{:.1f}".format(force_python_version)
+        environment_path = vim_environment_path
 
-        try:
-            environment = jedi.get_system_environment(force_python_version)
-        except jedi.InvalidPythonEnvironment as exc:
-            environment = jedi.api.environment.get_cached_default_environment()
-            echo_highlight(
-                "force_python_version=%s is not supported: %s - using %s." % (
-                    vim_force_python_version, str(exc), str(environment)))
+    if vim_project_path == ("auto", "", None):
+        project_path = jedi.get_default_project().path
+    else:
+        project_path = vim_project_path
 
-    current_environment = (vim_force_python_version, environment)
-    return environment
+    project = jedi.Project(project_path, environment_path=environment_path)
+
+    _current_project_cache = cache_key, project
+    return project
 
 
 def get_known_environments():
@@ -270,7 +262,7 @@ def get_script(source=None):
         source = '\n'.join(vim.current.buffer)
     buf_path = vim.current.buffer.name
 
-    return jedi.Script(source, path=buf_path, environment=get_environment())
+    return jedi.Script(source, path=buf_path, project=get_project())
 
 
 def get_pos(column=None):
@@ -1067,7 +1059,7 @@ def py_import_completions():
         comps = []
     else:
         names = get_project().complete_search(argl)
-        comps = [argl + n for n in set(c.complete for c in names)]
+        comps = [argl + n for n in sorted(set(c.complete for c in names))]
     vim.command("return '%s'" % '\n'.join(comps))
 
 
