@@ -255,7 +255,7 @@ def get_known_environments():
 
 
 @catch_and_print_exceptions
-def get_script(source=None, column=None):
+def get_script(source=None):
     jedi.settings.additional_dynamic_modules = [
         b.name for b in vim.buffers if (
             b.name is not None and
@@ -263,16 +263,16 @@ def get_script(source=None, column=None):
             b.options['buflisted'])]
     if source is None:
         source = '\n'.join(vim.current.buffer)
+    buf_path = vim.current.buffer.name
+
+    return jedi.Script(source, path=buf_path, environment=get_environment())
+
+
+def get_pos(column=None):
     row = vim.current.window.cursor[0]
     if column is None:
         column = vim.current.window.cursor[1]
-    buf_path = vim.current.buffer.name
-
-    return jedi.Script(
-        source, row, column, buf_path,
-        encoding=vim_eval('&encoding') or 'latin1',
-        environment=get_environment(),
-    )
+    return row, column
 
 
 @_check_jedi_availability(show_error=False)
@@ -303,9 +303,9 @@ def completions():
         # here again hacks, because jedi has a different interface than vim
         column += len(base)
         try:
-            script = get_script(source=source, column=column)
-            completions = script.completions()
-            signatures = script.call_signatures()
+            script = get_script(source=source)
+            completions = script.complete(*get_pos(column))
+            signatures = script.get_signatures(*get_pos(column))
 
             add_info = "preview" in vim.eval("&completeopt").split(",")
             out = []
@@ -358,14 +358,15 @@ def goto(mode="goto"):
     :rtype: list
     """
     script = get_script()
+    pos = get_pos()
     if mode == "goto":
-        definitions = script.goto_assignments(follow_imports=True)
+        definitions = script.goto(*pos, follow_imports=True)
     elif mode == "definition":
-        definitions = script.goto_definitions()
+        definitions = script.infer(*pos)
     elif mode == "assignment":
-        definitions = script.goto_assignments()
+        definitions = script.goto(*pos)
     elif mode == "stubs":
-        definitions = script.goto_assignments(follow_imports=True, only_stubs=True)
+        definitions = script.goto(*pos, follow_imports=True, only_stubs=True)
 
     if not definitions:
         echo_highlight("Couldn't find any definitions for this.")
@@ -376,19 +377,20 @@ def goto(mode="goto"):
                 echo_highlight("Cannot get the definition of Python keywords.")
             else:
                 echo_highlight("Builtin modules cannot be displayed (%s)."
-                               % d.desc_with_module)
+                               % (d.full_name or d.name))
         else:
             using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-            if (d.module_path or '') != vim.current.buffer.name:
-                result = new_buffer(d.module_path,
+            module_path = str(d.module_path)
+            if (module_path or '') != vim.current.buffer.name:
+                result = new_buffer(module_path,
                                     using_tagstack=using_tagstack)
                 if not result:
                     return []
-            if (using_tagstack and d.module_path and
-                    os.path.exists(d.module_path)):
+            if (using_tagstack and module_path and
+                    os.path.exists(module_path)):
                 tagname = d.name
                 with tempfile('{0}\t{1}\t{2}'.format(
-                        tagname, d.module_path, 'call cursor({0}, {1})'.format(
+                        tagname, module_path, 'call cursor({0}, {1})'.format(
                             d.line, d.column + 1))) as f:
                     old_tags = vim.eval('&tags')
                     old_wildignore = vim.eval('&wildignore')
@@ -445,7 +447,7 @@ def show_goto_multi_results(definitions, mode):
             lst.append(dict(text=PythonToVimStr(d.description)))
         else:
             text = annotate_description(d)
-            lst.append(dict(filename=PythonToVimStr(relpath(d.module_path)),
+            lst.append(dict(filename=PythonToVimStr(relpath(str(d.module_path))),
                             lnum=d.line, col=d.column + 1,
                             text=PythonToVimStr(text)))
 
@@ -497,7 +499,7 @@ def _same_definitions(a, b):
 @catch_and_print_exceptions
 def usages(visuals=True):
     script = get_script()
-    definitions = script.usages()
+    definitions = script.get_references(*get_pos())
     if not definitions:
         echo_highlight("No usages found here.")
         return definitions
@@ -590,7 +592,7 @@ def highlight_usages():
         defs_per_buf = {}
         for definition in definitions:
             try:
-                buf = bufs[definition.module_path]
+                buf = bufs[str(definition.module_path)]
             except KeyError:
                 continue
             defs_per_buf.setdefault(buf, []).append(definition)
@@ -693,7 +695,7 @@ def highlight_usages_for_vim_win():
     if definitions:
         buffer_path = vim.current.buffer.name
         for definition in definitions:
-            if (definition.module_path or '') == buffer_path:
+            if (str(definition.module_path) or '') == buffer_path:
                 positions = [
                     [definition.line,
                      definition.column + 1,
@@ -719,7 +721,7 @@ def highlight_usages_for_vim_win():
 def show_documentation():
     script = get_script()
     try:
-        definitions = script.goto_definitions()
+        definitions = script.help(*get_pos())
     except Exception:
         # print to stdout, will be in :messages
         definitions = []
@@ -735,7 +737,7 @@ def show_documentation():
     for d in definitions:
         doc = d.docstring()
         if doc:
-            title = 'Docstring for %s' % d.desc_with_module
+            title = 'Docstring for %s' % (d.full_name or d.name)
             underline = '=' * len(title)
             docs.append('%s\n%s\n%s' % (title, underline, doc))
         else:
@@ -783,7 +785,7 @@ def show_call_signatures(signatures=()):
     # buffer.
     clear_call_signatures()
     if signatures == ():
-        signatures = get_script().call_signatures()
+        signatures = get_script().get_signatures(*get_pos())
 
     if not signatures:
         return
@@ -1006,18 +1008,19 @@ def do_rename(replace, orig=None):
     # Sort the whole thing reverse (positions at the end of the line
     # must be first, because they move the stuff before the position).
     temp_rename = sorted(temp_rename, reverse=True,
-                         key=lambda x: (x.module_path, x.line, x.column))
+                         key=lambda x: (str(x.module_path), x.line, x.column))
     buffers = set()
     for r in temp_rename:
         if r.in_builtin_module():
             continue
 
-        if os.path.abspath(vim.current.buffer.name) != r.module_path:
-            assert r.module_path is not None
-            result = new_buffer(r.module_path)
+        module_path = r.module_path
+        if os.path.abspath(vim.current.buffer.name) != str(module_path):
+            assert module_path is not None
+            result = new_buffer(module_path)
             if not result:
                 echo_highlight('Failed to create buffer window for %s!' % (
-                    r.module_path))
+                    module_path))
                 continue
 
         buffers.add(vim.current.buffer.name)
@@ -1055,7 +1058,7 @@ def py_import():
             echo_highlight('%s is a builtin module.' % import_path)
         else:
             cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-            new_buffer(completion.module_path, cmd_args)
+            new_buffer(str(completion.module_path), cmd_args)
 
 
 @catch_and_print_exceptions
@@ -1068,8 +1071,8 @@ def py_import_completions():
         comps = []
     else:
         text = 'import %s' % argl
-        script = jedi.Script(text, 1, len(text), '', environment=get_environment())
-        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
+        script = jedi.Script(text, path='', environment=get_environment())
+        comps = ['%s%s' % (argl, c.complete) for c in script.complete(1, len(text))]
     vim.command("return '%s'" % '\n'.join(comps))
 
 
