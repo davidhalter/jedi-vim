@@ -359,33 +359,32 @@ def tempfile(content):
 def goto(mode="goto"):
     """
     :param str mode: "definition", "assignment", "goto"
-    :return: list of definitions/assignments
-    :rtype: list
+    :rtype: list of jedi.api.classes.Name
     """
     script = get_script()
     pos = get_pos()
     if mode == "goto":
-        definitions = script.goto(*pos, follow_imports=True)
+        names = script.goto(*pos, follow_imports=True)
     elif mode == "definition":
-        definitions = script.infer(*pos)
+        names = script.infer(*pos)
     elif mode == "assignment":
-        definitions = script.goto(*pos)
+        names = script.goto(*pos)
     elif mode == "stubs":
-        definitions = script.goto(*pos, follow_imports=True, only_stubs=True)
+        names = script.goto(*pos, follow_imports=True, only_stubs=True)
 
-    if not definitions:
+    if not names:
         echo_highlight("Couldn't find any definitions for this.")
-    elif len(definitions) == 1 and mode != "related_name":
-        d = list(definitions)[0]
-        if d.column is None:
-            if d.is_keyword:
+    elif len(names) == 1 and mode != "related_name":
+        n = list(names)[0]
+        if n.column is None:
+            if n.is_keyword:
                 echo_highlight("Cannot get the definition of Python keywords.")
             else:
                 echo_highlight("Builtin modules cannot be displayed (%s)."
-                               % (d.full_name or d.name))
+                               % (n.full_name or n.name))
         else:
             using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-            module_path = str(d.module_path)
+            module_path = str(n.module_path)
             if (module_path or '') != vim.current.buffer.name:
                 result = new_buffer(module_path,
                                     using_tagstack=using_tagstack)
@@ -393,10 +392,10 @@ def goto(mode="goto"):
                     return []
             if (using_tagstack and module_path and
                     os.path.exists(module_path)):
-                tagname = d.name
+                tagname = n.name
                 with tempfile('{0}\t{1}\t{2}'.format(
                         tagname, module_path, 'call cursor({0}, {1})'.format(
-                            d.line, d.column + 1))) as f:
+                            n.line, n.column + 1))) as f:
                     old_tags = vim.eval('&tags')
                     old_wildignore = vim.eval('&wildignore')
                     try:
@@ -410,10 +409,10 @@ def goto(mode="goto"):
                                     repr(PythonToVimStr(old_tags)))
                         vim.command('let &wildignore = %s' %
                                     repr(PythonToVimStr(old_wildignore)))
-            vim.current.window.cursor = d.line, d.column
+            vim.current.window.cursor = n.line, n.column
     else:
-        show_goto_multi_results(definitions, mode)
-    return definitions
+        show_goto_multi_results(names, mode)
+    return names
 
 
 def relpath(path):
@@ -424,45 +423,45 @@ def relpath(path):
     return path
 
 
-def annotate_description(d):
-    code = d.get_line_code().strip()
-    if d.type == 'statement':
+def annotate_description(n):
+    code = n.get_line_code().strip()
+    if n.type == 'statement':
         return code
-    if d.type == 'function':
+    if n.type == 'function':
         if code.startswith('def'):
             return code
         typ = 'def'
     else:
-        typ = d.type
+        typ = n.type
     return '[%s] %s' % (typ, code)
 
 
-def show_goto_multi_results(definitions, mode):
-    """Create (or reuse) a quickfix list for multiple definitions."""
-    global _current_definitions
+def show_goto_multi_results(names, mode):
+    """Create (or reuse) a quickfix list for multiple names."""
+    global _current_names
 
     lst = []
     (row, col) = vim.current.window.cursor
     current_idx = None
     current_def = None
-    for d in definitions:
-        if d.column is None:
+    for n in names:
+        if n.column is None:
             # Typically a namespace, in the future maybe other things as
             # well.
-            lst.append(dict(text=PythonToVimStr(d.description)))
+            lst.append(dict(text=PythonToVimStr(n.description)))
         else:
-            text = annotate_description(d)
-            lst.append(dict(filename=PythonToVimStr(relpath(str(d.module_path))),
-                            lnum=d.line, col=d.column + 1,
+            text = annotate_description(n)
+            lst.append(dict(filename=PythonToVimStr(relpath(str(n.module_path))),
+                            lnum=n.line, col=n.column + 1,
                             text=PythonToVimStr(text)))
 
             # Select current/nearest entry via :cc later.
-            if d.line == row and d.column <= col:
+            if n.line == row and n.column <= col:
                 if (current_idx is None
                         or (abs(lst[current_idx]["col"] - col)
-                            > abs(d.column - col))):
+                            > abs(n.column - col))):
                     current_idx = len(lst)
-                    current_def = d
+                    current_def = n
 
     # Build qflist title.
     qf_title = mode
@@ -475,8 +474,8 @@ def show_goto_multi_results(definitions, mode):
     else:
         select_entry = 0
 
-    qf_context = id(definitions)
-    if (_current_definitions
+    qf_context = id(names)
+    if (_current_names
             and VimCompat.can_update_current_qflist_for_context(qf_context)):
         # Same list, only adjust title/selected entry.
         VimCompat.setqflist_title(qf_title)
@@ -488,7 +487,7 @@ def show_goto_multi_results(definitions, mode):
         vim_command('%d' % select_entry)
 
 
-def _same_definitions(a, b):
+def _same_names(a, b):
     """Compare without _inference_state.
 
     Ref: https://github.com/davidhalter/jedi-vim/issues/952)
@@ -504,35 +503,35 @@ def _same_definitions(a, b):
 @catch_and_print_exceptions
 def usages(visuals=True):
     script = get_script()
-    definitions = script.get_references(*get_pos())
-    if not definitions:
+    names = script.get_references(*get_pos())
+    if not names:
         echo_highlight("No usages found here.")
-        return definitions
+        return names
 
     if visuals:
-        global _current_definitions
+        global _current_names
 
-        if _current_definitions:
-            if _same_definitions(_current_definitions, definitions):
-                definitions = _current_definitions
+        if _current_names:
+            if _same_names(_current_names, names):
+                names = _current_names
             else:
                 clear_usages()
-                assert not _current_definitions
+                assert not _current_names
 
-        show_goto_multi_results(definitions, "usages")
-        if not _current_definitions:
-            _current_definitions = definitions
+        show_goto_multi_results(names, "usages")
+        if not _current_names:
+            _current_names = names
             highlight_usages()
         else:
-            assert definitions is _current_definitions  # updated above
-    return definitions
+            assert names is _current_names  # updated above
+    return names
 
 
-_current_definitions = None
+_current_names = None
 """Current definitions to use for highlighting."""
-_pending_definitions = {}
+_pending_names = {}
 """Pending definitions for unloaded buffers."""
-_placed_definitions_in_buffers = set()
+_placed_names_in_buffers = set()
 """Set of buffers for faster cleanup."""
 
 
@@ -551,19 +550,19 @@ else:
 
 def clear_usages():
     """Clear existing highlights."""
-    global _current_definitions
-    if _current_definitions is None:
+    global _current_names
+    if _current_names is None:
         return
-    _current_definitions = None
+    _current_names = None
 
     if IS_NVIM:
-        for buf in _placed_definitions_in_buffers:
+        for buf in _placed_names_in_buffers:
             src_ids = buf.vars.get('_jedi_usages_src_ids')
             if src_ids is not None:
                 for src_id in src_ids:
                     buf.clear_highlight(src_id)
     elif vim_prop_add:
-        for buf in _placed_definitions_in_buffers:
+        for buf in _placed_names_in_buffers:
             vim_prop_remove({
                 'type': 'jediUsage',
                 'all': 1,
@@ -571,14 +570,14 @@ def clear_usages():
             })
     else:
         # Unset current window only.
-        assert _current_definitions is None
+        assert _current_names is None
         highlight_usages_for_vim_win()
 
-    _placed_definitions_in_buffers.clear()
+    _placed_names_in_buffers.clear()
 
 
 def highlight_usages():
-    """Set definitions to be highlighted.
+    """Set usage names to be highlighted.
 
     With Neovim it will use the nvim_buf_add_highlight API to highlight all
     buffers already.
@@ -587,41 +586,41 @@ def highlight_usages():
     highlighted via matchaddpos, and autocommands are setup to highlight other
     windows on demand.  Otherwise Vim's text-properties are used.
     """
-    global _current_definitions, _pending_definitions
+    global _current_names, _pending_names
 
-    definitions = _current_definitions
-    _pending_definitions = {}
+    names = _current_names
+    _pending_names = {}
 
     if IS_NVIM or vim_prop_add:
         bufs = {x.name: x for x in vim.buffers}
         defs_per_buf = {}
-        for definition in definitions:
+        for name in names:
             try:
-                buf = bufs[str(definition.module_path)]
+                buf = bufs[str(name.module_path)]
             except KeyError:
                 continue
-            defs_per_buf.setdefault(buf, []).append(definition)
+            defs_per_buf.setdefault(buf, []).append(name)
 
         if IS_NVIM:
             # We need to remember highlight ids with Neovim's API.
             buf_src_ids = {}
-            for buf, definitions in defs_per_buf.items():
+            for buf, names in defs_per_buf.items():
                 buf_src_ids[buf] = []
-                for definition in definitions:
-                    src_id = _add_highlight_definition(buf, definition)
+                for name in names:
+                    src_id = _add_highlighted_name(buf, name)
                     buf_src_ids[buf].append(src_id)
             for buf, src_ids in buf_src_ids.items():
                 buf.vars['_jedi_usages_src_ids'] = src_ids
         else:
-            for buf, definitions in defs_per_buf.items():
+            for buf, names in defs_per_buf.items():
                 try:
-                    for definition in definitions:
-                        _add_highlight_definition(buf, definition)
+                    for name in names:
+                        _add_highlighted_name(buf, name)
                 except vim.error as exc:
                     if exc.args[0].startswith('Vim:E275:'):
                         # "Cannot add text property to unloaded buffer"
-                        _pending_definitions.setdefault(buf.name, []).extend(
-                            definitions)
+                        _pending_names.setdefault(buf.name, []).extend(
+                            names)
     else:
         highlight_usages_for_vim_win()
 
@@ -631,29 +630,29 @@ def _handle_pending_usages_for_buf():
     buf = vim.current.buffer
     bufname = buf.name
     try:
-        buf_defs = _pending_definitions[bufname]
+        buf_names = _pending_names[bufname]
     except KeyError:
         return
-    for definition in buf_defs:
-        _add_highlight_definition(buf, definition)
-    del _pending_definitions[bufname]
+    for name in buf_names:
+        _add_highlighted_name(buf, name)
+    del _pending_names[bufname]
 
 
-def _add_highlight_definition(buf, definition):
-    lnum = definition.line
-    start_col = definition.column
+def _add_highlighted_name(buf, name):
+    lnum = name.line
+    start_col = name.column
 
     # Skip highlighting of module definitions that point to the start
     # of the file.
-    if definition.type == 'module' and lnum == 1 and start_col == 0:
+    if name.type == 'module' and lnum == 1 and start_col == 0:
         return
 
-    _placed_definitions_in_buffers.add(buf)
+    _placed_names_in_buffers.add(buf)
 
-    # TODO: validate that definition.name is at this position?
+    # TODO: validate that name.name is at this position?
     # Would skip the module definitions from above already.
 
-    length = len(definition.name)
+    length = len(name.name)
     if vim_prop_add:
         # XXX: needs jediUsage highlight (via after/syntax/python.vim).
         global vim_prop_type_added
@@ -668,7 +667,7 @@ def _add_highlight_definition(buf, definition):
         return
 
     assert IS_NVIM
-    end_col = definition.column + length
+    end_col = name.column + length
     src_id = buf.add_highlight('jediUsage', lnum-1, start_col, end_col,
                                src_id=0)
     return src_id
@@ -681,9 +680,6 @@ def highlight_usages_for_vim_win():
 
     (matchaddpos() only works for the current window.)
     """
-    global _current_definitions
-    definitions = _current_definitions
-
     win = vim.current.window
 
     cur_matchids = win.vars.get('_jedi_usages_vim_matchids')
@@ -697,14 +693,14 @@ def highlight_usages_for_vim_win():
             vim.eval(expr)
 
     matchids = []
-    if definitions:
+    if _current_names:
         buffer_path = vim.current.buffer.name
-        for definition in definitions:
-            if (str(definition.module_path) or '') == buffer_path:
+        for name in _current_names:
+            if (str(name.module_path) or '') == buffer_path:
                 positions = [
-                    [definition.line,
-                     definition.column + 1,
-                     len(definition.name)]
+                    [name.line,
+                     name.column + 1,
+                     len(name.name)]
                 ]
                 expr = "matchaddpos('jediUsage', %s)" % repr(positions)
                 matchids.append(int(vim_eval(expr)))
@@ -726,27 +722,27 @@ def highlight_usages_for_vim_win():
 def show_documentation():
     script = get_script()
     try:
-        definitions = script.help(*get_pos())
+        names = script.help(*get_pos())
     except Exception:
         # print to stdout, will be in :messages
-        definitions = []
+        names = []
         print("Exception, this shouldn't happen.")
         print(traceback.format_exc())
 
-    if not definitions:
+    if not names:
         echo_highlight('No documentation found for that.')
         vim.command('return')
         return
 
     docs = []
-    for d in definitions:
-        doc = d.docstring()
+    for n in names:
+        doc = n.docstring()
         if doc:
-            title = 'Docstring for %s' % (d.full_name or d.name)
+            title = 'Docstring for %s' % (n.full_name or n.name)
             underline = '=' * len(title)
             docs.append('%s\n%s\n%s' % (title, underline, doc))
         else:
-            docs.append('|No Docstring for %s|' % d)
+            docs.append('|No Docstring for %s|' % n)
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
