@@ -376,43 +376,47 @@ def goto(mode="goto"):
         echo_highlight("Couldn't find any definitions for this.")
     elif len(names) == 1 and mode != "related_name":
         n = list(names)[0]
-        if n.column is None:
-            if n.is_keyword:
-                echo_highlight("Cannot get the definition of Python keywords.")
-            else:
-                echo_highlight("Builtin modules cannot be displayed (%s)."
-                               % (n.full_name or n.name))
-        else:
-            using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-            module_path = str(n.module_path)
-            if (module_path or '') != vim.current.buffer.name:
-                result = new_buffer(module_path,
-                                    using_tagstack=using_tagstack)
-                if not result:
-                    return []
-            if (using_tagstack and module_path and
-                    os.path.exists(module_path)):
-                tagname = n.name
-                with tempfile('{0}\t{1}\t{2}'.format(
-                        tagname, module_path, 'call cursor({0}, {1})'.format(
-                            n.line, n.column + 1))) as f:
-                    old_tags = vim.eval('&tags')
-                    old_wildignore = vim.eval('&wildignore')
-                    try:
-                        # Clear wildignore to ensure tag file isn't ignored
-                        vim.command('set wildignore=')
-                        vim.command('let &tags = %s' %
-                                    repr(PythonToVimStr(f.name)))
-                        vim.command('tjump %s' % tagname)
-                    finally:
-                        vim.command('let &tags = %s' %
-                                    repr(PythonToVimStr(old_tags)))
-                        vim.command('let &wildignore = %s' %
-                                    repr(PythonToVimStr(old_wildignore)))
-            vim.current.window.cursor = n.line, n.column
+        _goto_specific_name(n)
     else:
         show_goto_multi_results(names, mode)
     return names
+
+
+def _goto_specific_name(n, options=''):
+    if n.column is None:
+        if n.is_keyword:
+            echo_highlight("Cannot get the definition of Python keywords.")
+        else:
+            echo_highlight("Builtin modules cannot be displayed (%s)."
+                           % (n.full_name or n.name))
+    else:
+        using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
+        module_path = str(n.module_path)
+        if (module_path or '') != vim.current.buffer.name:
+            result = new_buffer(module_path, options=options,
+                                using_tagstack=using_tagstack)
+            if not result:
+                return []
+        if (using_tagstack and module_path and
+                os.path.exists(module_path)):
+            tagname = n.name
+            with tempfile('{0}\t{1}\t{2}'.format(
+                    tagname, module_path, 'call cursor({0}, {1})'.format(
+                        n.line, n.column + 1))) as f:
+                old_tags = vim.eval('&tags')
+                old_wildignore = vim.eval('&wildignore')
+                try:
+                    # Clear wildignore to ensure tag file isn't ignored
+                    vim.command('set wildignore=')
+                    vim.command('let &tags = %s' %
+                                repr(PythonToVimStr(f.name)))
+                    vim.command('tjump %s' % tagname)
+                finally:
+                    vim.command('let &tags = %s' %
+                                repr(PythonToVimStr(old_tags)))
+                    vim.command('let &wildignore = %s' %
+                                repr(PythonToVimStr(old_wildignore)))
+        vim.current.window.cursor = n.line, n.column
 
 
 def relpath(path):
@@ -1045,18 +1049,14 @@ def do_rename(replace, orig=None):
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
 def py_import():
-    # args are the same as for the :edit command
     args = shsplit(vim.eval('a:args'))
     import_path = args.pop()
     name = next(get_project().search(import_path), None)
     if name is None:
-        echo_highlight('Cannot find %s in sys.path!' % import_path)
+        echo_highlight('Cannot find %s in your project or on sys.path!' % import_path)
     else:
-        if name.column is None:  # Python modules always have a line number.
-            echo_highlight('%s is a builtin module.' % import_path)
-        else:
-            cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-            new_buffer(str(name.module_path), cmd_args)
+        cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
+        _goto_specific_name(name, options=cmd_args)
 
 
 @catch_and_print_exceptions
