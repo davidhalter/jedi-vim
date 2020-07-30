@@ -92,6 +92,11 @@ def vim_eval(string):
     return _catch_exception(string, is_eval=True)
 
 
+def get_project():
+    # TODO remove get_environment() in favor of this.
+    return jedi.get_default_project()
+
+
 def no_jedi_warning(error=None):
     vim.command('echohl WarningMsg')
     vim.command('echom "Please install Jedi if you want to use jedi-vim."')
@@ -1047,32 +1052,26 @@ def py_import():
     # args are the same as for the :edit command
     args = shsplit(vim.eval('a:args'))
     import_path = args.pop()
-    text = 'import %s' % import_path
-    scr = jedi.Script(text, 1, len(text), '', environment=get_environment())
-    try:
-        completion = scr.goto_assignments()[0]
-    except IndexError:
+    name = next(get_project().search(import_path), None)
+    if name is None:
         echo_highlight('Cannot find %s in sys.path!' % import_path)
     else:
-        if completion.column is None:  # Python modules always have a line number.
+        if name.column is None:  # Python modules always have a line number.
             echo_highlight('%s is a builtin module.' % import_path)
         else:
             cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-            new_buffer(str(completion.module_path), cmd_args)
+            new_buffer(str(name.module_path), cmd_args)
 
 
 @catch_and_print_exceptions
 def py_import_completions():
     argl = vim.eval('a:argl')
-    try:
-        import jedi
-    except ImportError:
+    if jedi is None:
         print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
         comps = []
     else:
-        text = 'import %s' % argl
-        script = jedi.Script(text, path='', environment=get_environment())
-        comps = ['%s%s' % (argl, c.complete) for c in script.complete(1, len(text))]
+        names = get_project().complete_search(argl)
+        comps = [argl + n for n in set(c.complete for c in names)]
     vim.command("return '%s'" % '\n'.join(comps))
 
 
