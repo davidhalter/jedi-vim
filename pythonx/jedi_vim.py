@@ -216,12 +216,11 @@ _current_project_cache = None, None
 
 
 def get_project():
-    global _current_project_cache
-
     vim_environment_path = vim_eval("g:jedi#environment_path")
     vim_project_path = vim_eval("g:jedi#project_path")
-    cache_key = dict(project_path=vim_project_path, environment_path=vim_environment_path)
 
+    global _current_project_cache
+    cache_key = dict(project_path=vim_project_path, environment_path=vim_environment_path)
     if cache_key == _current_project_cache[0]:
         return _current_project_cache[1]
 
