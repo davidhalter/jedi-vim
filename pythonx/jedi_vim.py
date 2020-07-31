@@ -240,11 +240,25 @@ def get_project():
     return project
 
 
-def get_known_environments():
-    """Get known Jedi environments."""
-    envs = list(jedi.api.environment.find_virtualenvs())
-    envs.extend(jedi.api.environment.find_system_environments())
-    return envs
+def choose_environment():
+    args = shsplit(vim.eval('a:args'))
+
+    envs = list(jedi.find_system_environments())
+    envs.extend(jedi.find_virtualenvs(paths=args or None))
+
+    env_paths = [env.executable for env in envs]
+
+    vim_command('belowright new')
+    vim.current.buffer[:] = env_paths
+    vim.current.buffer.name = "Hit Enter to Choose an Environment"
+    vim_command('setlocal buftype=nofile bufhidden=hide noswapfile readonly nomodifiable')
+    vim_command('noremap <buffer> <ESC> :bd<CR>')
+    vim_command('noremap <buffer> <CR> :PythonJedi jedi_vim.choose_environment_hit_enter()<CR>')
+
+
+def choose_environment_hit_enter():
+    vim.vars['jedi#environment_path'] = vim.current.line
+    vim_command('bd')
 
 
 @catch_and_print_exceptions
