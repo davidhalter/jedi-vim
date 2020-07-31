@@ -394,8 +394,8 @@ def _goto_specific_name(n, options=''):
                            % (n.full_name or n.name))
     else:
         using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-        module_path = str(n.module_path)
-        if (module_path or '') != vim.current.buffer.name:
+        module_path = str(n.module_path or '')
+        if module_path != vim.current.buffer.name:
             result = new_buffer(module_path, options=options,
                                 using_tagstack=using_tagstack)
             if not result:
