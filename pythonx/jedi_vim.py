@@ -251,8 +251,8 @@ def choose_environment():
     vim_command('belowright new')
     vim.current.buffer[:] = env_paths
     vim.current.buffer.name = "Hit Enter to Choose an Environment"
-    vim_command('setlocal buftype=nofile bufhidden=hide noswapfile readonly nomodifiable')
-    vim_command('noremap <buffer> <ESC> :bd<CR>')
+    vim_command('setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted readonly nomodifiable')
+    vim_command('noremap <buffer> <ESC> :bw<CR>')
     vim_command('noremap <buffer> <CR> :PythonJedi jedi_vim.choose_environment_hit_enter()<CR>')
 
 
