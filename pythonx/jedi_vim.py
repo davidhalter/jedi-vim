@@ -251,7 +251,8 @@ def choose_environment():
     vim_command('belowright new')
     vim.current.buffer[:] = env_paths
     vim.current.buffer.name = "Hit Enter to Choose an Environment"
-    vim_command('setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted readonly nomodifiable')
+    vim_command(
+        'setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted readonly nomodifiable')
     vim_command('noremap <buffer> <ESC> :bw<CR>')
     vim_command('noremap <buffer> <CR> :PythonJedi jedi_vim.choose_environment_hit_enter()<CR>')
 
@@ -744,7 +745,7 @@ def show_documentation():
     for n in names:
         doc = n.docstring()
         if doc:
-            title = 'Docstring for %s' % (n.full_name or n.name)
+            title = 'Docstring for %s %s' % (n.type, n.full_name or n.name)
             underline = '=' * len(title)
             docs.append('%s\n%s\n%s' % (title, underline, doc))
         else:
