@@ -54,6 +54,7 @@ endif
 command! -nargs=1 -complete=custom,jedi#py_import_completions Pyimport :call jedi#py_import(<q-args>)
 
 command! -nargs=? -complete=file JediChooseEnvironment :call jedi#choose_environment(<q-args>)
+command! -nargs=? -complete=file JediLoadProject :call jedi#load_project(<q-args>)
 
 
 function! s:jedi_debug_info()

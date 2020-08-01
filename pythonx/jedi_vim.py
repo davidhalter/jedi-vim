@@ -240,6 +240,7 @@ def get_project():
     return project
 
 
+@catch_and_print_exceptions
 def choose_environment():
     args = shsplit(vim.eval('a:args'))
 
@@ -257,9 +258,33 @@ def choose_environment():
     vim_command('noremap <buffer> <CR> :PythonJedi jedi_vim.choose_environment_hit_enter()<CR>')
 
 
+@catch_and_print_exceptions
 def choose_environment_hit_enter():
     vim.vars['jedi#environment_path'] = vim.current.line
     vim_command('bd')
+
+
+@catch_and_print_exceptions
+def load_project():
+    path = vim.eval('a:args')
+    vim.vars['jedi#project_path'] = path
+    env_path = vim_eval("g:jedi#environment_path")
+    if env_path == 'auto':
+        env_path = None
+    if path:
+        try:
+            project = jedi.Project.load(path)
+        except FileNotFoundError:
+            project = jedi.Project(path, environment_path=env_path)
+            project.save()
+    else:
+        project = jedi.get_default_project()
+        path = project.path
+        project.save()
+
+    global _current_project_cache
+    cache_key = dict(project_path=path, environment_path=env_path)
+    _current_project_cache = cache_key, project
 
 
 @catch_and_print_exceptions

@@ -428,6 +428,10 @@ function! jedi#choose_environment(args) abort
     PythonJedi jedi_vim.choose_environment()
 endfun
 
+function! jedi#load_project(args) abort
+    PythonJedi jedi_vim.load_project()
+endfun
+
 function! jedi#py_import_completions(argl, cmdl, pos) abort
     PythonJedi jedi_vim.py_import_completions()
 endfun
