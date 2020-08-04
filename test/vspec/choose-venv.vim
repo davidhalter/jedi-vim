@@ -13,17 +13,17 @@ describe 'simple:'
 
     it 'choose'
         Expect g:jedi#environment_path == 'auto'
-        Expect bufname() == ''
+        Expect bufname('%') == ''
 
         JediChooseEnvironment
         " A Python executable needs to be a few letters
         Expect len(getline('.')) > 5
-        Expect bufname() == 'Hit Enter to Choose an Environment'
+        Expect bufname('%') == 'Hit Enter to Choose an Environment'
 
         execute "normal \<CR>"
         Expect g:jedi#environment_path != 'auto'
         bd " TODO why is this necessary? There seems to be a random buffer.
-        Expect bufname() == ''
+        Expect bufname('%') == ''
         Expect getline('.') == 'foo'
     end
 end
