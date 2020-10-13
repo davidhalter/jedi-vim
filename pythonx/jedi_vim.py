@@ -1151,7 +1151,7 @@ def _tabnew(path, options=''):
 
 
 def escape_file_path(path):
-    return path.replace(' ', r'\ ')
+    return str(path).replace(' ', r'\ ')
 
 
 def print_to_stdout(level, str_out):
