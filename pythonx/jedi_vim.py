@@ -270,7 +270,6 @@ def get_script(source=None, column=None):
 
     return jedi.Script(
         source, row, column, buf_path,
-        encoding=vim_eval('&encoding') or 'latin1',
         environment=get_environment(),
     )
 
