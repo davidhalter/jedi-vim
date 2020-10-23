@@ -229,7 +229,7 @@ def get_project():
     else:
         environment_path = vim_environment_path
 
-    if vim_project_path == ("auto", "", None):
+    if vim_project_path in ("auto", "", None):
         project_path = jedi.get_default_project().path
     else:
         project_path = vim_project_path
