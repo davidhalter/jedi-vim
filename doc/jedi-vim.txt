@@ -77,7 +77,7 @@ By leveraging this library, jedi-vim adds the following capabilities to Vim:
 ------------------------------------------------------------------------------
 2.0. Requirements                       *jedi-vim-installation-requirements*
 
-First of all, jedi-vim requires Vim to be compiled with the `+python` option.
+First of all, jedi-vim requires Vim to be compiled with the `+python3` option.
 
 It is best if you have VIM >= 7.3, compiled with the `+conceal` option. With
 older versions, you will probably not see the parameter recommendation list

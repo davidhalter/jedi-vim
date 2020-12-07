@@ -13,7 +13,7 @@ $(dir $(BUILD_VIRTUAL_ENV)):
 	mkdir -p $@
 
 $(BUILD_VIRTUAL_ENV): | $(dir $(BUILD_VIRTUAL_ENV))
-	python -m venv $@
+	python3 -m venv $@
 
 $(BUILD_VIRTUAL_ENV)/bin/vint: | $(BUILD_VIRTUAL_ENV)
 	$|/bin/python -m pip install vim-vint==0.3.21
