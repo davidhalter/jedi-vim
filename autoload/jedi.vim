@@ -27,7 +27,7 @@ let s:default_settings = {
     \ 'completions_enabled': 1,
     \ 'popup_on_dot': 'g:jedi#completions_enabled',
     \ 'documentation_command': "'K'",
-    \ 'show_call_signatures': has('conceal') ? 1 : 2,
+    \ 'show_call_signatures': has('popupwin') && has('textprop') ? 3 : has('conceal') ? 1 : 2,
     \ 'show_call_signatures_delay': 500,
     \ 'call_signature_escape': "'?!?'",
     \ 'auto_close_doc': 1,

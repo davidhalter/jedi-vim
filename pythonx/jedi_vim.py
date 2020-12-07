@@ -783,10 +783,16 @@ def show_documentation():
 
 @catch_and_print_exceptions
 def clear_call_signatures():
+    signatures_type = int(vim_eval("g:jedi#show_call_signatures"))
     # Check if using command line call signatures
-    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
+    if signatures_type == 2:
         vim_command('echo ""')
         return
+    if signatures_type == 3:
+        VimCompat.call("prop_remove", {"type": "jediSignatureAncor",
+                                       "all": True})
+        return
+
     cursor = vim.current.window.cursor
     e = vim_eval('g:jedi#call_signature_escape')
     # We need two turns here to search and replace certain lines:
@@ -810,22 +816,29 @@ def clear_call_signatures():
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
 def show_call_signatures(signatures=()):
-    if int(vim_eval("has('conceal') && g:jedi#show_call_signatures")) == 0:
+    signatures_type = int(vim_eval("g:jedi#show_call_signatures"))
+    if not signatures_type:
         return
 
     # We need to clear the signatures before we calculate them again. The
     # reason for this is that call signatures are unfortunately written to the
     # buffer.
     clear_call_signatures()
-    if signatures == ():
+    if not signatures:
         signatures = get_script().get_signatures(*get_pos())
-
     if not signatures:
         return
 
-    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
-        return cmdline_call_signatures(signatures)
+    if signatures_type == 1:
+        legacy_call_signatures(signatures)
+    elif signatures_type == 2:
+        cmdline_call_signatures(signatures)
+    elif signatures_type == 3:
+        popup_call_signatures(signatures)
 
+
+@catch_and_print_exceptions
+def legacy_call_signatures(signatures):
     seen_sigs = []
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
@@ -971,6 +984,55 @@ def cmdline_call_signatures(signatures):
                     'echohl Function     | echon "%s" | '
                     'echohl None         | echon "(%s)"'
                     % (spaces, signatures[0].name, text))
+
+
+_signatures_winid = None
+
+
+@catch_and_print_exceptions
+def popup_call_signatures(signatures):
+    global _signatures_winid
+
+    text = set()
+    for signature in signatures:
+        line, column = signature.bracket_start
+        # Descriptions are usually looking like `param name`, remove the param.
+        params = [p.description.replace("\n", "").replace("param ", "", 1)
+                  for p in signature.params]
+        text.add("(%s)" % ", ".join(params))
+    text = sorted(text, key=len)
+
+    mask, longest = [], len(text[-1])
+    for index, length in enumerate(map(len, text), start=1):
+        if length == longest:
+            break
+        mask.append([length + 1, longest, index, index])
+    # NOTE: The computed mask may not exactly follow the text in popup buffer
+    # due to possible line wrapping which we do not know here. But in the case,
+    # no essential information will be hidden thanks to sorting above.
+
+    if _signatures_winid is not None \
+            and VimCompat.call("popup_getoptions", _signatures_winid):
+        # Reuse previously created window if it still exists.
+        VimCompat.call("popup_settext", _signatures_winid, text)
+        VimCompat.call("popup_setoptions", _signatures_winid, {"mask": mask})
+    else:
+        if b"jediSignatureAncor" not in VimCompat.call("prop_type_list"):
+            VimCompat.call("prop_type_add", "jediSignatureAncor", {})
+        _signatures_winid = VimCompat.call("popup_create", text,
+                                           {"pos": "botleft",
+                                            "posinvert": False,
+                                            "highlight": "jediFunction",
+                                            "mask": mask,
+                                            "textprop": "jediSignatureAncor"})
+        if VimCompat.has("linebreak"):
+            VimCompat.call("setwinvar", _signatures_winid, "&linebreak", True)
+            VimCompat.call("setwinvar", _signatures_winid, "&breakindent", True)
+            # Continue wrapped lines right under left bracket.
+            VimCompat.call("setwinvar", _signatures_winid,
+                           "&breakindentopt", "shift:1")
+    # Insert property at left bracket. Column is counting from one, not zero.
+    VimCompat.call("prop_add", line, column + 1, {"type": "jediSignatureAncor"})
 
 
 @_check_jedi_availability(show_error=True)
