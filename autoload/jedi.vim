@@ -29,6 +29,7 @@ let s:default_settings = {
     \ 'documentation_command': "'K'",
     \ 'show_call_signatures': has('popupwin') && has('textprop') ? 3 : has('conceal') ? 1 : 2,
     \ 'show_call_signatures_delay': 500,
+    \ 'show_call_signatures_wrap': has('linebreak'),
     \ 'call_signature_escape': "'?!?'",
     \ 'auto_close_doc': 1,
     \ 'max_doc_height': 30,

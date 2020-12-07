@@ -1019,13 +1019,15 @@ def popup_call_signatures(signatures):
     else:
         if b"jediSignatureAncor" not in VimCompat.call("prop_type_list"):
             VimCompat.call("prop_type_add", "jediSignatureAncor", {})
+        wrap_signatures = int(vim_eval("g:jedi#show_call_signatures_wrap"))
         _signatures_winid = VimCompat.call("popup_create", text,
                                            {"pos": "botleft",
                                             "posinvert": False,
                                             "highlight": "jediFunction",
                                             "mask": mask,
+                                            "wrap": bool(wrap_signatures),
                                             "textprop": "jediSignatureAncor"})
-        if VimCompat.has("linebreak"):
+        if wrap_signatures and VimCompat.has("linebreak"):
             VimCompat.call("setwinvar", _signatures_winid, "&linebreak", True)
             VimCompat.call("setwinvar", _signatures_winid, "&breakindent", True)
             # Continue wrapped lines right under left bracket.
