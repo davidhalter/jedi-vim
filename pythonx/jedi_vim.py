@@ -297,6 +297,9 @@ def get_script(source=None):
     if source is None:
         source = '\n'.join(vim.current.buffer)
     buf_path = vim.current.buffer.name
+    if not buf_path:
+        # If a buffer has no name its name is an empty string.
+        buf_path = None
 
     return jedi.Script(source, path=buf_path, project=get_project())
 
