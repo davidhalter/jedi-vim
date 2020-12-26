@@ -4,10 +4,12 @@ source test/_utils.vim
 describe 'pyimport'
     before
         let g:jedi#use_tabs_not_buffers = 1
+        let g:jedi#project_path = 'autoload'
     end
 
     after
         try | %bwipeout! | catch | endtry
+        unlet g:jedi#project_path
     end
 
     it 'open_tab'
