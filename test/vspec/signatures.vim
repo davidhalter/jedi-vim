@@ -45,9 +45,6 @@ describe 'signatures'
     end
 
     it 'highlights correct argument'
-        if !has('python3')
-          SKIP 'py2: no signatures with print()'
-        endif
         noautocmd normal o
         doautocmd CursorHoldI
         noautocmd normal iprint(42, sep="X", )
@@ -66,7 +63,7 @@ describe 'signatures'
 
     it 'no signature'
         exe 'normal ostr '
-        Python jedi_vim.show_call_signatures()
+        python3 jedi_vim.show_call_signatures()
         Expect getline(1, '$') == ['', 'str ']
     end
 
@@ -74,7 +71,7 @@ describe 'signatures'
         let g:jedi#show_call_signatures = 0
 
         exe 'normal ostr( '
-        Python jedi_vim.show_call_signatures()
+        python3 jedi_vim.show_call_signatures()
         Expect getline(1, '$') == ['', 'str( ']
 
         let g:jedi#show_call_signatures = 1
@@ -86,7 +83,7 @@ describe 'signatures'
 
         exe 'normal ostaticmethod( '
         redir => msg
-        Python jedi_vim.show_call_signatures()
+        python3 jedi_vim.show_call_signatures()
         redir END
         Expect msg == "\nstaticmethod(f: Callable[..., Any])"
 
@@ -98,7 +95,7 @@ describe 'signatures'
         normal Sdef foo(a, b): pass
         exe 'normal ofoo(a, b, c, '
         redir => msg
-        Python jedi_vim.show_call_signatures()
+        python3 jedi_vim.show_call_signatures()
         redir END
         Expect msg == "\nfoo(a, b)"
     end
@@ -109,7 +106,7 @@ describe 'signatures'
 
         function! Signature()
             redir => msg
-            Python jedi_vim.show_call_signatures()
+            python3 jedi_vim.show_call_signatures()
             redir END
             return msg
         endfunction
@@ -142,7 +139,7 @@ describe 'signatures'
 
         exe 'normal ostr '
         redir => msg
-        Python jedi_vim.show_call_signatures()
+        python3 jedi_vim.show_call_signatures()
         redir END
         Expect msg == "\n"
     end

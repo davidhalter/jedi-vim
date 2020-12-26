@@ -16,14 +16,8 @@ describe 'documentation docstrings'
         Expect bufname('%') == "__doc__"
         Expect &filetype == 'rst'
         let header = getline(1, 2)
-        PythonJedi vim.vars["is_py2"] = sys.version_info[0] == 2
-        if g:is_py2
-            Expect header[0] == "Docstring for class __builtin__.ImportError"
-            Expect header[1] == "==========================================="
-        else
-            Expect header[0] == "Docstring for class builtins.ImportError"
-            Expect header[1] == "========================================"
-        endif
+        Expect header[0] == "Docstring for class builtins.ImportError"
+        Expect header[1] == "========================================"
         let content = join(getline(3, '$'), "\n")
         Expect stridx(content, "Import can't find module") > 0
         normal K

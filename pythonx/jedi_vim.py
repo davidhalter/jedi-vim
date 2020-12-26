@@ -255,7 +255,7 @@ def choose_environment():
     vim_command(
         'setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted readonly nomodifiable')
     vim_command('noremap <buffer> <ESC> :bw<CR>')
-    vim_command('noremap <buffer> <CR> :PythonJedi jedi_vim.choose_environment_hit_enter()<CR>')
+    vim_command('noremap <buffer> <CR> :python3 jedi_vim.choose_environment_hit_enter()<CR>')
 
 
 @catch_and_print_exceptions

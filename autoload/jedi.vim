@@ -62,35 +62,13 @@ let s:supports_buffer_usages = has('nvim') || exists('*prop_add')
 " ------------------------------------------------------------------------
 let s:script_path = expand('<sfile>:p:h:h')
 
-" Initialize Python (PythonJedi command).
 function! s:init_python() abort
     " Use g:jedi#force_py_version for loading Jedi, or fall back to using
     " `has()` - preferring Python 3.
-    let loader_version = get(g:, 'jedi#loader_py_version', g:jedi#force_py_version)
-    if loader_version ==# 'auto'
-        if has('python3')
-            let loader_version = 3
-        elseif has('python')
-            let loader_version = 2
-        else
-            throw 'jedi-vim requires Vim with support for Python 2 or 3.'
-        endif
-    else
-        if loader_version =~# '^3'
-            let loader_version = 3
-        elseif loader_version =~# '^2'
-            let loader_version = 2
-        else
-            if !exists('g:jedi#squelch_py_warning')
-                echohl WarningMsg
-                echom printf("jedi-vim: could not determine Python loader version from 'g:jedi#loader_py_version/g:jedi#force_py_version' (%s), using 3.",
-                            \ loader_version)
-                echohl None
-            endif
-            let loader_version = 3
-        endif
+    if !has('python3')
+        throw 'jedi-vim requires Vim with support for Python 3.'
     endif
-    call jedi#setup_python_imports(loader_version)
+    call jedi#setup_python_imports()
     return 1
 endfunction
 
@@ -145,20 +123,7 @@ function! jedi#init_python() abort
 endfunction
 
 
-let s:python_version = 'null'
-function! jedi#setup_python_imports(py_version) abort
-    if a:py_version == 2
-        let cmd_exec = 'python'
-        let s:python_version = 2
-    elseif a:py_version == 3
-        let cmd_exec = 'python3'
-        let s:python_version = 3
-    else
-        throw 'jedi#setup_python_imports: invalid py_version: '.a:py_version
-    endif
-
-    execute 'command! -nargs=1 PythonJedi '.cmd_exec.' <args>'
-
+function! jedi#setup_python_imports() abort
     let g:_jedi_init_error = 0
     let init_lines = [
           \ 'import vim',
@@ -176,7 +141,7 @@ function! jedi#setup_python_imports(py_version) abort
           \ 'except Exception as exc:',
           \ '    _jedi_handle_exc(sys.exc_info())',
           \ ]
-    exe 'PythonJedi exec('''.escape(join(init_lines, '\n'), "'").''')'
+    exe 'python3 exec('''.escape(join(init_lines, '\n'), "'").''')'
     if g:_jedi_init_error isnot 0
         throw printf('jedi#setup_python_imports: %s', g:_jedi_init_error)
     endif
@@ -204,25 +169,24 @@ function! jedi#debug_info() abort
     echo "\n"
     echo '##### Global Python'
     echo "\n"
-    echo 'Using Python version '.s:python_version.' to access Jedi.'
-    let pyeval = s:python_version == 3 ? 'py3eval' : 'pyeval'
+    echo 'Using Python version 3 to access Jedi.'
     let s:pythonjedi_called = 0
     try
-      PythonJedi import vim; vim.command('let s:pythonjedi_called = 1')
+      python3 import vim; vim.command('let s:pythonjedi_called = 1')
     catch
       echo 'Error when trying to import vim: '.v:exception
     endtry
     if !s:pythonjedi_called
       echohl WarningMsg
-      echom 'PythonJedi failed to run, likely a Python config issue.'
+      echom 'python3 failed to run, likely a Python config issue.'
       if exists(':checkhealth') == 2
         echom 'Try :checkhealth for more information.'
       endif
       echohl None
     else
       try
-        PythonJedi from jedi_vim_debug import display_debug_info
-        PythonJedi display_debug_info()
+        python3 from jedi_vim_debug import display_debug_info
+        python3 display_debug_info()
       catch
         echohl WarningMsg
         echo 'Error when running display_debug_info: '.v:exception
@@ -297,26 +261,26 @@ call jedi#init_python()  " Might throw an error.
 " functions that call python code
 " ------------------------------------------------------------------------
 function! jedi#goto() abort
-    PythonJedi jedi_vim.goto(mode="goto")
+    python3 jedi_vim.goto(mode="goto")
 endfunction
 
 function! jedi#goto_assignments() abort
-    PythonJedi jedi_vim.goto(mode="assignment")
+    python3 jedi_vim.goto(mode="assignment")
 endfunction
 
 function! jedi#goto_definitions() abort
-    PythonJedi jedi_vim.goto(mode="definition")
+    python3 jedi_vim.goto(mode="definition")
 endfunction
 
 function! jedi#goto_stubs() abort
-    PythonJedi jedi_vim.goto(mode="stubs")
+    python3 jedi_vim.goto(mode="stubs")
 endfunction
 
 function! jedi#usages() abort
     if exists('#jedi_usages#BufWinEnter')
         call jedi#clear_usages()
     endif
-    PythonJedi jedi_vim.usages()
+    python3 jedi_vim.usages()
 endfunction
 
 if !s:supports_buffer_usages
@@ -340,7 +304,7 @@ endfunction
 
 " Show usages for current window (Vim without textprops only).
 function! jedi#_show_usages_in_win() abort
-    PythonJedi jedi_vim.highlight_usages_for_vim_win()
+    python3 jedi_vim.highlight_usages_for_vim_win()
 
     if !exists('#jedi_usages#TextChanged#<buffer>')
         augroup jedi_usages
@@ -393,54 +357,54 @@ function! jedi#clear_usages() abort
         augroup END
     endif
 
-    PythonJedi jedi_vim.clear_usages()
+    python3 jedi_vim.clear_usages()
 endfunction
 
 function! jedi#rename(...) abort
-    PythonJedi jedi_vim.rename()
+    python3 jedi_vim.rename()
 endfunction
 
 function! jedi#rename_visual(...) abort
-    PythonJedi jedi_vim.rename_visual()
+    python3 jedi_vim.rename_visual()
 endfunction
 
 function! jedi#completions(findstart, base) abort
-    PythonJedi jedi_vim.completions()
+    python3 jedi_vim.completions()
 endfunction
 
 function! jedi#enable_speed_debugging() abort
-    PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
+    python3 jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
 endfunction
 
 function! jedi#enable_debugging() abort
-    PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
+    python3 jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 endfunction
 
 function! jedi#disable_debugging() abort
-    PythonJedi jedi_vim.jedi.set_debug_function(None)
+    python3 jedi_vim.jedi.set_debug_function(None)
 endfunction
 
 function! jedi#py_import(args) abort
-    PythonJedi jedi_vim.py_import()
+    python3 jedi_vim.py_import()
 endfun
 
 function! jedi#choose_environment(args) abort
-    PythonJedi jedi_vim.choose_environment()
+    python3 jedi_vim.choose_environment()
 endfun
 
 function! jedi#load_project(args) abort
-    PythonJedi jedi_vim.load_project()
+    python3 jedi_vim.load_project()
 endfun
 
 function! jedi#py_import_completions(argl, cmdl, pos) abort
-    PythonJedi jedi_vim.py_import_completions()
+    python3 jedi_vim.py_import_completions()
 endfun
 
 function! jedi#clear_cache(bang) abort
     if a:bang
-        PythonJedi jedi_vim.jedi.cache.clear_time_caches(True)
+        python3 jedi_vim.jedi.cache.clear_time_caches(True)
     else
-        PythonJedi jedi_vim.jedi.cache.clear_time_caches(False)
+        python3 jedi_vim.jedi.cache.clear_time_caches(False)
     endif
 endfunction
 
@@ -449,7 +413,7 @@ endfunction
 " show_documentation
 " ------------------------------------------------------------------------
 function! jedi#show_documentation() abort
-    PythonJedi if jedi_vim.show_documentation() is None: vim.command('return')
+    python3 if jedi_vim.show_documentation() is None: vim.command('return')
 
     let bn = bufnr('__doc__')
     if bn > 0
@@ -532,7 +496,7 @@ endfunction
 
 " Highlight usages for a buffer if not done so yet (Neovim only).
 function! s:usages_for_pending_buffers() abort
-    PythonJedi jedi_vim._handle_pending_usages_for_buf()
+    python3 jedi_vim._handle_pending_usages_for_buf()
 endfunction
 
 
@@ -542,7 +506,7 @@ function! jedi#goto_window_on_enter() abort
     if l:data.bufnr
         " close goto_window buffer
         normal! ZQ
-        PythonJedi jedi_vim.new_buffer(vim.eval('bufname(l:data.bufnr)'))
+        python3 jedi_vim.new_buffer(vim.eval('bufname(l:data.bufnr)'))
         call cursor(l:data.lnum, l:data.col)
     else
         echohl WarningMsg | echo 'Builtin module cannot be opened.' | echohl None
@@ -604,7 +568,7 @@ function! jedi#show_call_signatures() abort
     let s:show_call_signatures_last = [line, col, curline]
 
     if reload_signatures
-        PythonJedi jedi_vim.show_call_signatures()
+        python3 jedi_vim.show_call_signatures()
     endif
 endfunction
 
@@ -615,7 +579,7 @@ function! jedi#clear_call_signatures() abort
     endif
 
     let s:show_call_signatures_last = [0, 0, '']
-    PythonJedi jedi_vim.clear_call_signatures()
+    python3 jedi_vim.clear_call_signatures()
 endfunction
 
 
@@ -760,7 +724,7 @@ function! jedi#setup_completion() abort
     endif
 endfunction
 
-"PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
-"PythonJedi jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
+"python3 jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout, speed=True, warnings=False, notices=False)
+"python3 jedi_vim.jedi.set_debug_function(jedi_vim.print_to_stdout)
 
 " vim: set et ts=4:

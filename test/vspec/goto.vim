@@ -91,7 +91,7 @@ describe 'goto with buffers'
         put = ['import os']
         normal G$
         call jedi#goto_assignments()
-        PythonJedi jedi_vim.goto()
+        python3 jedi_vim.goto()
         Expect CurrentBufferIsModule('os') == 0
         " Without hidden, it's not possible to open a new buffer, when the old
         " one is not saved.
