@@ -208,6 +208,11 @@ get more information. If you set them to ``""``, they are not assigned.
     let g:jedi#completions_command = "<C-Space>"
     let g:jedi#rename_command = "<leader>r"
 
+A few examples of setting up your project:
+
+.. code-block:: vim
+
+    let g:jedi#environment_path = "<leader>d"
 
 Finally, if you don't want completion, but all the other features, use:
 

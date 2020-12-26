@@ -35,6 +35,8 @@ let s:default_settings = {
     \ 'popup_select_first': 1,
     \ 'quickfix_window_height': 10,
     \ 'force_py_version': "'auto'",
+    \ 'environment_path': "'auto'",
+    \ 'project_path': "'auto'",
     \ 'smart_auto_mappings': 0,
     \ 'use_tag_stack': 1
 \ }
@@ -420,6 +422,14 @@ endfunction
 
 function! jedi#py_import(args) abort
     PythonJedi jedi_vim.py_import()
+endfun
+
+function! jedi#choose_environment(args) abort
+    PythonJedi jedi_vim.choose_environment()
+endfun
+
+function! jedi#load_project(args) abort
+    PythonJedi jedi_vim.load_project()
 endfun
 
 function! jedi#py_import_completions(argl, cmdl, pos) abort

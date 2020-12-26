@@ -2,7 +2,7 @@
 import sys
 
 import vim
-from jedi_vim import PythonToVimStr
+from jedi_vim import PythonToVimStr, jedi
 
 
 def echo(msg):
@@ -32,6 +32,13 @@ def format_exc_info(exc_info=None, tb_indent=2):
     return '{0}'.format(('\n' + indent).join(lines))
 
 
+def get_known_environments():
+    """Get known Jedi environments."""
+    envs = list(jedi.find_virtualenvs())
+    envs.extend(jedi.find_system_environments())
+    return envs
+
+
 def display_debug_info():
     echo(' - global sys.executable: `{0}`'.format(sys.executable))
     echo(' - global sys.version: `{0}`'.format(
@@ -58,7 +65,8 @@ def display_debug_info():
         echo(' - version: {0}'.format(jedi_vim.jedi.__version__))
 
         try:
-            environment = jedi_vim.get_environment(use_cache=False)
+            project = jedi_vim.get_project()
+            environment = project.get_environment()
         except AttributeError:
             script_evaluator = jedi_vim.jedi.Script('')._evaluator
             try:
@@ -81,7 +89,7 @@ def display_debug_info():
 
         if environment:
             echo('\n##### Known environments\n\n')
-            for environment in jedi_vim.get_known_environments():
+            for environment in get_known_environments():
                 echo(' - {0} ({1})\n'.format(
                     environment,
                     environment.executable,

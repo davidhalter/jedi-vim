@@ -1,17 +1,10 @@
-dist: xenial
+dist: bionic
 language: python
-python: 3.7
+python: 3.8
 env:
-  matrix:
-    - ENV=test
-    - ENV=check
-    - ENV=test_coverage
-matrix:
-  include:
-    - env: ENV=test_coverage
-      python: 2.7
-    - env: ENV=test_coverage
-      python: 3.8
+  - ENV=test
+  - ENV=check
+  - ENV=test_coverage
 install:
   - |
     if [ "$ENV" = "test" ]; then

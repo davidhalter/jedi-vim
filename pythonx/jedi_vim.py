@@ -211,51 +211,84 @@ def _check_jedi_availability(show_error=False):
     return func_receiver
 
 
-current_environment = (None, None)
+# Tuple of cache key / project
+_current_project_cache = None, None
 
 
-def get_environment(use_cache=True):
-    global current_environment
+def get_project():
+    vim_environment_path = vim_eval("g:jedi#environment_path")
+    vim_project_path = vim_eval("g:jedi#project_path")
 
-    vim_force_python_version = vim_eval("g:jedi#force_py_version")
-    if use_cache and vim_force_python_version == current_environment[0]:
-        return current_environment[1]
+    global _current_project_cache
+    cache_key = dict(project_path=vim_project_path, environment_path=vim_environment_path)
+    if cache_key == _current_project_cache[0]:
+        return _current_project_cache[1]
 
-    environment = None
-    if vim_force_python_version == "auto":
-        environment = jedi.api.environment.get_cached_default_environment()
+    if vim_environment_path in ("auto", "", None):
+        environment_path = None
     else:
-        force_python_version = vim_force_python_version
-        if '0000' in force_python_version or '9999' in force_python_version:
-            # It's probably a float that wasn't shortened.
-            try:
-                force_python_version = "{:.1f}".format(float(force_python_version))
-            except ValueError:
-                pass
-        elif isinstance(force_python_version, float):
-            force_python_version = "{:.1f}".format(force_python_version)
+        environment_path = vim_environment_path
 
-        try:
-            environment = jedi.get_system_environment(force_python_version)
-        except jedi.InvalidPythonEnvironment as exc:
-            environment = jedi.api.environment.get_cached_default_environment()
-            echo_highlight(
-                "force_python_version=%s is not supported: %s - using %s." % (
-                    vim_force_python_version, str(exc), str(environment)))
+    if vim_project_path in ("auto", "", None):
+        project_path = jedi.get_default_project().path
+    else:
+        project_path = vim_project_path
 
-    current_environment = (vim_force_python_version, environment)
-    return environment
+    project = jedi.Project(project_path, environment_path=environment_path)
 
-
-def get_known_environments():
-    """Get known Jedi environments."""
-    envs = list(jedi.api.environment.find_virtualenvs())
-    envs.extend(jedi.api.environment.find_system_environments())
-    return envs
+    _current_project_cache = cache_key, project
+    return project
 
 
 @catch_and_print_exceptions
-def get_script(source=None, column=None):
+def choose_environment():
+    args = shsplit(vim.eval('a:args'))
+
+    envs = list(jedi.find_system_environments())
+    envs.extend(jedi.find_virtualenvs(paths=args or None))
+
+    env_paths = [env.executable for env in envs]
+
+    vim_command('belowright new')
+    vim.current.buffer[:] = env_paths
+    vim.current.buffer.name = "Hit Enter to Choose an Environment"
+    vim_command(
+        'setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted readonly nomodifiable')
+    vim_command('noremap <buffer> <ESC> :bw<CR>')
+    vim_command('noremap <buffer> <CR> :PythonJedi jedi_vim.choose_environment_hit_enter()<CR>')
+
+
+@catch_and_print_exceptions
+def choose_environment_hit_enter():
+    vim.vars['jedi#environment_path'] = vim.current.line
+    vim_command('bd')
+
+
+@catch_and_print_exceptions
+def load_project():
+    path = vim.eval('a:args')
+    vim.vars['jedi#project_path'] = path
+    env_path = vim_eval("g:jedi#environment_path")
+    if env_path == 'auto':
+        env_path = None
+    if path:
+        try:
+            project = jedi.Project.load(path)
+        except FileNotFoundError:
+            project = jedi.Project(path, environment_path=env_path)
+            project.save()
+    else:
+        project = jedi.get_default_project()
+        path = project.path
+        project.save()
+
+    global _current_project_cache
+    cache_key = dict(project_path=path, environment_path=env_path)
+    _current_project_cache = cache_key, project
+
+
+@catch_and_print_exceptions
+def get_script(source=None):
     jedi.settings.additional_dynamic_modules = [
         b.name for b in vim.buffers if (
             b.name is not None and
@@ -263,16 +296,19 @@ def get_script(source=None, column=None):
             b.options['buflisted'])]
     if source is None:
         source = '\n'.join(vim.current.buffer)
+    buf_path = vim.current.buffer.name
+    if not buf_path:
+        # If a buffer has no name its name is an empty string.
+        buf_path = None
+
+    return jedi.Script(source, path=buf_path, project=get_project())
+
+
+def get_pos(column=None):
     row = vim.current.window.cursor[0]
     if column is None:
         column = vim.current.window.cursor[1]
-    buf_path = vim.current.buffer.name
-
-    return jedi.Script(
-        source, row, column, buf_path,
-        encoding=vim_eval('&encoding') or 'latin1',
-        environment=get_environment(),
-    )
+    return row, column
 
 
 @_check_jedi_availability(show_error=False)
@@ -303,9 +339,9 @@ def completions():
         # here again hacks, because jedi has a different interface than vim
         column += len(base)
         try:
-            script = get_script(source=source, column=column)
-            completions = script.completions()
-            signatures = script.call_signatures()
+            script = get_script(source=source)
+            completions = script.complete(*get_pos(column))
+            signatures = script.get_signatures(*get_pos(column))
 
             add_info = "preview" in vim.eval("&completeopt").split(",")
             out = []
@@ -354,59 +390,64 @@ def tempfile(content):
 def goto(mode="goto"):
     """
     :param str mode: "definition", "assignment", "goto"
-    :return: list of definitions/assignments
-    :rtype: list
+    :rtype: list of jedi.api.classes.Name
     """
     script = get_script()
+    pos = get_pos()
     if mode == "goto":
-        definitions = script.goto_assignments(follow_imports=True)
+        names = script.goto(*pos, follow_imports=True)
     elif mode == "definition":
-        definitions = script.goto_definitions()
+        names = script.infer(*pos)
     elif mode == "assignment":
-        definitions = script.goto_assignments()
+        names = script.goto(*pos)
     elif mode == "stubs":
-        definitions = script.goto_assignments(follow_imports=True, only_stubs=True)
+        names = script.goto(*pos, follow_imports=True, only_stubs=True)
 
-    if not definitions:
+    if not names:
         echo_highlight("Couldn't find any definitions for this.")
-    elif len(definitions) == 1 and mode != "related_name":
-        d = list(definitions)[0]
-        if d.column is None:
-            if d.is_keyword:
-                echo_highlight("Cannot get the definition of Python keywords.")
-            else:
-                echo_highlight("Builtin modules cannot be displayed (%s)."
-                               % d.desc_with_module)
-        else:
-            using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-            if (d.module_path or '') != vim.current.buffer.name:
-                result = new_buffer(d.module_path,
-                                    using_tagstack=using_tagstack)
-                if not result:
-                    return []
-            if (using_tagstack and d.module_path and
-                    os.path.exists(d.module_path)):
-                tagname = d.name
-                with tempfile('{0}\t{1}\t{2}'.format(
-                        tagname, d.module_path, 'call cursor({0}, {1})'.format(
-                            d.line, d.column + 1))) as f:
-                    old_tags = vim.eval('&tags')
-                    old_wildignore = vim.eval('&wildignore')
-                    try:
-                        # Clear wildignore to ensure tag file isn't ignored
-                        vim.command('set wildignore=')
-                        vim.command('let &tags = %s' %
-                                    repr(PythonToVimStr(f.name)))
-                        vim.command('tjump %s' % tagname)
-                    finally:
-                        vim.command('let &tags = %s' %
-                                    repr(PythonToVimStr(old_tags)))
-                        vim.command('let &wildignore = %s' %
-                                    repr(PythonToVimStr(old_wildignore)))
-            vim.current.window.cursor = d.line, d.column
+    elif len(names) == 1 and mode != "related_name":
+        n = list(names)[0]
+        _goto_specific_name(n)
     else:
-        show_goto_multi_results(definitions, mode)
-    return definitions
+        show_goto_multi_results(names, mode)
+    return names
+
+
+def _goto_specific_name(n, options=''):
+    if n.column is None:
+        if n.is_keyword:
+            echo_highlight("Cannot get the definition of Python keywords.")
+        else:
+            echo_highlight("Builtin modules cannot be displayed (%s)."
+                           % (n.full_name or n.name))
+    else:
+        using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
+        module_path = str(n.module_path or '')
+        if module_path != vim.current.buffer.name:
+            result = new_buffer(module_path, options=options,
+                                using_tagstack=using_tagstack)
+            if not result:
+                return []
+        if (using_tagstack and module_path and
+                os.path.exists(module_path)):
+            tagname = n.name
+            with tempfile('{0}\t{1}\t{2}'.format(
+                    tagname, module_path, 'call cursor({0}, {1})'.format(
+                        n.line, n.column + 1))) as f:
+                old_tags = vim.eval('&tags')
+                old_wildignore = vim.eval('&wildignore')
+                try:
+                    # Clear wildignore to ensure tag file isn't ignored
+                    vim.command('set wildignore=')
+                    vim.command('let &tags = %s' %
+                                repr(PythonToVimStr(f.name)))
+                    vim.command('tjump %s' % tagname)
+                finally:
+                    vim.command('let &tags = %s' %
+                                repr(PythonToVimStr(old_tags)))
+                    vim.command('let &wildignore = %s' %
+                                repr(PythonToVimStr(old_wildignore)))
+        vim.current.window.cursor = n.line, n.column
 
 
 def relpath(path):
@@ -417,45 +458,45 @@ def relpath(path):
     return path
 
 
-def annotate_description(d):
-    code = d.get_line_code().strip()
-    if d.type == 'statement':
+def annotate_description(n):
+    code = n.get_line_code().strip()
+    if n.type == 'statement':
         return code
-    if d.type == 'function':
+    if n.type == 'function':
         if code.startswith('def'):
             return code
         typ = 'def'
     else:
-        typ = d.type
+        typ = n.type
     return '[%s] %s' % (typ, code)
 
 
-def show_goto_multi_results(definitions, mode):
-    """Create (or reuse) a quickfix list for multiple definitions."""
-    global _current_definitions
+def show_goto_multi_results(names, mode):
+    """Create (or reuse) a quickfix list for multiple names."""
+    global _current_names
 
     lst = []
     (row, col) = vim.current.window.cursor
     current_idx = None
     current_def = None
-    for d in definitions:
-        if d.column is None:
+    for n in names:
+        if n.column is None:
             # Typically a namespace, in the future maybe other things as
             # well.
-            lst.append(dict(text=PythonToVimStr(d.description)))
+            lst.append(dict(text=PythonToVimStr(n.description)))
         else:
-            text = annotate_description(d)
-            lst.append(dict(filename=PythonToVimStr(relpath(d.module_path)),
-                            lnum=d.line, col=d.column + 1,
+            text = annotate_description(n)
+            lst.append(dict(filename=PythonToVimStr(relpath(str(n.module_path))),
+                            lnum=n.line, col=n.column + 1,
                             text=PythonToVimStr(text)))
 
             # Select current/nearest entry via :cc later.
-            if d.line == row and d.column <= col:
+            if n.line == row and n.column <= col:
                 if (current_idx is None
                         or (abs(lst[current_idx]["col"] - col)
-                            > abs(d.column - col))):
+                            > abs(n.column - col))):
                     current_idx = len(lst)
-                    current_def = d
+                    current_def = n
 
     # Build qflist title.
     qf_title = mode
@@ -468,8 +509,8 @@ def show_goto_multi_results(definitions, mode):
     else:
         select_entry = 0
 
-    qf_context = id(definitions)
-    if (_current_definitions
+    qf_context = id(names)
+    if (_current_names
             and VimCompat.can_update_current_qflist_for_context(qf_context)):
         # Same list, only adjust title/selected entry.
         VimCompat.setqflist_title(qf_title)
@@ -481,7 +522,7 @@ def show_goto_multi_results(definitions, mode):
         vim_command('%d' % select_entry)
 
 
-def _same_definitions(a, b):
+def _same_names(a, b):
     """Compare without _inference_state.
 
     Ref: https://github.com/davidhalter/jedi-vim/issues/952)
@@ -497,35 +538,35 @@ def _same_definitions(a, b):
 @catch_and_print_exceptions
 def usages(visuals=True):
     script = get_script()
-    definitions = script.usages()
-    if not definitions:
+    names = script.get_references(*get_pos())
+    if not names:
         echo_highlight("No usages found here.")
-        return definitions
+        return names
 
     if visuals:
-        global _current_definitions
+        global _current_names
 
-        if _current_definitions:
-            if _same_definitions(_current_definitions, definitions):
-                definitions = _current_definitions
+        if _current_names:
+            if _same_names(_current_names, names):
+                names = _current_names
             else:
                 clear_usages()
-                assert not _current_definitions
+                assert not _current_names
 
-        show_goto_multi_results(definitions, "usages")
-        if not _current_definitions:
-            _current_definitions = definitions
+        show_goto_multi_results(names, "usages")
+        if not _current_names:
+            _current_names = names
             highlight_usages()
         else:
-            assert definitions is _current_definitions  # updated above
-    return definitions
+            assert names is _current_names  # updated above
+    return names
 
 
-_current_definitions = None
+_current_names = None
 """Current definitions to use for highlighting."""
-_pending_definitions = {}
+_pending_names = {}
 """Pending definitions for unloaded buffers."""
-_placed_definitions_in_buffers = set()
+_placed_names_in_buffers = set()
 """Set of buffers for faster cleanup."""
 
 
@@ -544,19 +585,19 @@ else:
 
 def clear_usages():
     """Clear existing highlights."""
-    global _current_definitions
-    if _current_definitions is None:
+    global _current_names
+    if _current_names is None:
         return
-    _current_definitions = None
+    _current_names = None
 
     if IS_NVIM:
-        for buf in _placed_definitions_in_buffers:
+        for buf in _placed_names_in_buffers:
             src_ids = buf.vars.get('_jedi_usages_src_ids')
             if src_ids is not None:
                 for src_id in src_ids:
                     buf.clear_highlight(src_id)
     elif vim_prop_add:
-        for buf in _placed_definitions_in_buffers:
+        for buf in _placed_names_in_buffers:
             vim_prop_remove({
                 'type': 'jediUsage',
                 'all': 1,
@@ -564,14 +605,14 @@ def clear_usages():
             })
     else:
         # Unset current window only.
-        assert _current_definitions is None
+        assert _current_names is None
         highlight_usages_for_vim_win()
 
-    _placed_definitions_in_buffers.clear()
+    _placed_names_in_buffers.clear()
 
 
 def highlight_usages():
-    """Set definitions to be highlighted.
+    """Set usage names to be highlighted.
 
     With Neovim it will use the nvim_buf_add_highlight API to highlight all
     buffers already.
@@ -580,41 +621,41 @@ def highlight_usages():
     highlighted via matchaddpos, and autocommands are setup to highlight other
     windows on demand.  Otherwise Vim's text-properties are used.
     """
-    global _current_definitions, _pending_definitions
+    global _current_names, _pending_names
 
-    definitions = _current_definitions
-    _pending_definitions = {}
+    names = _current_names
+    _pending_names = {}
 
     if IS_NVIM or vim_prop_add:
         bufs = {x.name: x for x in vim.buffers}
         defs_per_buf = {}
-        for definition in definitions:
+        for name in names:
             try:
-                buf = bufs[definition.module_path]
+                buf = bufs[str(name.module_path)]
             except KeyError:
                 continue
-            defs_per_buf.setdefault(buf, []).append(definition)
+            defs_per_buf.setdefault(buf, []).append(name)
 
         if IS_NVIM:
             # We need to remember highlight ids with Neovim's API.
             buf_src_ids = {}
-            for buf, definitions in defs_per_buf.items():
+            for buf, names in defs_per_buf.items():
                 buf_src_ids[buf] = []
-                for definition in definitions:
-                    src_id = _add_highlight_definition(buf, definition)
+                for name in names:
+                    src_id = _add_highlighted_name(buf, name)
                     buf_src_ids[buf].append(src_id)
             for buf, src_ids in buf_src_ids.items():
                 buf.vars['_jedi_usages_src_ids'] = src_ids
         else:
-            for buf, definitions in defs_per_buf.items():
+            for buf, names in defs_per_buf.items():
                 try:
-                    for definition in definitions:
-                        _add_highlight_definition(buf, definition)
+                    for name in names:
+                        _add_highlighted_name(buf, name)
                 except vim.error as exc:
                     if exc.args[0].startswith('Vim:E275:'):
                         # "Cannot add text property to unloaded buffer"
-                        _pending_definitions.setdefault(buf.name, []).extend(
-                            definitions)
+                        _pending_names.setdefault(buf.name, []).extend(
+                            names)
     else:
         highlight_usages_for_vim_win()
 
@@ -624,29 +665,29 @@ def _handle_pending_usages_for_buf():
     buf = vim.current.buffer
     bufname = buf.name
     try:
-        buf_defs = _pending_definitions[bufname]
+        buf_names = _pending_names[bufname]
     except KeyError:
         return
-    for definition in buf_defs:
-        _add_highlight_definition(buf, definition)
-    del _pending_definitions[bufname]
+    for name in buf_names:
+        _add_highlighted_name(buf, name)
+    del _pending_names[bufname]
 
 
-def _add_highlight_definition(buf, definition):
-    lnum = definition.line
-    start_col = definition.column
+def _add_highlighted_name(buf, name):
+    lnum = name.line
+    start_col = name.column
 
     # Skip highlighting of module definitions that point to the start
     # of the file.
-    if definition.type == 'module' and lnum == 1 and start_col == 0:
+    if name.type == 'module' and lnum == 1 and start_col == 0:
         return
 
-    _placed_definitions_in_buffers.add(buf)
+    _placed_names_in_buffers.add(buf)
 
-    # TODO: validate that definition.name is at this position?
+    # TODO: validate that name.name is at this position?
     # Would skip the module definitions from above already.
 
-    length = len(definition.name)
+    length = len(name.name)
     if vim_prop_add:
         # XXX: needs jediUsage highlight (via after/syntax/python.vim).
         global vim_prop_type_added
@@ -661,7 +702,7 @@ def _add_highlight_definition(buf, definition):
         return
 
     assert IS_NVIM
-    end_col = definition.column + length
+    end_col = name.column + length
     src_id = buf.add_highlight('jediUsage', lnum-1, start_col, end_col,
                                src_id=0)
     return src_id
@@ -674,9 +715,6 @@ def highlight_usages_for_vim_win():
 
     (matchaddpos() only works for the current window.)
     """
-    global _current_definitions
-    definitions = _current_definitions
-
     win = vim.current.window
 
     cur_matchids = win.vars.get('_jedi_usages_vim_matchids')
@@ -690,14 +728,14 @@ def highlight_usages_for_vim_win():
             vim.eval(expr)
 
     matchids = []
-    if definitions:
+    if _current_names:
         buffer_path = vim.current.buffer.name
-        for definition in definitions:
-            if (definition.module_path or '') == buffer_path:
+        for name in _current_names:
+            if (str(name.module_path) or '') == buffer_path:
                 positions = [
-                    [definition.line,
-                     definition.column + 1,
-                     len(definition.name)]
+                    [name.line,
+                     name.column + 1,
+                     len(name.name)]
                 ]
                 expr = "matchaddpos('jediUsage', %s)" % repr(positions)
                 matchids.append(int(vim_eval(expr)))
@@ -719,27 +757,27 @@ def highlight_usages_for_vim_win():
 def show_documentation():
     script = get_script()
     try:
-        definitions = script.goto_definitions()
+        names = script.help(*get_pos())
     except Exception:
         # print to stdout, will be in :messages
-        definitions = []
+        names = []
         print("Exception, this shouldn't happen.")
         print(traceback.format_exc())
 
-    if not definitions:
+    if not names:
         echo_highlight('No documentation found for that.')
         vim.command('return')
         return
 
     docs = []
-    for d in definitions:
-        doc = d.docstring()
+    for n in names:
+        doc = n.docstring()
         if doc:
-            title = 'Docstring for %s' % d.desc_with_module
+            title = 'Docstring for %s %s' % (n.type, n.full_name or n.name)
             underline = '=' * len(title)
             docs.append('%s\n%s\n%s' % (title, underline, doc))
         else:
-            docs.append('|No Docstring for %s|' % d)
+            docs.append('|No Docstring for %s|' % n)
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
@@ -783,7 +821,7 @@ def show_call_signatures(signatures=()):
     # buffer.
     clear_call_signatures()
     if signatures == ():
-        signatures = get_script().call_signatures()
+        signatures = get_script().get_signatures(*get_pos())
 
     if not signatures:
         return
@@ -1006,18 +1044,19 @@ def do_rename(replace, orig=None):
     # Sort the whole thing reverse (positions at the end of the line
     # must be first, because they move the stuff before the position).
     temp_rename = sorted(temp_rename, reverse=True,
-                         key=lambda x: (x.module_path, x.line, x.column))
+                         key=lambda x: (str(x.module_path), x.line, x.column))
     buffers = set()
     for r in temp_rename:
         if r.in_builtin_module():
             continue
 
-        if os.path.abspath(vim.current.buffer.name) != r.module_path:
-            assert r.module_path is not None
-            result = new_buffer(r.module_path)
+        module_path = r.module_path
+        if os.path.abspath(vim.current.buffer.name) != str(module_path):
+            assert module_path is not None
+            result = new_buffer(module_path)
             if not result:
                 echo_highlight('Failed to create buffer window for %s!' % (
-                    r.module_path))
+                    module_path))
                 continue
 
         buffers.add(vim.current.buffer.name)
@@ -1041,35 +1080,25 @@ def do_rename(replace, orig=None):
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
 def py_import():
-    # args are the same as for the :edit command
     args = shsplit(vim.eval('a:args'))
     import_path = args.pop()
-    text = 'import %s' % import_path
-    scr = jedi.Script(text, 1, len(text), '', environment=get_environment())
-    try:
-        completion = scr.goto_assignments()[0]
-    except IndexError:
-        echo_highlight('Cannot find %s in sys.path!' % import_path)
+    name = next(get_project().search(import_path), None)
+    if name is None:
+        echo_highlight('Cannot find %s in your project or on sys.path!' % import_path)
     else:
-        if completion.column is None:  # Python modules always have a line number.
-            echo_highlight('%s is a builtin module.' % import_path)
-        else:
-            cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
-            new_buffer(completion.module_path, cmd_args)
+        cmd_args = ' '.join([a.replace(' ', '\\ ') for a in args])
+        _goto_specific_name(name, options=cmd_args)
 
 
 @catch_and_print_exceptions
 def py_import_completions():
     argl = vim.eval('a:argl')
-    try:
-        import jedi
-    except ImportError:
+    if jedi is None:
         print('Pyimport completion requires jedi module: https://github.com/davidhalter/jedi')
         comps = []
     else:
-        text = 'import %s' % argl
-        script = jedi.Script(text, 1, len(text), '', environment=get_environment())
-        comps = ['%s%s' % (argl, c.complete) for c in script.completions()]
+        names = get_project().complete_search(argl)
+        comps = [argl + n for n in sorted(set(c.complete for c in names))]
     vim.command("return '%s'" % '\n'.join(comps))
 
 
