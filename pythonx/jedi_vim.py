@@ -837,8 +837,7 @@ def show_call_signatures(signatures=(), mode=None):
     """
     global _show_call_signatures_mode
     if mode is None and _show_call_signatures_mode is None:
-        print('jedi-vim: called show_call_signatures without mode')
-        return
+        raise Exception('jedi-vim: called show_call_signatures without mode')
     _show_call_signatures_mode = mode
 
     # We need to clear the signatures before we calculate them again. The

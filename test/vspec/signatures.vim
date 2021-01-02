@@ -14,8 +14,8 @@ describe 'signatures'
         normal odef xyz(number): return
         normal o
         normal oxyz()
-        doautocmd CursorHoldI
-        Expect getline(3) == '?!?jedi=0, ?!?   (*_*number*_*) ?!?jedi?!?'
+        call jedi#show_call_signatures()
+        Expect getline(3) == '?!?jedi=?!?   (*_*number*_*) ?!?jedi?!?'
 
         doautocmd InsertLeave
         Expect getline(3) == ''
@@ -36,26 +36,23 @@ describe 'signatures'
         Expect autocmds =~# 'jedi_call_signatures'
     end
 
-    it 'simple after CursorHoldI with only parenthesis'
+    it 'simple with only parenthesis'
         noautocmd normal o
-        doautocmd CursorHoldI
         noautocmd normal istaticmethod()
-        doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?            (*_*f: Callable[..., Any]*_*) ?!?jedi?!?'
+        call jedi#show_call_signatures()
+        Expect getline(1) == '?!?jedi=?!?            (*_*f: Callable[..., Any]*_*) ?!?jedi?!?'
     end
 
     it 'highlights correct argument'
-        noautocmd normal o
-        doautocmd CursorHoldI
-        noautocmd normal iformat(42, "x")
+        noautocmd normal oformat(42, "x")
         " Move to x - highlights "x".
         noautocmd normal 2h
-        doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?      (value: object, *_*format_spec: str=...*_*) ?!?jedi?!?'
-        " Move left to 42 - hightlights first argument ("value").
+        call jedi#show_call_signatures()
+        Expect getline(1) == '?!?jedi=?!?      (o: object, *_*format_spec: str=...*_*) ?!?jedi?!?'
+        " Move left to 42 - highlights first argument ("value").
         noautocmd normal 4h
-        doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?      (*_*value: object*_*, format_spec: str=...) ?!?jedi?!?'
+        call jedi#show_call_signatures()
+        Expect getline(1) == '?!?jedi=?!?      (*_*o: object*_*, format_spec: str=...) ?!?jedi?!?'
     end
 
     it 'no signature'
@@ -65,22 +62,24 @@ describe 'signatures'
     end
 
     it 'signatures disabled'
-        let g:jedi#show_call_signatures = 0
+        call jedi#configure_call_signatures(0)
 
         exe 'normal ostr( '
-        python3 jedi_vim.show_call_signatures()
+        doautocmd CursorMoved
         Expect getline(1, '$') == ['', 'str( ']
 
-        let g:jedi#show_call_signatures = 1
+        call jedi#configure_call_signatures(1)
     end
 
     it 'command line simple'
         let g:jedi#show_call_signatures = 2
         call jedi#configure_call_signatures()
 
+        Expect exists('#CursorMoved') == 0
+
         exe 'normal ostaticmethod( '
         redir => msg
-        python3 jedi_vim.show_call_signatures()
+        call jedi#show_call_signatures()
         redir END
         Expect msg == "\nstaticmethod(f: Callable[..., Any])"
 
@@ -92,7 +91,7 @@ describe 'signatures'
         normal Sdef foo(a, b): pass
         exe 'normal ofoo(a, b, c, '
         redir => msg
-        python3 jedi_vim.show_call_signatures()
+        call jedi#show_call_signatures()
         redir END
         Expect msg == "\nfoo(a, b)"
     end
@@ -103,7 +102,7 @@ describe 'signatures'
 
         function! Signature()
             redir => msg
-            python3 jedi_vim.show_call_signatures()
+            call jedi#show_call_signatures()
             redir END
             return msg
         endfunction
@@ -136,7 +135,7 @@ describe 'signatures'
 
         exe 'normal ostr '
         redir => msg
-        python3 jedi_vim.show_call_signatures()
+        call jedi#show_call_signatures()
         redir END
         Expect msg == "\n"
     end
