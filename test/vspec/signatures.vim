@@ -47,18 +47,18 @@ describe 'signatures'
     it 'highlights correct argument'
         noautocmd normal o
         doautocmd CursorHoldI
-        noautocmd normal iprint(42, sep="X", )
+        noautocmd normal iformat(42, 2)
         " Move to "=" - hightlights "sep=...".
-        noautocmd normal 5h
+        noautocmd normal h
         doautocmd CursorHoldI
-        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*values: object, *_*sep: Optional[Text]=...*_*'
+        Expect getline(1) == '?!?jedi=0, ?!?      (value: object, *_*format_spec: str=...*_*) ?!?jedi?!?'
         " Move left to "=" - hightlights first argument ("values").
         " NOTE: it is arguable that maybe "sep=..." should be highlighted
         "       still, but this tests for the cache to be "busted", and that
         "       fresh results are retrieved from Jedi.
-        noautocmd normal h
+        noautocmd normal 3h
         doautocmd CursorHoldI
-        Expect getline(1) =~# '\V\^?!?jedi=0, ?!?     (*_**values: object*_*, sep: Optional[Text]=...,'
+        Expect getline(1) == '?!?jedi=0, ?!?      (*_*value: object*_*, format_spec: str=...) ?!?jedi?!?'
     end
 
     it 'no signature'
