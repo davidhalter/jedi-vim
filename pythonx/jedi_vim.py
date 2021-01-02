@@ -420,8 +420,11 @@ def _goto_specific_name(n, options=''):
         if n.is_keyword:
             echo_highlight("Cannot get the definition of Python keywords.")
         else:
-            echo_highlight("Builtin modules cannot be displayed (%s)."
-                           % (n.full_name or n.name))
+            name = 'Namespaces' if n.type == 'namespace' else 'Builtin modules'
+            echo_highlight(
+                "%s cannot be displayed (%s)."
+                % (name, n.full_name or n.name)
+            )
     else:
         using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
         result = set_buffer(n.module_path, options=options,
