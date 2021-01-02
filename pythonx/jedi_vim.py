@@ -4,12 +4,14 @@ The Python parts of the Jedi library for VIM. It is mostly about communicating
 with VIM.
 """
 
+from typing import Optional
 import traceback  # for exception output
 import re
 import os
 import sys
 from shlex import split as shsplit
 from contextlib import contextmanager
+from pathlib import Path
 try:
     from itertools import zip_longest
 except ImportError:
@@ -422,17 +424,15 @@ def _goto_specific_name(n, options=''):
                            % (n.full_name or n.name))
     else:
         using_tagstack = int(vim_eval('g:jedi#use_tag_stack')) == 1
-        module_path = str(n.module_path or '')
-        if module_path != vim.current.buffer.name:
-            result = new_buffer(module_path, options=options,
-                                using_tagstack=using_tagstack)
-            if not result:
-                return []
-        if (using_tagstack and module_path and
-                os.path.exists(module_path)):
+        result = set_buffer(n.module_path, options=options,
+                            using_tagstack=using_tagstack)
+        if not result:
+            return []
+        if (using_tagstack and n.module_path and
+                n.module_path.exists()):
             tagname = n.name
             with tempfile('{0}\t{1}\t{2}'.format(
-                    tagname, module_path, 'call cursor({0}, {1})'.format(
+                    tagname, n.module_path, 'call cursor({0}, {1})'.format(
                         n.line, n.column + 1))) as f:
                 old_tags = vim.eval('&tags')
                 old_wildignore = vim.eval('&wildignore')
@@ -1050,14 +1050,10 @@ def do_rename(replace, orig=None):
         if r.in_builtin_module():
             continue
 
-        module_path = r.module_path
-        if os.path.abspath(vim.current.buffer.name) != str(module_path):
-            assert module_path is not None
-            result = new_buffer(module_path)
-            if not result:
-                echo_highlight('Failed to create buffer window for %s!' % (
-                    module_path))
-                continue
+        result = set_buffer(r.module_path)
+        if not result:
+            echo_highlight('Failed to create buffer window for %s!' % (r.module_path))
+            continue
 
         buffers.add(vim.current.buffer.name)
 
@@ -1103,7 +1099,17 @@ def py_import_completions():
 
 
 @catch_and_print_exceptions
-def new_buffer(path, options='', using_tagstack=False):
+def set_buffer(path: Optional[Path], options='', using_tagstack=False):
+    """
+    Opens a new buffer if we have to or does nothing. Returns True in case of
+    success.
+    """
+    path = str(path or '')
+    # Check both, because it might be an empty string
+    if path in (vim.current.buffer.name, os.path.abspath(vim.current.buffer.name)):
+        return True
+
+    path = os.path.relpath(path)
     # options are what you can to edit the edit options
     if int(vim_eval('g:jedi#use_tabs_not_buffers')) == 1:
         _tabnew(path, options)
@@ -1151,7 +1157,6 @@ def _tabnew(path, options=''):
 
     :param options: `:tabnew` options, read vim help.
     """
-    path = os.path.abspath(path)
     if int(vim_eval('has("gui")')) == 1:
         vim_command('tab drop %s %s' % (options, escape_file_path(path)))
         return
@@ -1166,7 +1171,7 @@ def _tabnew(path, options=''):
                 # don't know why this happens :-)
                 pass
             else:
-                if buf_path == path:
+                if os.path.abspath(buf_path) == os.path.abspath(path):
                     # tab exists, just switch to that tab
                     vim_command('tabfirst | tabnext %i' % (tab_nr + 1))
                     # Goto the buffer's window.
