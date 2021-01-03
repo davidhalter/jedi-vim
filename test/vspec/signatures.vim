@@ -48,7 +48,7 @@ describe 'signatures'
         noautocmd normal o
         doautocmd CursorHoldI
         noautocmd normal iformat(42, "x")
-        " Move to x- hightlights "x".
+        " Move to x - highlights "x".
         noautocmd normal 2h
         doautocmd CursorHoldI
         Expect getline(1) == '?!?jedi=0, ?!?      (value: object, *_*format_spec: str=...*_*) ?!?jedi?!?'
