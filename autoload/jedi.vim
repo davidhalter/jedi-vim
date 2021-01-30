@@ -506,7 +506,7 @@ function! jedi#goto_window_on_enter() abort
     if l:data.bufnr
         " close goto_window buffer
         normal! ZQ
-        python3 jedi_vim.new_buffer(vim.eval('bufname(l:data.bufnr)'))
+        python3 jedi_vim.set_buffer(vim.eval('bufname(l:data.bufnr)'))
         call cursor(l:data.lnum, l:data.col)
     else
         echohl WarningMsg | echo 'Builtin module cannot be opened.' | echohl None
