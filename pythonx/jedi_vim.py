@@ -1112,7 +1112,7 @@ def set_buffer(path: Optional[Path], options='', using_tagstack=False):
     if path in (vim.current.buffer.name, os.path.abspath(vim.current.buffer.name)):
         return True
 
-    path = os.path.relpath(path)
+    path = relpath(path)
     # options are what you can to edit the edit options
     if int(vim_eval('g:jedi#use_tabs_not_buffers')) == 1:
         _tabnew(path, options)
