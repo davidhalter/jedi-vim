@@ -518,6 +518,14 @@ Both setting the directory and setting a project is working.
 Examples: "/usr/bin/python3.9", "venv", "../venv", "../venv/bin/python"
 Default: "auto"
 
+------------------------------------------------------------------------------
+6.15. `g:jedi#added_sys_path`                *g:jedi#added_sys_path*
+
+To add extra sys_path.
+
+Examples: ["../site-packages"]
+Default: []
+
 ==============================================================================
 7. Testing                              *jedi-vim-testing*
 
