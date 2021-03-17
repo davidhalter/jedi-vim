@@ -45,6 +45,7 @@ Contents                                *jedi-vim-contents*
     6.13. smart_auto_mappings           |g:jedi#smart_auto_mappings|
     6.14. use_tag_stack                 |g:jedi#use_tag_stack|
     6.15. environment_path              |g:jedi#environment_path|
+    6.16. added_sys_path                |g:jedi#added_sys_path|
 7. Testing                              |jedi-vim-testing|
 8. Contributing                         |jedi-vim-contributing|
 9. License                              |jedi-vim-license|
@@ -519,7 +520,7 @@ Examples: "/usr/bin/python3.9", "venv", "../venv", "../venv/bin/python"
 Default: "auto"
 
 ------------------------------------------------------------------------------
-6.15. `g:jedi#added_sys_path`                *g:jedi#added_sys_path*
+6.16. `g:jedi#added_sys_path`                *g:jedi#added_sys_path*
 
 To add extra sys_path.
 
