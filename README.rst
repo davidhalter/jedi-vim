@@ -79,12 +79,17 @@ You need a VIM version that was compiled with Python 2.7 or later
 
 Manual installation
 -------------------
+The plugin uses `git` submodules to fetch latest version of Jedi.
 
-You might want to use `pathogen <https://github.com/tpope/vim-pathogen>`_ or
+To install using standard Vim 8 plugin system:
+
+.. code-block:: sh
+
+    mkdir -p ~/.vim/pack/git-plugins/start
+    git clone --recursive https://github.com/davidhalter/jedi-vim.git ~/.vim/pack/git-plugins/start/jedi-vim
+
+Or you might want to use `pathogen <https://github.com/tpope/vim-pathogen>`_ or
 `Vundle <https://github.com/gmarik/vundle>`_ to install jedi-vim.
-
-The first thing you need after that is an up-to-date version of Jedi. Install
-``git submodule update --init --recursive`` in your jedi-vim repository.
 
 Example installation command using Pathogen:
 
