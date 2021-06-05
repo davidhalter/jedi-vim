@@ -79,7 +79,7 @@ You need a VIM version that was compiled with Python 2.7 or later
 
 Manual installation
 -------------------
-The plugin uses `git` submodules to fetch latest version of Jedi.
+The plugin uses `git` submodules to fetch the vendored versions of Jedi.
 
 To install using standard Vim 8 plugin system:
 
