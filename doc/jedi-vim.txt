@@ -45,6 +45,7 @@ Contents                                *jedi-vim-contents*
     6.13. smart_auto_mappings           |g:jedi#smart_auto_mappings|
     6.14. use_tag_stack                 |g:jedi#use_tag_stack|
     6.15. environment_path              |g:jedi#environment_path|
+                                        |b:jedi_environment_path|
     6.16. added_sys_path                |g:jedi#added_sys_path|
 7. Testing                              |jedi-vim-testing|
 8. Contributing                         |jedi-vim-contributing|
@@ -510,6 +511,7 @@ Default: 1 (enabled by default)
 
 ------------------------------------------------------------------------------
 6.15. `g:jedi#environment_path`                *g:jedi#environment_path*
+                                               *b:jedi_environment_path*
 
 To use a specific virtualenv or a specific Python version it is possible to
 set an interpreter.
@@ -517,6 +519,10 @@ set an interpreter.
 Both setting the directory and setting a project is working.
 
 Examples: "/usr/bin/python3.9", "venv", "../venv", "../venv/bin/python"
+
+The buffer-local variable `b:jedi_environment_path` can be used to override the
+global variable `g:jedi#environment_path`.
+
 Default: "auto"
 
 ------------------------------------------------------------------------------
