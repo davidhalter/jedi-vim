@@ -230,6 +230,12 @@ Finally, if you don't want completion, but all the other features, use:
 FAQ
 ===
 
+I want to use Jedi with a Python 2 Environment, but it's not listed under "Known environments"
+----------------------------------------------------------------------------------------------
+
+Starting with version 0.18.0 Jedi dropped support for Python 2.
+
+
 I don't want the docstring window to popup during completion
 ------------------------------------------------------------
 
