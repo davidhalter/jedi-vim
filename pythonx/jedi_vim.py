@@ -1094,6 +1094,7 @@ def call_signatures_floatwin(signatures):
             'row': floatwin_row_offset,
             'anchor': 'NW',
             'style': 'minimal',
+            'noautocmd': True,
         }
         win = vim.api.open_win(buf, 0, opts)
         vim.api.buf_set_option(buf, 'syntax', 'jedi_signature')
