@@ -218,7 +218,11 @@ _current_project_cache = None, None
 
 
 def get_project():
-    vim_environment_path = vim_eval("b:jedi_environment_path")
+    try:
+        vim_environment_path = vim_eval("b:jedi_environment_path")
+    except VimError:
+        vim_environment_path = ""
+
     if vim_environment_path in ("", None):
         vim_environment_path = vim_eval("g:jedi#environment_path")
     vim_project_path = vim_eval("g:jedi#project_path")
