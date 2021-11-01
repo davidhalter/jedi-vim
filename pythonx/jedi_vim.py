@@ -9,6 +9,7 @@ import traceback  # for exception output
 import re
 import os
 import sys
+import subprocess
 from shlex import split as shsplit
 from contextlib import contextmanager
 from pathlib import Path
@@ -789,7 +790,9 @@ def show_documentation():
             underline = '=' * len(title)
             docs.append('%s\n%s\n%s' % (title, underline, doc))
         else:
-            docs.append('|No Docstring for %s|' % n)
+            keywordprg = vim.eval('&keywordprg')
+            co = subprocess.run([keywordprg, n.name], capture_output=True, text=True)
+            docs.append(co.stdout)
         text = ('\n' + '-' * 79 + '\n').join(docs)
         vim.command('let l:doc = %s' % repr(PythonToVimStr(text)))
         vim.command('let l:doc_lines = %s' % len(text.split('\n')))
