@@ -55,5 +55,6 @@ Brian Mego (@brianmego)
 Stevan Milic (@stevanmilic) <stevan.milic@yahoo.com>
 Konstantin Glukhov (@Konstantin-Glukhov)
 Seungchan An (@SeungChan92) <dev.issea1015@gmail.com>
+Thomas Blauth (@ThomasBlauth) <thomas.blauth@protonmail.com>
 
 @something are github user names.
