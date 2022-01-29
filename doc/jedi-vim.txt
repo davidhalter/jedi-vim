@@ -47,6 +47,8 @@ Contents                                *jedi-vim-contents*
     6.15. environment_path              |g:jedi#environment_path|
                                         |b:jedi_environment_path|
     6.16. added_sys_path                |g:jedi#added_sys_path|
+    6.17. case_insensitive_completion   |g:jedi#case_insensitive_completion|
+                                        |b:jedi_case_insensitive_completion|
 7. Testing                              |jedi-vim-testing|
 8. Contributing                         |jedi-vim-contributing|
 9. License                              |jedi-vim-license|
@@ -532,6 +534,18 @@ To add extra sys_path.
 
 Examples: ["../site-packages"]
 Default: []
+
+------------------------------------------------------------------------------
+6.17. `g:jedi#case_insensitive_completion` *g:jedi#case_insensitive_completion*
+                                           *b:jedi_case_insensitive_completion*
+
+0 to disable case insensitive completion.
+1 to enable case insensitive completion (default).
+
+The buffer-local variable `b:jedi_case_insensitive_completion` can be used to
+override the global variable `g:jedi#case_insensitive_completion`.
+
+Default: 1
 
 ==============================================================================
 7. Testing                              *jedi-vim-testing*

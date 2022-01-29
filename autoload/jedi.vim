@@ -39,6 +39,7 @@ let s:default_settings = {
     \ 'added_sys_path': '[]',
     \ 'project_path': "'auto'",
     \ 'smart_auto_mappings': 0,
+    \ 'case_insensitive_completion': 1,
     \ 'use_tag_stack': 1
 \ }
 
