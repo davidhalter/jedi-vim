@@ -321,6 +321,10 @@ def get_pos(column=None):
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
 def completions():
+    jedi.settings.case_insensitive_completion = \
+        bool(int(vim_eval("get(b:, 'jedi_case_insensitive_completion', "
+                          "g:jedi#case_insensitive_completion)")))
+
     row, column = vim.current.window.cursor
     # Clear call signatures in the buffer so they aren't seen by the completer.
     # Call signatures in the command line can stay.
