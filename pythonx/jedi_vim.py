@@ -222,15 +222,14 @@ def get_project():
         "get(b:, 'jedi_environment_path', g:jedi#environment_path)"
     )
     vim_project_path = vim_eval("g:jedi#project_path")
-    vim_added_sys_path = vim_eval(
-        "get(g:, 'jedi#added_sys_path', [])"
-    )
-    vim_added_sys_path += vim_eval(
-        "get(b:, 'jedi_added_sys_path', [])"
-    )
+
+    vim_added_sys_path = vim_eval("get(g:, 'jedi#added_sys_path', [])")
+    vim_added_sys_path += vim_eval("get(b:, 'jedi_added_sys_path', [])")
 
     global _current_project_cache
-    cache_key = dict(project_path=vim_project_path, environment_path=vim_environment_path)
+    cache_key = dict(project_path=vim_project_path,
+                     environment_path=vim_environment_path,
+                     added_sys_path=vim_added_sys_path)
     if cache_key == _current_project_cache[0]:
         return _current_project_cache[1]
 
@@ -295,7 +294,9 @@ def load_project():
         project.save()
 
     global _current_project_cache
-    cache_key = dict(project_path=path, environment_path=env_path)
+    cache_key = dict(project_path=path,
+                     environment_path=env_path,
+                     added_sys_path=[])
     _current_project_cache = cache_key, project
 
 
