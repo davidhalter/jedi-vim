@@ -26,6 +26,12 @@ if is_py3:
 else:
     ELLIPSIS = u"…"
 
+IS_NVIM = hasattr(vim, 'from_nvim')
+
+
+_show_call_signatures_mode = None
+"""Current mode for call signatures (1: concealing, 2: command line, 3: floatwin)"""
+
 
 try:
     # Somehow sys.prefix is set in combination with VIM and virtualenvs.
@@ -332,10 +338,6 @@ def completions():
                           "g:jedi#case_insensitive_completion)")))
 
     row, column = vim.current.window.cursor
-    # Clear call signatures in the buffer so they aren't seen by the completer.
-    # Call signatures in the command line can stay.
-    if int(vim_eval("g:jedi#show_call_signatures")) == 1:
-        clear_call_signatures()
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
@@ -343,51 +345,57 @@ def completions():
                 break
             count += 1
         vim.command('return %i' % (column - count))
+        return
+
+    # Clear call signatures in the buffer so they aren't seen by the completer.
+    if _show_call_signatures_mode == 1:
+        restore_signatures = clear_call_signatures(temporary=True)
     else:
-        base = vim.eval('a:base')
-        source = ''
-        for i, line in enumerate(vim.current.buffer):
-            # enter this path again, otherwise source would be incomplete
-            if i == row - 1:
-                source += line[:column] + base + line[column:]
-            else:
-                source += line
-            source += '\n'
-        # here again hacks, because jedi has a different interface than vim
-        column += len(base)
-        try:
-            script = get_script(source=source)
-            completions = script.complete(*get_pos(column))
-            signatures = script.get_signatures(*get_pos(column))
+        restore_signatures = None
 
-            add_info = "preview" in vim.eval("&completeopt").split(",")
-            out = []
-            for c in completions:
-                d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
-                         abbr=PythonToVimStr(c.name_with_symbols),
-                         # stuff directly behind the completion
-                         menu=PythonToVimStr(c.description),
-                         icase=1,  # case insensitive
-                         dup=1  # allow duplicates (maybe later remove this)
-                         )
-                if add_info:
-                    try:
-                        d["info"] = PythonToVimStr(c.docstring())
-                    except Exception:
-                        print("jedi-vim: error with docstring for %r: %s" % (
-                            c, traceback.format_exc()))
-                out.append(d)
+    base = vim.eval('a:base')
+    source = ''
+    for i, line in enumerate(vim.current.buffer):
+        # enter this path again, otherwise source would be incomplete
+        if i == row - 1:
+            source += line[:column] + base + line[column:]
+        else:
+            source += line
+        source += '\n'
+    # here again hacks, because jedi has a different interface than vim
+    column += len(base)
+    try:
+        script = get_script(source=source)
+        completions = script.complete(*get_pos(column))
 
-            strout = str(out)
-        except Exception:
-            # print to stdout, will be in :messages
-            print(traceback.format_exc())
-            strout = ''
-            completions = []
-            signatures = []
+        add_info = "preview" in vim.eval("&completeopt").split(",")
+        out = []
+        for c in completions:
+            d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
+                     abbr=PythonToVimStr(c.name_with_symbols),
+                     # stuff directly behind the completion
+                     menu=PythonToVimStr(c.description),
+                     icase=1,  # case insensitive
+                     dup=1  # allow duplicates (maybe later remove this)
+                     )
+            if add_info:
+                try:
+                    d["info"] = PythonToVimStr(c.docstring())
+                except Exception:
+                    print("jedi-vim: error with docstring for %r: %s" % (
+                        c, traceback.format_exc()))
+            out.append(d)
 
-        show_call_signatures(signatures)
-        vim.command('return ' + strout)
+        strout = str(out)
+    except Exception:
+        # print to stdout, will be in :messages
+        print(traceback.format_exc())
+        strout = ''
+        completions = []
+
+    if restore_signatures:
+        show_call_signatures()
+    vim.command('return ' + strout)
 
 
 @contextmanager
@@ -803,50 +811,82 @@ def show_documentation():
 
 
 @catch_and_print_exceptions
-def clear_call_signatures():
-    # Check if using command line call signatures
-    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
+def clear_call_signatures(temporary=False):
+    if _show_call_signatures_mode == 2:
         vim_command('echo ""')
         return
-    cursor = vim.current.window.cursor
-    e = vim_eval('g:jedi#call_signature_escape')
-    # We need two turns here to search and replace certain lines:
-    # 1. Search for a line with a call signature and save the appended
-    #    characters
-    # 2. Actually replace the line and redo the status quo.
-    py_regex = r'%sjedi=([0-9]+), (.*?)%s.*?%sjedi%s'.replace(
-        '%s', re.escape(e))
-    for i, line in enumerate(vim.current.buffer):
-        match = re.search(py_regex, line)
-        if match is not None:
-            # Some signs were added to minimize syntax changes due to call
-            # signatures. We have to remove them again. The number of them is
-            # specified in `match.group(1)`.
-            after = line[match.end() + int(match.group(1)):]
-            line = line[:match.start()] + match.group(2) + after
-            vim.current.buffer[i] = line
-    vim.current.window.cursor = cursor
+
+    if _show_call_signatures_mode == 3:
+        if IS_NVIM:
+            win = vim.current.buffer.vars.get('_jedi_signature_window')
+            if win:
+                vim.api.win_close(win, True)
+                del vim.current.buffer.vars['_jedi_signature_window']
+        else:
+            try:
+                winid = vim.current.buffer.vars['_jedi_signature_winid']
+            except KeyError:
+                pass
+            else:
+                popup_hide = vim.Function("popup_hide")
+                popup_hide(winid)
+        return
+
+    r = False
+    orig_lines = vim.current.buffer.vars.get('_jedi_callsig_orig', {})
+    if orig_lines:
+        orig_modified = int(vim_eval("&modified"))
+
+        for linenr, line in orig_lines.items():
+            # Check that the line would be reset, helps with keeping a single
+            # undochain.
+            # assert line != vim.current.buffer[int(linenr)-1]
+            if line != vim.current.buffer[int(linenr)-1]:
+                vim.current.buffer[int(linenr)-1] = line
+                vim_command('let b:_jedi_changing_text = changenr()')
+                r = True
+        if not orig_modified:
+            vim_command('set nomodified')
+        if not temporary:
+            vim_command('unlet b:_jedi_callsig_orig')
+    return r
 
 
 @_check_jedi_availability(show_error=False)
 @catch_and_print_exceptions
-def show_call_signatures(signatures=()):
-    if int(vim_eval("has('conceal') && g:jedi#show_call_signatures")) == 0:
-        return
+def show_call_signatures(signatures=(), mode=None):
+    """Show call signatures and remember current mode.
+
+    Passing in the mode from Vim avoids to call back into it several times.
+    """
+    global _show_call_signatures_mode
+    if mode is None and _show_call_signatures_mode is None:
+        raise Exception('jedi-vim: called show_call_signatures without mode')
+    _show_call_signatures_mode = mode
 
     # We need to clear the signatures before we calculate them again. The
     # reason for this is that call signatures are unfortunately written to the
     # buffer.
-    clear_call_signatures()
+    if _show_call_signatures_mode != 2:
+        clear_call_signatures()
     if signatures == ():
         signatures = get_script().get_signatures(*get_pos())
 
     if not signatures:
         return
 
-    if int(vim_eval("g:jedi#show_call_signatures")) == 2:
+    if mode == 2:
         return cmdline_call_signatures(signatures)
 
+    if mode == 3:
+        return call_signatures_floatwin(signatures)
+
+    return call_signatures_inline(signatures)
+
+
+@catch_and_print_exceptions
+def call_signatures_inline(signatures):
+    set_lines = []
     seen_sigs = []
     for i, signature in enumerate(signatures):
         line, column = signature.bracket_start
@@ -865,7 +905,7 @@ def show_call_signatures(signatures=()):
         params = [p.description.replace('\n', '').replace('param ', '', 1)
                   for p in signature.params]
         try:
-            # *_*PLACEHOLDER*_* makes something fat. See after/syntax file.
+            # *_*PLACEHOLDER*_* makes something fat via jediFatSymbol.
             params[signature.index] = '*_*%s*_*' % params[signature.index]
         except (IndexError, TypeError):
             pass
@@ -890,7 +930,7 @@ def show_call_signatures(signatures=()):
         if hasattr(e, 'decode'):
             e = e.decode('UTF-8')
         # replace line before with cursor
-        regex = "xjedi=%sx%sxjedix".replace('x', e)
+        regex = "xjedi=x{}xjedix".replace('x', e)
 
         prefix, replace = line[:insert_column], line[insert_column:end_column]
 
@@ -905,10 +945,209 @@ def show_call_signatures(signatures=()):
             a = re.search(regex_quotes + '$', prefix)
             add = ('' if a is None else a.group(0)) + add
 
-        tup = '%s, %s' % (len(add), replace)
-        repl = prefix + (regex % (tup, text)) + add + line[end_column:]
+        repl = prefix + regex.format(text) + add + line[end_column:]
 
-        vim_eval('setline(%s, %s)' % (line_to_replace, repr(PythonToVimStr(repl))))
+        set_lines.append((line_to_replace, repl))
+
+    if not set_lines:
+        return
+
+    orig_modified = int(vim_eval("&modified"))
+    orig_lines = {}
+    for linenr, line in set_lines:
+        orig_lines[str(linenr)] = vim.current.buffer[linenr-1]
+        vim_command('silent! undojoin')
+        vim.current.buffer[int(linenr)-1] = line
+    vim.current.buffer.vars['_jedi_callsig_orig'] = orig_lines
+    if not orig_modified:
+        vim_command('set nomodified')
+
+
+@catch_and_print_exceptions
+def call_signatures_floatwin(signatures):
+    """Display signatures using Neovim's floating / Vim's popup window."""
+    seen_sigs = []
+    sig_bracket_start_col = None
+    sig_bracket_start_row = None
+    lines = []
+    max_visible_sig_width = 0
+
+    # Build text lines from signatures.
+    # This has quite some common code copied from call_signatures_inline still.
+    # TODO: refactor?
+    for i, signature in enumerate(signatures):
+        row, column = signature.bracket_start
+        if sig_bracket_start_col:
+            assert row == sig_bracket_start_row
+            assert column == sig_bracket_start_col
+        sig_bracket_start_row = row
+        sig_bracket_start_col = column
+
+        # Descriptions are usually looking like `param name`, remove the param.
+        # Also replace leading params with ellipsis (for shortness).
+        params = [re.sub(r'\n\s+', '', p.description.replace('param ', '', 1))
+                  if idx >= signature.index
+                  else "…"
+                  for idx, p in enumerate(signature.params)]
+
+        # Get (visible) width without any added concealed text.
+        w = len("(%s)" % ', '.join(params))
+        if w > max_visible_sig_width:
+            max_visible_sig_width = w
+        try:
+            # *_*PLACEHOLDER*_* makes something fat via jediFatSymbol.
+            params[signature.index] = '*_*%s*_*' % params[signature.index]
+        except (IndexError, TypeError):
+            pass
+
+        # Skip duplicates.
+        if params in seen_sigs:
+            continue
+        seen_sigs.append(params)
+
+        text = "(%s)" % ', '.join(params)
+
+        # Need to decode it with utf8, because vim returns always a python 2
+        # string even if it is unicode.
+        e = vim_eval('g:jedi#call_signature_escape')
+        if hasattr(e, 'decode'):
+            e = e.decode('UTF-8')
+        # replace line before with cursor
+        regex = "xjedi=x{}xjedix".replace('x', e)
+        text = regex.format(text)
+        lines.append(text)
+
+    cur_cursor = vim.current.window.cursor
+    cur_row = cur_cursor[0]
+    sig_row_offset = sig_bracket_start_row - cur_row
+    if sig_row_offset == 0:
+        # Display above when on current line.
+        sig_row_offset = -1
+    else:
+        # Display above when anything after signatures parenthesis (for
+        # multiline statements.
+        sig_buffer_line = vim.current.buffer[sig_bracket_start_row-1]
+        if len(sig_buffer_line) > sig_bracket_start_col + 1:
+            sig_row_offset -= 1
+    cur_col = cur_cursor[1]
+    floatwin_col_offset = sig_bracket_start_col - cur_col
+
+    height = len(lines)
+
+    # Display above/below when at the top/bottom of the window.
+    # It limits "height" to the available room, preferring the other for
+    # when there is more room.
+    wline = VimCompat.call('winline')
+    floatwin_row_offset = None
+
+    space_above = wline - (cur_row - sig_bracket_start_row) - 1
+    space_below = VimCompat.call("winheight", 0) - wline
+
+    if space_above <= 0 and space_below <= 0:
+        # No space above sig_bracket_start_row and cur_row, display it at the
+        # top of the window.
+        floatwin_row_offset = 1 - wline
+    else:
+        # Check if there is only whitespace for where the signature would be put
+        # above, and prefer to putting it below otherwise (since often code is used
+        # rather from above than below (and should not be covered therefore)).
+        # TODO: might prefer above/below via setting in general, and/or for when
+        #       the signature/function definition spans multiple lines (but AFAICS
+        #       that info is not available (would need signature.bracket_end?)
+        prefer_below = False
+        for lnum_offset_above in range(1, height + 1):
+            lnum_above = sig_bracket_start_row - lnum_offset_above
+            if len(VimCompat.call('getline', lnum_above).rstrip()) > sig_bracket_start_col - 1:
+                prefer_below = True
+                break
+
+        put_below = prefer_below
+        if prefer_below:
+            if height > space_below and space_above > space_below:
+                put_below = False
+        else:
+            if height > space_above and space_below > space_above:
+                put_below = True
+
+        if put_below:
+            floatwin_row_offset = 1
+            height = min(space_below, height)
+        else:
+            height = min(space_above, height)
+            floatwin_row_offset = sig_row_offset - height
+
+    if IS_NVIM:
+        buf = vim.current.buffer.vars.get('_jedi_signature_buffer')
+        if not buf:
+            buf = vim.api.create_buf(False, True)
+            vim.current.buffer.vars['_jedi_signature_buffer'] = buf
+
+        vim.api.buf_set_lines(buf, 0, -1, True, lines)
+
+        # Use maximum width to not have Nvim move it left.
+        # https://github.com/neovim/neovim/issues/10811
+        win_screen_col_start = vim.funcs.getwininfo(vim.funcs.win_getid())[0]["wincol"]
+        win_screen_col_cur = win_screen_col_start + vim.funcs.wincol()
+        start_wincol = win_screen_col_cur + floatwin_col_offset
+        max_width = vim.options["columns"] - start_wincol + 1
+        width = min([max_visible_sig_width, max_width])
+
+        opts = {
+            'relative': 'cursor',
+            'width': width,
+            'height': height,
+            'col': floatwin_col_offset,
+            'row': floatwin_row_offset,
+            'anchor': 'NW',
+            'style': 'minimal',
+            'noautocmd': True,
+        }
+        win = vim.api.open_win(buf, 0, opts)
+        vim.api.buf_set_option(buf, 'syntax', 'jedi_signature')
+
+        vim.current.buffer.vars['_jedi_signature_window'] = win
+
+    else:
+        line = ("%d" if floatwin_row_offset < 0 else "+%d") % floatwin_row_offset
+        col = ("%d" if floatwin_col_offset < 0 else "+%d") % floatwin_col_offset
+
+        popup_opts = vim.Dictionary(**{
+            "line": "cursor%s" % line,
+            "col": "cursor%s" % col,
+            "pos": "topleft",
+            "wrap": 0,
+            "fixed": 1,
+            "flip": 1,
+            "minwidth": max_visible_sig_width,
+            "maxwidth": max_visible_sig_width,
+            "maxheight": height,
+        })
+
+        try:
+            winid = vim.current.buffer.vars['_jedi_signature_winid']
+        except KeyError:
+            popup_create = vim.Function("popup_create")
+            winid = popup_create(lines, popup_opts)
+            buf = int(vim.eval("winbufnr(%d)" % winid))
+
+            vim.command("call setwinvar(%d, '&wincolor', 'jediCallsigNormal')" % winid)
+
+            # Set syntax to apply concealing.
+            vim.eval("win_execute(%d, 'set syntax=jedi_signature')" % winid)
+
+            # vim.eval("setbufvar(%d, '&filetype', 'jedi_signature')" % buf)
+            # # vim.eval("win_execute(%d, 'doautocmd FileType')" % winid)
+            # vim.eval("setwinvar(%d, '&concealcursor', 'nvic')" % (winid,))
+            # vim.eval("setwinvar(%d, '&conceallevel', 2)" % (winid,))
+
+            vim.current.buffer.vars['_jedi_signature_winid'] = winid
+        else:
+            popup_settext = vim.Function("popup_settext")
+            popup_settext(winid, lines)
+            popup_move = vim.Function("popup_move")
+            popup_move(winid, popup_opts)
+            popup_show = vim.Function("popup_show")
+            popup_show(winid)
 
 
 @catch_and_print_exceptions
@@ -971,7 +1210,7 @@ def cmdline_call_signatures(signatures):
     if index is not None:
         max_num_spaces -= len(join())
     _, column = signatures[0].bracket_start
-    spaces = min(int(vim_eval('g:jedi#first_col +'
+    spaces = min(int(vim_eval('s:callsig_cmd_first_col +'
                               'wincol() - col(".")')) +
                  column - len(signatures[0].name),
                  max_num_spaces) * ' '
