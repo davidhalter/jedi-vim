@@ -349,7 +349,8 @@ Default: 1 (Perform automatic initialization)
 ------------------------------------------------------------------------------
 6.2. `g:jedi#auto_vim_configuration`    *g:jedi#auto_vim_configuration*
 
-Jedi-vim sets 'completeopt' to `menuone,longest,preview` by default, if
+Jedi-vim sets 'completeopt' to `menuone,longest` and `popup` (for Vim version
+numbers higher than 8.1.1882) respectively `preview` by default, if
 'completeopt' is not changed from Vim's default.
 It also remaps <Ctrl-C> to <Esc> in insert mode.
 
@@ -388,12 +389,14 @@ Default: 1 (Automatically select first completion entry)
 ------------------------------------------------------------------------------
 6.5. `g:jedi#auto_close_doc`            *g:jedi#auto_close_doc*
 
-When doing completion, jedi-vim shows the docstring of the currently selected
-item in a preview window. By default, this window is being closed after
+When doing completion and jedi-vim shows the docstring of the currently selected
+item in a preview (not a popup) window, this window is being closed after
 insertion of a completion item.
 
 Set this to 0 to leave the preview window open even after leaving insert mode.
 This could be useful if you want to browse longer docstrings.
+
+This setting is ignored if a popup instead of a preview window is used.
 
 Options: 0 or 1
 Default: 1 (Automatically close preview window upon leaving insert mode)

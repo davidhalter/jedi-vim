@@ -33,7 +33,12 @@ if get(g:, 'jedi#auto_vim_configuration', 1)
             redir END
         endif
         if len(split(completeopt, '\n')) == 1
-            set completeopt=menuone,longest,preview
+            set completeopt=menuone,longest
+            if v:version > 801 || (v:version == 801  && has('patch-8.1.1882'))
+              set completeopt+=popup
+            else
+              set completeopt+=preview
+            endif
         endif
     endfunction
     if has('nvim')

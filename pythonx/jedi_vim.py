@@ -360,7 +360,7 @@ def completions():
             completions = script.complete(*get_pos(column))
             signatures = script.get_signatures(*get_pos(column))
 
-            add_info = "preview" in vim.eval("&completeopt").split(",")
+            add_info = any(option in vim.eval("&completeopt").split(",") for option in ("preview", "popup"))
             out = []
             for c in completions:
                 d = dict(word=PythonToVimStr(c.name[:len(base)] + c.complete),
