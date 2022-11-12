@@ -361,7 +361,7 @@ def completions():
             signatures = script.get_signatures(*get_pos(column))
 
             add_info = \
-                any(option in vim.eval("&completeopt").split(",") \
+                any(option in vim.eval("&completeopt").split(",")
                     for option in ("preview", "popup"))
             out = []
             for c in completions:
