@@ -44,10 +44,15 @@ if g:jedi#auto_initialization
         inoremap <silent> <buffer> <space> <C-R>=jedi#smart_auto_mappings()<CR>
     end
 
-    if g:jedi#auto_close_doc
+    if g:jedi#auto_close_doc && (&g:completeopt =~# '\<preview\>' && &g:completeopt !~# '\<popup\>')
         " close preview if its still open after insert
         augroup jedi_preview
-            autocmd! InsertLeave <buffer> if pumvisible() == 0|pclose|endif
+            if v:version > 704
+                autocmd CompleteDone <buffer> * pclose
+            else
+                autocmd InsertLeave <buffer> * if pumvisible() == 0|pclose|endif
+                autocmd CursorMovedI <buffer> * if pumvisible() == 0|pclose|endif
+            endif
         augroup END
     endif
 endif
