@@ -48,10 +48,10 @@ if g:jedi#auto_initialization
         " close preview if its still open after insert
         augroup jedi_preview
             if v:version > 704
-                autocmd CompleteDone <buffer> * pclose
+                autocmd CompleteDone <buffer> pclose
             else
-                autocmd InsertLeave <buffer> * if pumvisible() == 0|pclose|endif
-                autocmd CursorMovedI <buffer> * if pumvisible() == 0|pclose|endif
+                autocmd InsertLeave <buffer> if pumvisible() == 0|pclose|endif
+                autocmd CursorMovedI <buffer> if pumvisible() == 0|pclose|endif
             endif
         augroup END
     endif
