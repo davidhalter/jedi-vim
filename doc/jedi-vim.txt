@@ -50,6 +50,8 @@ Contents                                *jedi-vim-contents*
                                         |b:jedi_added_sys_path|
     6.17. case_insensitive_completion   |g:jedi#case_insensitive_completion|
                                         |b:jedi_case_insensitive_completion|
+    6.18. way_to_open_documentation     |g:jedi#way_to_open_documentation|
+                                        |b:jedi_way_to_open_documentation|
 7. Testing                              |jedi-vim-testing|
 8. Contributing                         |jedi-vim-contributing|
 9. License                              |jedi-vim-license|
@@ -554,6 +556,19 @@ The buffer-local variable `b:jedi_case_insensitive_completion` can be used to
 override the global variable `g:jedi#case_insensitive_completion`.
 
 Default: 1
+
+------------------------------------------------------------------------------
+6.18. `g:jedi#way_to_open_documentation`        *g:jedi#way_to_open_documentation*
+                                              *b:jedi_way_to_open_documentation*
+
+This option allows choosing how Jedi-vim shows the pydoc documentation when
+the user presses the 'K' key (The key mapping can be changed with the option
+|g:jedi#documentation_command|).
+
+split  Open the documentation in a horizontal split
+tab    Open the documentation in a new tab
+
+Default: split
 
 ==============================================================================
 7. Testing                              *jedi-vim-testing*

@@ -27,6 +27,7 @@ let s:default_settings = {
     \ 'completions_enabled': 1,
     \ 'popup_on_dot': 'g:jedi#completions_enabled',
     \ 'documentation_command': "'K'",
+    \ 'way_to_open_documentation': "'split'",
     \ 'show_call_signatures': has('conceal') ? 1 : 2,
     \ 'show_call_signatures_delay': 500,
     \ 'call_signature_escape': "'?!?'",
@@ -417,17 +418,36 @@ endfunction
 function! jedi#show_documentation() abort
     python3 if jedi_vim.show_documentation() is None: vim.command('return')
 
+    let l:way_to_open_documentation = get(
+        \ b:, 'jedi_way_to_open_documentation',
+        \ g:jedi#way_to_open_documentation)
+    if index(['tab', 'split'], l:way_to_open_documentation) < 0
+        let l:way_to_open_documentation = 'split'
+    endif
+
     let bn = bufnr('__doc__')
-    if bn > 0
-        let wi=index(tabpagebuflist(tabpagenr()), bn)
-        if wi >= 0
-            " If the __doc__ buffer is open in the current tab, jump to it
-            silent execute (wi+1).'wincmd w'
-        else
-            silent execute 'sbuffer '.bn
+    if l:way_to_open_documentation ==# 'tab'
+        if bn > 0
+            for l:win_id in win_findbuf(bn)
+                if win_gotoid(l:win_id)
+                    return
+                endif
+            endfor
         endif
-    else
-        split __doc__
+
+        tabnew __doc__
+    elseif l:way_to_open_documentation ==# 'split'
+      if bn > 0
+          let wi=index(tabpagebuflist(tabpagenr()), bn)
+          if wi >= 0
+              " If the __doc__ buffer is open in the current tab, jump to it
+              silent execute (wi+1).'wincmd w'
+          else
+              silent execute 'sbuffer '.bn
+          endif
+      else
+          split __doc__
+      endif
     endif
 
     setlocal modifiable
@@ -441,10 +461,12 @@ function! jedi#show_documentation() abort
     setlocal filetype=rst
     setlocal foldlevel=200 " do not fold in __doc__
 
-    if l:doc_lines > g:jedi#max_doc_height " max lines for plugin
-        let l:doc_lines = g:jedi#max_doc_height
+    if l:way_to_open_documentation ==# 'split'
+        if l:doc_lines > g:jedi#max_doc_height " max lines for plugin
+            let l:doc_lines = g:jedi#max_doc_height
+        endif
+        execute 'resize '.l:doc_lines
     endif
-    execute 'resize '.l:doc_lines
 
     " quit comands
     nnoremap <buffer> q ZQ
