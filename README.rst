@@ -207,6 +207,7 @@ get more information. If you set them to ``""``, they are not assigned.
     let g:jedi#usages_command = "<leader>n"
     let g:jedi#completions_command = "<C-Space>"
     let g:jedi#rename_command = "<leader>r"
+    let g:jedi#rename_command_keep_name = "<leader>R"
 
 An example for setting up your project:
 

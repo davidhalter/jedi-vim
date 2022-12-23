@@ -24,6 +24,7 @@ let s:default_settings = {
     \ 'call_signatures_command': "'<leader>n'",
     \ 'usages_command': "'<leader>n'",
     \ 'rename_command': "'<leader>r'",
+    \ 'rename_command_keep_name': "'<leader>R'",
     \ 'completions_enabled': 1,
     \ 'popup_on_dot': 'g:jedi#completions_enabled',
     \ 'documentation_command': "'K'",
@@ -368,6 +369,14 @@ endfunction
 
 function! jedi#rename_visual(...) abort
     python3 jedi_vim.rename_visual()
+endfunction
+
+function! jedi#rename_keep_name(...) abort
+    python3 jedi_vim.rename(delete_word=False)
+endfunction
+
+function! jedi#rename_visual_keep_name(...) abort
+    python3 jedi_vim.rename_visual(use_selected_text_as_prompt_answer=True)
 endfunction
 
 function! jedi#completions(findstart, base) abort
