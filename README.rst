@@ -114,7 +114,7 @@ It is also available on
 `Ubuntu (≥14.04) <http://packages.ubuntu.com/vim-python-jedi>`__ as
 vim-python-jedi.
 On Fedora Linux, it is available as
-`vim-jedi <https://apps.fedoraproject.org/packages/vim-jedi>`__.
+`vim-jedi <https://packages.fedoraproject.org/pkgs/vim-jedi/vim-jedi/>`__.
 
 Please note that this version might be quite old compared to using jedi-vim
 from Git.
