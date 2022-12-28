@@ -27,6 +27,10 @@ if g:jedi#auto_initialization
         execute 'nnoremap <buffer> '.g:jedi#rename_command.' :call jedi#rename()<CR>'
         execute 'vnoremap <buffer> '.g:jedi#rename_command.' :call jedi#rename_visual()<CR>'
     endif
+    if len(g:jedi#rename_command_keep_name)
+        execute 'nnoremap <buffer> '.g:jedi#rename_command_keep_name.' :call jedi#rename_keep_name()<CR>'
+        execute 'vnoremap <buffer> '.g:jedi#rename_command_keep_name.' :call jedi#rename_visual_keep_name()<CR>'
+    endif
     " documentation/pydoc
     if len(g:jedi#documentation_command)
         execute 'nnoremap <silent> <buffer>'.g:jedi#documentation_command.' :call jedi#show_documentation()<CR>'

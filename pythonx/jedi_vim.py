@@ -998,7 +998,7 @@ def cmdline_call_signatures(signatures):
 
 @_check_jedi_availability(show_error=True)
 @catch_and_print_exceptions
-def rename():
+def rename(delete_word=True):
     if not int(vim.eval('a:0')):
         # Need to save the cursor position before insert mode
         cursor = vim.current.window.cursor
@@ -1010,7 +1010,12 @@ def rename():
 
         vim_command("let s:jedi_replace_orig = expand('<cword>')")
         line = vim_eval('getline(".")')
-        vim_command('normal! diw')
+
+        if delete_word:
+            vim_command('normal! diw')
+        else:
+            vim_command('normal! yiwel')
+
         if re.match(r'\w+$', line[cursor[1]:]):
             # In case the deleted word is at the end of the line we need to
             # move the cursor to the end.
@@ -1042,9 +1047,17 @@ def rename():
             return do_rename(replace)
 
 
-def rename_visual():
-    replace = vim.eval('input("Rename to: ")')
-    orig = vim.eval('getline(".")[(getpos("\'<")[2]-1):getpos("\'>")[2]]')
+def rename_visual(use_selected_text_as_prompt_answer=False):
+    orig = vim.eval('getline(".")[(getpos("\'<")[2]-1):getpos("\'>")[2]'
+                    '-((&selection ==# "exclusive") ? 2 : 1)]')
+
+    input_text = ""
+    if use_selected_text_as_prompt_answer:
+        input_text = orig
+
+    replace = vim.eval(
+        'input("Rename to:", "{}")'.format(PythonToVimStr(input_text))
+    )
     do_rename(replace, orig)
 
 
@@ -1055,6 +1068,10 @@ def do_rename(replace, orig=None):
 
     if orig is None:
         orig = vim_eval('s:jedi_replace_orig')
+
+    if orig == replace:
+        echo_highlight('Jedi did 0 renames.')
+        return
 
     # Save original window / tab.
     saved_tab = int(vim_eval('tabpagenr()'))
