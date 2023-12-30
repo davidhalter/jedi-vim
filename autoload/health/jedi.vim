@@ -1,4 +1,4 @@
 function! health#jedi#check() abort
-  call health#report_start('jedi')
+  call v:lua.vim.health.start('jedi')
   silent call jedi#debug_info()
 endfunction
