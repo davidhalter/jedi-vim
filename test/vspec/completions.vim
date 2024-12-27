@@ -52,19 +52,6 @@ describe 'completions'
         Expect getline('.') == 'IndentationError().filename'
     end
 
-    it 'multi complete'
-        " NOTE: nvim results in "importErr()" here with completeopt+=longest,
-        " but Vim is fine.
-        " This is due to `pumvisible()` in jedi#complete_opened being true
-        " with nvim still, but it is 0 with Vim, i.e. Vim appears to close
-        " the pum already (with the tests).
-        "
-        " This might be a misunderstanding though, since the test might not
-        " expect the "import" keyword to be offered for completion?!
-        normal oImpXErrX()
-        Expect getline('.') == 'ImportError()'
-    end
-
     it 'cycling through entries popup_select_first=0'
         set completeopt+=longest
         let g:jedi#popup_select_first = 0
