@@ -10,6 +10,7 @@ import re
 import os
 import sys
 from shlex import split as shsplit
+import string
 from contextlib import contextmanager
 from pathlib import Path
 try:
@@ -26,6 +27,10 @@ if is_py3:
 else:
     ELLIPSIS = u"…"
 
+IDENTIFIER_CHARS = set(string.letters + string.digits + "_")
+RIGHTMOST_WORD_PATTERN = re.compile(r"\w+$")
+SIGNATURE_QUOTES_PATTERN = re.compile(r'''\\*["']+''')
+RIGHTMOST_SIGNATURE_QUOTES_PATTERN = re.compile(r'''\\*["']+$''')
 
 try:
     # Somehow sys.prefix is set in combination with VIM and virtualenvs.
@@ -339,7 +344,7 @@ def completions():
     if vim.eval('a:findstart') == '1':
         count = 0
         for char in reversed(vim.current.line[:column]):
-            if not re.match(r'[\w\d]', char):
+            if char not in IDENTIFIER_CHARS:
                 break
             count += 1
         vim.command('return %i' % (column - count))
@@ -898,13 +903,12 @@ def show_call_signatures(signatures=()):
 
         # Check the replace stuff for strings, to append them
         # (don't want to break the syntax)
-        regex_quotes = r'''\\*["']+'''
         # `add` are all the quotation marks.
         # join them with a space to avoid producing '''
-        add = ' '.join(re.findall(regex_quotes, replace))
+        add = ' '.join(SIGNATURE_QUOTES_PATTERN.findall(replace))
         # search backwards
         if add and replace[0] in ['"', "'"]:
-            a = re.search(regex_quotes + '$', prefix)
+            a = RIGHTMOST_SIGNATURE_QUOTES_PATTERN.search(prefix)
             add = ('' if a is None else a.group(0)) + add
 
         tup = '%s, %s' % (len(add), replace)
@@ -1016,7 +1020,7 @@ def rename(delete_word=True):
         else:
             vim_command('normal! yiwel')
 
-        if re.match(r'\w+$', line[cursor[1]:]):
+        if RIGHTMOST_WORD_PATTERN.match(line[cursor[1]:]):
             # In case the deleted word is at the end of the line we need to
             # move the cursor to the end.
             vim_command('startinsert!')
