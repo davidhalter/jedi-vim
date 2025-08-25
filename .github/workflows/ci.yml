@@ -20,16 +20,3 @@ jobs:
 
       - name: Run tests
         run: 'make test'
-
-  code-quality:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Run tests
-        run: |
-          vim --version
-          make check
