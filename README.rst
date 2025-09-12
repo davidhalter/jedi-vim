@@ -114,7 +114,7 @@ Installation with your distribution
 -----------------------------------
 
 On Arch Linux, you can also install jedi-vim from official repositories as
-`vim-jedi <https://www.archlinux.org/packages/community/any/vim-jedi/>`__.
+`vim-jedi <https://archlinux.org/packages/extra/any/vim-jedi/>`__.
 It is also available on
 `Debian (≥8) <https://packages.debian.org/vim-python-jedi>`__ and
 `Ubuntu (≥14.04) <http://packages.ubuntu.com/vim-python-jedi>`__ as
