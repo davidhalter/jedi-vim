@@ -74,14 +74,14 @@ Installation
 Requirements
 ------------
 - **Vim**: You need a VIM version that was compiled with Python 3 or later
-(``+python3``).  You can check this from within VIM using
-``:python3 import sys; print(sys.version)``.
+  (``+python3``).  You can check this from within VIM using
+  ``:python3 import sys; print(sys.version)``.
 
 - **Neovim**: You need a python environment with ``pynvim`` installed:
-``pip install pynvim``
+  ``pip install pynvim``
 
-then check your environment is correctly setup from within Neovim using
-``:checkhealth provider.python``
+  then check your environment is correctly setup from within Neovim using
+  ``:checkhealth provider.python``
 
 Manual installation
 -------------------
