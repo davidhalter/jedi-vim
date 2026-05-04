@@ -41,7 +41,7 @@ describe 'signatures'
         doautocmd CursorHoldI
         noautocmd normal istaticmethod()
         doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?            (*_*f: Callable[..., Any]*_*) ?!?jedi?!?'
+        Expect getline(1) == '?!?jedi=0, ?!?            (*_*f: Callable[_P, _R_co]*_*) ?!?jedi?!?'
     end
 
     it 'highlights correct argument'
@@ -51,11 +51,11 @@ describe 'signatures'
         " Move to x - highlights "x".
         noautocmd normal 2h
         doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?      (value: object, *_*format_spec: str=...*_*) ?!?jedi?!?'
+        Expect getline(1) == '?!?jedi=0, ?!?      (value: object, *_*format_spec: str=""*_*) ?!?jedi?!?'
         " Move left to 42 - hightlights first argument ("value").
         noautocmd normal 4h
         doautocmd CursorHoldI
-        Expect getline(1) == '?!?jedi=0, ?!?      (*_*value: object*_*, format_spec: str=...) ?!?jedi?!?'
+        Expect getline(1) == '?!?jedi=0, ?!?      (*_*value: object*_*, format_spec: str="") ?!?jedi?!?'
     end
 
     it 'no signature'
@@ -82,7 +82,7 @@ describe 'signatures'
         redir => msg
         python3 jedi_vim.show_call_signatures()
         redir END
-        Expect msg == "\nstaticmethod(f: Callable[..., Any])"
+        Expect msg == "\nstaticmethod(f: Callable[_P, _R_co])"
 
         redir => msg
         doautocmd InsertLeave
@@ -98,6 +98,11 @@ describe 'signatures'
     end
 
     it 'command line truncation'
+        " Disable autoindent so `o` opens a new line at column 0; relying on
+        " `\<BS>` to strip the indent is not portable across vim/nvim defaults
+        " (with `bs=eol` it joins lines instead of just removing the indent).
+        setlocal noautoindent nosmartindent indentexpr=
+
         let g:jedi#show_call_signatures = 2
         call jedi#configure_call_signatures()
 
@@ -111,7 +116,7 @@ describe 'signatures'
         let funcname = repeat('a', &columns - (30 + (&ruler ? 18 : 0)))
         put = 'def '.funcname.'(arg1, arg2, arg3, a, b, c):'
         put = '    pass'
-        execute "normal o\<BS>".funcname."( "
+        execute "normal o".funcname."( "
         Expect Signature() == "\n".funcname."(arg1, …)"
 
         exe 'normal sarg1, '
@@ -126,7 +131,7 @@ describe 'signatures'
         g/^/d
         put = 'def '.funcname.'('.repeat('b', 20).', arg2):'
         put = '    pass'
-        execute "normal o\<BS>".funcname."( "
+        execute "normal o".funcname."( "
         Expect Signature() == "\n".funcname."(…)"
     end
 
