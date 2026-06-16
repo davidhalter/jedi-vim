@@ -342,9 +342,12 @@ def completions():
             if not re.match(r'[\w\d]', char):
                 break
             count += 1
+        # Save initial correct calculated offset, in case a chain of completions is called using o flag in complete
+        vim.command("let b:omni_offset=%i" % (column - count))
         vim.command('return %i' % (column - count))
     else:
         base = vim.eval('a:base')
+        column = vim.current.buffer.vars["omni_offset"]
         source = ''
         for i, line in enumerate(vim.current.buffer):
             # enter this path again, otherwise source would be incomplete

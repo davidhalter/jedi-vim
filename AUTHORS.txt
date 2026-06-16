@@ -57,5 +57,6 @@ Konstantin Glukhov (@Konstantin-Glukhov)
 Seungchan An (@SeungChan92) <dev.issea1015@gmail.com>
 Thomas Blauth (@ThomasBlauth) <thomas.blauth@protonmail.com>
 James Cherti (@jamescherti)
+Pablo Gimenez Pizarro (@pablogipi) <pablogipi@gmail.com>
 
 @something are github user names.
