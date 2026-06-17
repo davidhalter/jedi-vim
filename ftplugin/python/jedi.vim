@@ -41,7 +41,14 @@ if g:jedi#auto_initialization
     endif
 
     if g:jedi#completions_enabled == 1
-        inoremap <silent> <buffer> . .<C-R>=jedi#complete_string(1)<CR>
+        function! s:complete_on_dot() abort
+            " Do not trigger completion if there is a dot before already.
+            if getline('.')[-2:-2] ==# '.'
+                return ''
+            endif
+            return jedi#complete_string(1)
+        endfunction
+        inoremap <silent> <buffer> . .<C-R>=<SID>complete_on_dot()<CR>
     endif
 
     if g:jedi#smart_auto_mappings == 1
